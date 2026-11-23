@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.3.4] - 2026-11-22
+
+### Changed
+- **规范文档整理** - `docs/CONTRIBUTING.md` 新增 §1.1 适用范围 / 约束强度 / 优先级矩阵、§2.1 技术栈矩阵、§2.2 build tag 矩阵；§6.3 与 §9.2 门禁命令改为引用 §2 唯一清单，删除重复旧命令；§9.3 冒烟清单补齐三语切换
+- **页脚格式统一** - `vX.Y.Z · build yymmddhhmm` 定为全项目唯一格式；`scripts/gen-landing-version.mjs` 标签由 `V…· build …` 改为统一格式，Go 页脚 / CLI / 参考界面 / 落地页一致
+- **记忆文档重构** - `.codebuddy/memory/2026-08-12.md` 按主题与时间线重写，标注时效性与可信度，删除 v1.2.1 失效信息，与规范文档 §1 / §10.11 建立引用
+
+### Fixed
+- **远程描述矛盾** - `MAINTAINERS.md` §1 与 `CONTRIBUTING.md` §7.2 按 `git remote -v` 实况修正：本地 remote 为 `sutchan/RepoCleaner.git`，平台仓库名为 `sutchan/RepoManager`，两者并存属历史状态
+- **lockfile 依赖版本** - `node_modules/picomatch` 的 `version` 由历史批量替换误写的 `2.3.3` 回退为 `2.3.2`，与 `resolved` / `integrity` 对齐，避免 `npm ci` 校验失败
+
+### Docs
+- **版本同步** - 权威源 `internal/buildinfo/version.go` 与 §8.2 全部展示位同步至 `2.3.4`
+
+---
+
 ## [2.3.3] - 2026-11-14
 
 ### Added

@@ -1,4 +1,4 @@
-# Repo Manager 开发规范与贡献指南 v2.3.3
+# Repo Manager 开发规范与贡献指南 v2.3.4
 
 > 本文是 Repo Manager 仓库的**唯一开发规范来源**，规定「如何改代码、如何写文档、如何提交与评审」。
 > 本文存放于 `docs/`；所有贡献者（含 AI 协作会话）在动手前必须阅读本文。
@@ -8,7 +8,22 @@
 
 ## 1. 文档体系与职责边界
 
-仓库文档按「一个主题一份权威文档、统一归档 `docs/`」组织，禁止同一事实在多处重复维护。下表路径均为**仓库根相对路径**。
+仓库文档按「一个主题一份权威文档、统一归档 `docs/`」组织，禁止同一事实在多处重复维护。下表路径均为**仓库根相对路径**；完整文档地图与按角色阅读路径见 [`docs/README.md`](./README.md) §1 / §2，本文只定义职责边界。
+
+### 1.1 适用范围与优先级
+
+**规则优先级（高 → 低）**：用户明确指示 > 项目规范（本文 / `OPENSPEC.md` / `DESIGN-SYSTEM.md`）> 全局用户规则 > 工具默认行为。同级冲突以「更具体、更新近」为准；**代码与文档冲突时以代码实况为准**，并立即修正文档。
+
+| 规范类别 | 权威位置 | 适用范围 | 约束强度 | 冲突裁决 |
+|----------|----------|----------|----------|----------|
+| 功能行为契约 | `OPENSPEC.md` §3 / §4 / §7 | 7 项功能、交互、兼容性、已知限制 | 强制 | 功能事实以规格为准；规格与代码冲突以代码为准 |
+| 工程与协作规范 | 本文 §3 / §4 / §5 / §6 / §7 / §9 / §10 / §11 | 全部源码、脚本、文档、提交与审查 | 强制 | 流程冲突以本文为准 |
+| UI 视觉规范 | `DESIGN-SYSTEM.md` + `tokens.json` | 产品 GUI、参考界面、落地页 | 强制（遗留代码按现状） | 视觉冲突以设计系统为准 |
+| 版本与发布规范 | 本文 §8 + `MAINTAINERS.md` §3 | bump、CHANGELOG、Release | 强制 | 版本权威源为 `internal/buildinfo.Version` |
+| 历史归档 | `CHANGELOG.MD` 旧版本段、`tasks-done.md` | 仅追溯，不作当前事实 | 不追溯改写 | 不得作为现行规范引用 |
+| 本地记忆 | `.codebuddy/memory/`（见 §10.11） | AI 协作背景与决策记录 | 参考，非规范 | 不覆盖上述任何规范 |
+
+**格式统一约定**：标题层级为 `# 文档名 vX.Y.Z` → `## N. 章节` → `### N.M 小节`；术语以 §5 为唯一来源；链接按实际大小写书写（§5）；页脚版本格式见 §8.2。
 
 | 文档 | 职责（写什么） | 不写什么 |
 |------|---------------|----------|
@@ -49,30 +64,49 @@
 | 项 | 要求 |
 |----|------|
 | 操作系统 | 产品支持 Windows / macOS / Linux；本仓库在三个平台上均可开发 |
-| Go | **≥ 1.25**（产品本体 `repo-manager`，依赖由 `go.mod` 管理） |
-| GUI 框架 | Fyne v2（唯一 UI 依赖；构建需系统 OpenGL / C 工具链，运行为单二进制） |
-| Node.js | ≥ 18（仅**已弃用**的 `src/` 参考 Web 界面需要） |
+| Go | **≥ 1.25**（`go.mod` 声明 1.25；产品本体 `repo-manager`） |
+| GUI 框架 | Fyne **v2.8.2**（唯一 UI 依赖；默认标签构建需 CGO + OpenGL / X11 / Wayland） |
+| Node.js | 文档最低 **≥ 18**；CI 固定 **20**（`ci.yml` / `release.yml`）；本机 `.nvmdrc` 为 **26.13.1**。贡献环境 ≥18 即可，CI 以 20 为准，本机标记仅供参考 |
+| 参考界面 | Next.js 16.3.0 / React 19.2.8 / TypeScript 5（strict）/ Tailwind 4 / ESLint 9；已弃用，仅遗留预览 |
 
-在**仓库根目录**执行：
+在**仓库根目录**执行（与 [`ci.yml`](../.github/workflows/ci.yml) 的 `check` job 一致；Windows 本机用对应命令观察输出）：
 
 ```bash
-gofmt -l .                                      # 列出未格式化文件（应为空）
-go vet ./cmd/... ./internal/...                   # 静态检查
-go test ./cmd/... ./internal/...                  # 单元 / 临时目录集成测试
-go build ./cmd/...                               # 编译产品（需 OpenGL C 工具链）
-npm run check:docs                               # 校验所有 Markdown 相对链接（含大小写）
+npm run check:root-clean                    # 根目录清洁度（CI 首步）
+gofmt -l ./cmd ./internal                   # 输出应为空（CI 用 test -z "$(...)" 判定）
+go vet -tags nogui ./...                    # 静态检查
+go test -tags nogui -count=1 ./...          # 单元 / 临时目录集成测试
+go build -tags nogui ./...                  # 编译（nogui 排除 GUI 包）
+go build -tags ci ./...                     # 编译 GUI 代码层（software driver，无需 C 工具链）
+npm ci                                      # 安装参考界面依赖（CI）
+npm run check:docs                          # 文档相对链接（含大小写）
 
-# 无 OpenGL C 工具链时，Go 命令统一加 -tags nogui（GUI 包按 build tag 排除）
-go vet -tags nogui ./cmd/... ./internal/...
-go test -tags nogui ./cmd/... ./internal/...
-go build -tags nogui ./...
-
-go run ./cmd/repo-manager -h                     # 命令行帮助
-./scripts/build.ps1                             # 交叉编译（Windows / PowerShell）
-./scripts/build.sh                              # 交叉编译（macOS / Linux）
+go run ./cmd/repo-manager -h                # 命令行帮助
+./scripts/build.ps1                         # 6 目标交叉编译（Windows / PowerShell）
+./scripts/build.sh                          # 6 目标交叉编译（macOS / Linux）
 ```
 
-> `npm run dev` / `type-check` / `lint` / `build` 仅服务于已弃用的 `src/` 参考 Web 界面，**不属于产品门禁**。产品质量门禁为 `gofmt` + `go vet` + `go test` + `go build` + `check:docs`，外加 §9.3 的 GUI 手动冒烟清单；无 C 工具链时按 §6.3 加 `-tags nogui`。
+> `npm run dev` / `type-check` / `lint` / `build` / `landing:version` 服务于参考界面与落地页，**不属于产品核心门禁**；产品质量门禁为上述 8 步，外加 §9.3 的 GUI 手动冒烟。
+
+### 2.1 技术栈与依赖矩阵
+
+| 层次 | 技术 / 版本 | 权威来源 | 状态 |
+|------|-------------|----------|------|
+| 产品本体 | Go 1.25 + Fyne v2.8.2（CGO / 系统 OpenGL） | `go.mod` | 当前 |
+| 产品入口 | `cmd/repo-manager/`（main + gui/headless build tag） | `cmd/` | 当前 |
+| 落地页 | 原生 HTML / CSS / JS + `landing/assets/version.js` | `landing/` | 当前 |
+| 参考界面 | Next.js 16.3.0 / React 19.2.8 / TS 5 strict / Tailwind 4 / ESLint 9 | `package.json` / `tsconfig.json` | 已弃用，仅遗留预览 |
+| 门禁脚本 | Node 18+（CI 20）+ `scripts/check-*.mjs` | `.github/workflows/ci.yml` | 当前 |
+| 发布打包 | `scripts/package-release.sh`（zip / tar.gz + SHA256SUMS） | `.github/workflows/release.yml` | 当前 |
+
+### 2.2 Build tag 与运行环境矩阵
+
+| 标签 | 用途 | CGO / OpenGL | 产物 | 使用范围 |
+|------|------|--------------|------|----------|
+| 默认（无 tag） | 完整 Fyne GUI | 需要 C 工具链 + X11 / Wayland 开发库 | 可执行文件 | 发布构建、`gui-build` job |
+| `nogui` | 排除 `internal/ui`，验证业务与平台层 | 不需要 | 无 GUI | 本地无 C 工具链、CI 静态门禁 |
+| `ci` | Fyne software driver 编译 GUI 代码层 | 不需要 | 无（仅验证 API） | CI `check` / `windows-smoke` |
+| `x11` | 仅 X11 后端，绕过 Wayland 编译 | 需要 X11 开发库 | 不支持 Wayland，**不用于发布** | 本地排障（`TROUBLESHOOTING.md` §2） |
 
 ---
 
@@ -83,7 +117,7 @@ go run ./cmd/repo-manager -h                     # 命令行帮助
 ```
 RepoManager/
 ├── .github/                     # Community Health Files（禁止创建 .github/readme.md）
-│   ├── workflows/               # ci.yml（门禁）+ release.yml（tag 触发，门禁边界见 §8.4）
+│   ├── workflows/               # ci.yml（门禁）+ release.yml（version / build / package / release，见 §8.4）
 │   ├── CODE_OF_CONDUCT.md       # 行为准则
 │   ├── SECURITY.md              # 安全策略与私密漏洞报告
 │   ├── SUPPORT.md               # 支持指南
@@ -105,8 +139,9 @@ RepoManager/
 │   ├── config.example.ini       # 运行配置示例模板（4 键）
 │   └── tasks.md / tasks-done.md # 任务单一来源与完成归档
 ├── public/                      # 参考界面应用静态资源（SVG）
-├── landing/                     # Web 展示项目落地页（页面源码与资源；README.md 为目录说明）
-│   └── README.md
+├── landing/                     # Web 展示项目落地页（index.html + assets/；README.md 为目录说明）
+│   ├── README.md
+│   └── assets/                  # 样式 / 三语脚本 / 构建期注入的 version.js
 ├── scripts/                     # 工程脚本
 │   ├── check-doc-links.mjs      # 文档相对链接校验（npm run check:docs）
 │   ├── check-root-clean.mjs    # 根目录清洁度门禁（npm run check:root-clean）
@@ -300,18 +335,14 @@ v1.2.5
 
 ### 6.3 提交前检查
 
-```bash
-git status                                   # 确认无 node_modules / .next / *.log / *.tsbuildinfo / bin/ / .tmp/ 被跟踪
-gofmt -l .                                   # 输出应为空
-go vet ./cmd/... ./internal/...
-go test ./cmd/... ./internal/...
-go build ./cmd/...
-npm run check:docs
-npm run check:root-clean       # 根目录清洁度门禁
+按 §2 的 8 步门禁命令逐项执行（**唯一命令清单**，与 `ci.yml` 对齐，勿在此维护第二套），并额外确认：
 
-# 无 OpenGL C 工具链时，Go 命令统一改用 -tags nogui（含 go build -tags nogui ./...）
-go build -tags ci ./...            # 无需 C 工具链即可编译 internal/ui（ci software driver，与 ci.yml 对齐）
+```bash
+git status --porcelain             # 无 node_modules / .next / *.log / *.tsbuildinfo / bin/ / .tmp/ 被跟踪
+git diff --check                   # 无空白错误
 ```
+
+> 无 OpenGL / C 工具链时用 `-tags nogui` 跑静态门禁；`-tags ci` 验证 GUI 代码层。两者已列在 §2，`-tags x11` 仅用于本地排障、不用于发布。
 
 ---
 
@@ -337,7 +368,7 @@ go build -tags ci ./...            # 无需 C 工具链即可编译 internal/ui�
 1. **禁止直接向 `main` 强推**；禁止 `--force` 覆盖 `main` / `dev` 历史。
 2. 短期分支合并后删除；保留提交历史，**不使用 squash 合并**，便于回滚。
 3. 分支名与提交 type 保持一致语义。
-4. 远程为 `https://github.com/sutchan/RepoManager.git`，推送使用 `git push origin <分支>`。
+4. 推送目标以 `git remote -v` 实况为准（当前 `https://github.com/sutchan/RepoCleaner.git`，远端名 `RepoCleaner` / `origin`）；平台仓库名为 `sutchan/RepoManager`（GitHub 改名后旧 URL 仍可访问）。两者并存属历史状态，详见 `MAINTAINERS.md` §1；禁止仅按文档硬编码远程地址。
 5. 单人小改动（≤ 3 个文件、纯文档/拼写）可直接提交到 `main`；涉及 ≥ 5 个文件、新增依赖或架构调整，须走 PR 流程（§9）。
 
 ---
@@ -374,11 +405,12 @@ go build -tags ci ./...            # 无需 C 工具链即可编译 internal/ui�
 
 **页脚版本与 build 编号（强制）**：应用页面的**页脚区**是版本号与 build 编号的唯一展示位置；页眉 / 顶部栏 / 其他区块一律不得出现版本号，页脚若原本展示「更新日期」一律改为 build 编号。
 
-- **格式**：`vX.Y.Z · build yymmddhhmm`（示例 `v1.2.3 · build 2611051259`）。`yymmddhhmm` 是 **10 位**构建时间（2 位年份 + 月 + 日 + 时 + 分，24 小时制），禁止使用 12 位 `yyyymmddhhmm`。
+- **统一格式（全项目唯一）**：`vX.Y.Z · build yymmddhhmm`（示例 `v2.3.4 · build 2611221000`）——小写 `v`、`·` 两侧各一个空格、10 位构建时间（2 位年份 + 月 + 日 + 时 + 分，24 小时制）。禁止 `V2.3.4· build ...`（大写 V / 缺空格）与 12 位 `yyyymmddhhmm`；该格式对 Go GUI 页脚、CLI `-h`、参考界面页脚与落地页页脚一律适用。
 - **Go 产品本体**：`internal/buildinfo/version.go` 的 `Version` 与 `BuildID`，由 `Footer()` 生成页脚文本；`internal/ui/ui.go` 用 `container.NewBorder` 的 bottom 区渲染（`NewBorder` 底部即页脚，页脚容器在 Web 侧须带 `id="app-footer"`）。`scripts/build.ps1`（`(Get-Date).ToString("yyMMddHHmm")`）/ `scripts/build.sh`（`date +%y%m%d%H%M`）在构建期以 `-ldflags "-X repo-manager/internal/buildinfo.BuildID=<10位>"` 注入；未注入时从 `debug.ReadBuildInfo` 的 `vcs.time` 推导本地时间（Go 布局 `0601021504`），仍缺失则回退为仅版本号。CLI `-h` 的 `BuildInfo()` 输出不算页面页眉。
 - **已弃用 Web 参考界面**：`next.config.ts` 从 `package.json` 读取版本并注入 `NEXT_PUBLIC_APP_VERSION` 与 10 位 `NEXT_PUBLIC_BUILD_ID`，`src/app/page.tsx` 的 `<footer id="app-footer">` 展示，注入缺失时回退仅显示版本号。
+- **落地页**：`scripts/gen-landing-version.mjs` 从版本权威源读取 `Version` 并生成 10 位 build 编号，写入 `landing/assets/version.js` 的 `label`（`npm run landing:version`），页脚渲染该 label；生成文件禁止手工修改。
 - **禁止**：在页面 / 组件硬编码版本号或 build 编号；禁止运行时用 `new Date()` / `time.Now()` 现场生成（必须构建期注入，保证同一构建内稳定）。
-- **验证**：`go test ./internal/buildinfo`（`Footer` 格式、回退、10 位布局）+ `npm run build`（页脚输出须为 `vX.Y.Z · build <10位数字>`）。
+- **验证**：`go test ./internal/buildinfo`（`Footer` 格式、回退、10 位布局）+ `npm run build` + `node scripts/gen-landing-version.mjs`（各页脚均输出 `vX.Y.Z · build <10位数字>`）。
 
 ### 8.3 CHANGELOG 写法
 
@@ -426,7 +458,7 @@ go build -tags ci ./...            # 无需 C 工具链即可编译 internal/ui�
 - [ ] 新增/修改的 UI 对齐 `docs/DESIGN-SYSTEM.md` 与 `docs/tokens.json`，无硬编码颜色
 - [ ] 主要容器与关键元素已加语义化 `id`（§4.4）
 - [ ] 无 `fmt.Println` 调试输出、无吞错（`_ = err`）、无未使用的 import / 变量；Go 代码已 `gofmt` 且导出符号有 doc 注释
-- [ ] `gofmt -l .` 输出为空，`go vet` / `go test` / `go build`（按 §6.3 命令，含 `-tags nogui` 回退）与 `npm run check:docs` 全部通过
+- [ ] §2 的 8 步门禁全部通过：`gofmt -l ./cmd ./internal` 无输出；`go vet/test/build` 用 `-tags nogui`、`go build -tags ci` 验证 GUI 层；`npm ci`、`check:docs`、`check:root-clean` 通过
 - [ ] 单文件 ≤ 200 行（代码文件）；超出已按职责拆分且不破坏导出契约
 - [ ] 平台层改动：路径经 `path/filepath` 处理、删除目标仅来自枚举、危险操作有二次确认
 - [ ] 提交信息格式合规，且含新版本号
@@ -446,7 +478,7 @@ go build -tags ci ./...            # 无需 C 工具链即可编译 internal/ui�
 |--------|------|
 | `repo-manager -h` | 输出帮助信息后退出 |
 | `repo-manager -lang en` | `config.ini` 写入 `LANG=en` 且不产生重复行 |
-| GUI 语言按钮 | 中/英切换生效，执行日志同步切换 |
+| GUI 语言按钮 | 简中 / 繁中 / 英文三语切换生效，执行日志同步切换，语言偏好持久化 |
 | GUI 关于按钮 | 弹窗展示功能说明，不出现版本号 |
 | 功能 1（确认） | 生成 `.npmrc`、清理本地 `node_modules`；取消则返回且不删除 |
 | 功能 3 → 功能 4 | 生成带隐藏属性的 `.next` 文件；功能 4 能成功删除该文件（无残留、无报错） |
@@ -468,7 +500,8 @@ go build -tags ci ./...            # 无需 C 工具链即可编译 internal/ui�
 7. 改动文档后必须执行 `npm run check:docs`（相对链接含大小写）与 `npm run check:root-clean`（根目录无散落条目），校验方法见 [`docs/README.md` §5](./README.md)。
 8. **任务单一来源**：未完成 / 进行中事项只写 `docs/tasks.md`，完成后归档到 `docs/tasks-done.md`；其他文档不得另建待办清单。
 9. **新增 / 删除 / 重命名文档**按 §3.2 规则 7 同步四处登记，并在 `CHANGELOG.MD` 对应版本的 `Docs` 分组记录。
-10. 版本同步清单按 §8.2 执行，含 `docs/TROUBLESHOOTING.md` / `docs/MAINTAINERS.md` 标题与 `docs/tasks.md` 头部版本说明。
+10. 版本同步清单按 §8.2 执行，含 `docs/TROUBLESHOOTING.md` / `docs/MAINTAINERS.md` / `landing/README.md` 标题与 `docs/tasks.md` 头部版本说明。
+11. **本地记忆文档**：`.codebuddy/memory/`（已被 `.gitignore` 忽略，不入库）记录 AI 协作的背景、核心决策与时间线，是**参考信息而非规范来源**，不得覆盖本文 / `OPENSPEC.md` / `DESIGN-SYSTEM.md`。记忆文档须按主题归类、标注时效性与可信度，并引用本文 §1 作为规范入口；本文只在 §1.1 表中提及它，**不建立指向未入库文件的可点击链接**（GitHub 上会 404）。
 
 ---
 

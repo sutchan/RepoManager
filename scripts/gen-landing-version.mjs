@@ -1,4 +1,4 @@
-// scripts/gen-landing-version.mjs v2.3.3
+// scripts/gen-landing-version.mjs v2.3.4
 // 从版本权威源 internal/buildinfo/version.go 读取版本号，按本地时间生成 10 位 build 编号，
 // 写入 landing/assets/version.js（构建期注入，页面运行时不生成、不硬编码版本号）。
 import fs from 'node:fs';
@@ -21,7 +21,7 @@ const buildId = [
   pad(now.getHours()),
   pad(now.getMinutes()),
 ].join('');
-const label = `V${version}· build ${buildId}`;
+const label = `v${version} · build ${buildId}`;
 const target = path.join(ROOT, 'landing/assets/version.js');
 fs.mkdirSync(path.dirname(target), { recursive: true });
 fs.writeFileSync(

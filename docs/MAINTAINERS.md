@@ -1,4 +1,4 @@
-# Repo Manager 维护者手册 (Maintainers) v2.3.3
+# Repo Manager 维护者手册 (Maintainers) v2.3.4
 
 > **定位**：仓库维护者的操作与决策记录——命名现状、GitHub 仓库设置、发版校验、文档治理、门禁与目录卫生。
 > 使用者请从 [README.MD](../README.MD) 开始；功能行为以 [OPENSPEC.md](./OPENSPEC.md) 为准；编码 / 提交 / 审查规范以 [CONTRIBUTING.md](./CONTRIBUTING.md) 为准；未完成的任务以 [tasks.md](./tasks.md) 为唯一来源。
@@ -14,10 +14,11 @@
 |------|--------|------|
 | 产品展示名 | `Repo Manager` | 根 `README.MD`、全部 `docs/` 文档标题与术语表 |
 | Go 模块 / 可执行文件 / 日志 | `repo-manager` / `repo-manager.log` | `go.mod`、`cmd/repo-manager/`、`scripts/build.*`、`internal/logs` |
-| Git 远程 | `https://github.com/sutchan/RepoManager.git` | `git remote -v` |
+| Git 远程（本地实况） | `https://github.com/sutchan/RepoCleaner.git` | `git remote -v`（2026-11-22 实查） |
+| 平台仓库名（文档 / 元数据链接） | `sutchan/RepoManager` | `package.json`、README、`.github/` 模板 |
 | 本地目录 / 工作区文件 | 目录名 `RepoManager`、文件 `RepoManager.code-workspace` | 本机磁盘实况，不进入代码与远程 |
 
-**决策（2026-11-14，v2.3.3 完成）**：项目显示名 `Repo Manager` 与技术标识 `repo-manager`、远程 `sutchan/RepoManager` 已全量统一；应用内文案（GUI 标题、CLI 帮助、i18n 字典、Web 参考界面）与 Release 资产名同步。文档中的命令、路径与链接一律按实况书写；CHANGELOG 与 tasks-done 历史条目保留原貌。
+**决策（2026-11-14，v2.3.3 完成）**：项目显示名 `Repo Manager` 与技术标识 `repo-manager`、应用内文案（GUI 标题、CLI 帮助、i18n 字典、Web 参考界面）与 Release 资产名已统一。**远程地址以本地 `git remote -v` 为准**（当前 `sutchan/RepoCleaner.git`）；`sutchan/RepoManager` 仅为平台仓库名与文档 / 元数据链接目标（GitHub 改名后旧 URL 仍可访问）。禁止仅按文档硬编码远程地址，详见 `CONTRIBUTING.md` §7.2；CHANGELOG 与 tasks-done 历史条目保留原貌。
 
 技术标识同步清单（v2.3.3 已全部执行，后续改名须按同一清单整体推进）：`go.mod` 模块路径与全部 import、`cmd/` 目录、二进制与日志文件名、构建脚本与 Release 资产名、Fyne app ID、`package.json` 的 `name` / `homepage` / `repository` / `bugs`、README 徽章与链接、`.github/` 模板、应用内 i18n 文案与全部 `docs/` 文档标题与术语表，并重新打 tag。当前按上表书写，历史归档不追溯改写。
 
