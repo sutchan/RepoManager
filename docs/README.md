@@ -23,6 +23,7 @@
 | [landing/README.md](../landing/README.md) | 落地页目录说明 | Web 展示项目落地页的用途、边界、内容约定与门禁登记 | 规范正文、产品业务代码 |
 | [prototype/README.md](../prototype/README.md) | 原型目录说明 | 原型现状与本目录用途 | 不复述设计规范正文 |
 | [.github/PULL_REQUEST_TEMPLATE.md](../.github/PULL_REQUEST_TEMPLATE.md) | PR 审查清单 | 提交 PR 时逐项勾选 | — |
+| `reports/` | 工具产物与历史快照目录 | 审计报告 / 校验输出，已被 `.gitignore` 忽略；**不作当前事实来源**，现行结论以 `docs/` 与代码为准 | 事实来源、长期文档 |
 
 **单一来源原则**：同一事实只在一处维护，其他位置用链接引用。需要版本历史 → `CHANGELOG.MD`；需要功能行为 → `OPENSPEC.md`；需要协作流程 → `CONTRIBUTING.md`；需要视觉/组件规范 → `DESIGN-SYSTEM.md`；需要排障 → `TROUBLESHOOTING.md`；需要维护动作与决策 → `MAINTAINERS.md`；需要未完成事项 → `tasks.md`。禁止跨文档复制正文。
 

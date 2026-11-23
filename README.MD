@@ -181,19 +181,19 @@ cross-env dotenv nodemon pm2 rimraf mkdirp
 
 ### 语言切换
 
-支持中文/英文界面与执行日志切换：
+支持简中 / 繁中 / 英文三语界面与执行日志切换（v2.3.3 起）：
 
 | 方式 | 说明 |
 |------|------|
-| GUI 下拉框 | 顶部「中文 / English」实时切换并写入 `config.ini` |
-| 命令行参数 | `repo-manager -lang en`（写入 `LANG=en`） |
-| 配置文件 | `config.ini` 中 `LANG=zh` 或 `LANG=en` |
+| GUI 下拉框 | 顶部「简中 / 繁中 / 英文」实时切换并写入 `config.ini` |
+| 命令行参数 | `repo-manager -lang zh-Hant`（写入 `LANG=zh-Hant`） |
+| 配置文件 | `config.ini` 中 `LANG=zh` / `zh-Hant` / `en` |
 
-> 语言仅 `zh` / `en` 两种：除 `en` 外的任何值（含非法值、空值）均回落中文 `zh`。
+> 语言代码为 `zh`（简中）、`zh-Hant`（繁中）、`en`（英文）；`tw` / `zh-TW` 归一化为 `zh-Hant`。除 `en` / `zh-Hant` / 其别名外的任何值（含非法值、空值）均回落简中 `zh`。完整契约见 [`OPENSPEC.md` §4.1](./docs/OPENSPEC.md)。
 
 ### 配置文件示例
 
-完整模板见 [`docs/config.example.ini`](./docs/config.example.ini)（共 4 个键，键缺失时按内部默认值处理）：
+完整模板见 [`docs/config.example.ini`](./docs/config.example.ini)（共 4 个键，键缺失时按内部默认值处理）；**行为契约的唯一来源**是 [`OPENSPEC.md` §5.3](./docs/OPENSPEC.md)，本示例只给可复制的默认值：
 
 ```ini
 REPO_ROOT=E:\Github
@@ -208,9 +208,11 @@ EXTRA_CLEAN_DIRS=
 repo-manager [选项] [功能号] [目录路径]
 ```
 
+> 本表为速查；**完整契约（优先级、边界、失败语义）见 [`OPENSPEC.md` §4.3](./docs/OPENSPEC.md)**。
+
 | 参数 | 说明 |
 |------|------|
-| `-lang en\|zh` | 设置界面语言并写入 `config.ini`（非 `en` 值回落 `zh`） |
+| `-lang zh\|zh-Hant\|en` | 设置界面语言并写入 `config.ini`（`tw` / `zh-TW` 归繁中，其余非法值回落简中） |
 | `-dry-run` | 预演模式：仅显示将要执行的操作，不修改任何文件与环境变量 |
 | `-recursive` | 递归扫描 monorepo 深层项目（深度 3 层；也可经 `config.ini` 的 `RECURSIVE=true` 持久化） |
 | `EXTRA_CLEAN_DIRS`（config.ini） | 自定义清理目录名（逗号分隔），并入功能 6 / 7 白名单，仅限项目目录内部 |
@@ -221,7 +223,7 @@ repo-manager [选项] [功能号] [目录路径]
 > 无 `-root` 标志、无 `-version` 标志、无控制台交互菜单；功能号超出 `1`–`7` 的数字会被当作路径处理。
 > CLI 与 GUI 的执行日志都会追加写入可执行文件同目录的 `repo-manager.log`；`-h` 帮助固定英文（不随 `-lang` 切换），其中 `-recursive` 的递归深度与实际一致，均为 3 层。
 
-**示例**
+**基础示例**
 
 ```bash
 repo-manager                       # GUI 模式
@@ -231,6 +233,30 @@ repo-manager 6 "D:\My Projects"    # CLI：指定含空格的仓库根目录
 repo-manager -lang en              # 写入 LANG=en 后启动（默认 GUI）
 repo-manager -dry-run 6            # 预演清理所有项目缓存（不删除任何文件）
 repo-manager -h                    # 查看帮助与构建信息
+```
+
+**组合示例**
+
+```bash
+repo-manager -lang zh-Hant -dry-run -recursive 6 "D:\My Projects"  # 繁中 + 预演 + 递归清理，不删除任何文件
+repo-manager -recursive 7 E:\Projects                              # 递归扫描 monorepo 深层项目并清理构建缓存
+repo-manager -dry-run 1                                            # 先预演功能 1 的改动，确认后再执行
+```
+
+**端到端演练（首次使用）**
+
+1. `repo-manager -dry-run 6 "<仓库根目录>"` —— 预演清理，核对将要删除的目录；
+2. 确认无误后执行 `repo-manager 6 "<仓库根目录>"`，CLI 输入 `Y` 完成二次确认；
+3. 打开可执行文件同目录的 `repo-manager.log`，核对本次执行结果与日志。
+
+**Release 归档校验**
+
+```bash
+sha256sum -c SHA256SUMS.txt        # Linux / macOS（在归档所在目录执行）
+```
+
+```powershell
+Get-Content .\SHA256SUMS.txt | ForEach-Object { $h, $f = $_ -split '\s+', 2; if ((Get-FileHash $f -Algorithm SHA256).Hash.ToLower() -eq $h.ToLower()) { "OK $f" } else { "FAIL $f" } }
 ```
 
 ---

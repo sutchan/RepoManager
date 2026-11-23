@@ -135,7 +135,7 @@ grep 'const Version' internal/buildinfo/version.go
 | M2 | ~~已修复~~ v2.3.3：`gate` 含 `check:root-clean`，`release` job 校验同 SHA 的其它工作流全绿 | 跨工作流阻断见 §3 |
 | M3 | ~~已修复~~ v2.3.3：帮助、日志、代码与测试注释统一为 3 层，帮助固定英文 | 见 [OPENSPEC.md §7.3](./OPENSPEC.md) L6 |
 | M4 | ~~已修复~~ v2.3.3：i18n 三语齐全（zh / zh-Hant / en），切换 UI 与持久化覆盖全部语言 | 繁中别名与回退见 `internal/i18n` |
-| M5 | 部分收敛：`internal/ui` 新增 `progress_parse_test.go`，`cmd/` 仍无自动化测试 | 发版前按 [CONTRIBUTING.md §9.3](./CONTRIBUTING.md) 手动冒烟（清单口径已归档 D5） |
+| M5 | **已接受**：`cmd/` 无自动化测试（`internal/ui` 已有 `progress_parse_test.go`）；理由是 CLI 参数解析简单、§9.3 冒烟可覆盖，后续若引入复杂 CLI 逻辑再转 task | 发版前按 [CONTRIBUTING.md §9.3](./CONTRIBUTING.md) 手动冒烟（清单口径已归档 D5） |
 | M6 | ~~已修复~~ v2.3.3：产品名与技术标识、远程、应用内文案全量统一 | 同步清单见 §1 |
 
 > 修复任一项时同步更新本表、[tasks.md](./tasks.md) 与 [CHANGELOG.MD](../CHANGELOG.MD)；本表只记录决策，不替代任务跟踪。

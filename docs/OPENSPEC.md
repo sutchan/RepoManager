@@ -36,7 +36,7 @@
 | `internal/platform` | **操作系统差异抽象**（关键）：目录扫描、删除、隐藏/系统/只读属性、环境变量持久化、默认 `REPO_ROOT`，按 `build tag` 分 `platform_windows.go` / `platform_unix.go` 实现；`Platform` 接口共 11 个方法 |
 | `internal/engine` | 功能 1 ～ 功能 7 的**平台无关**业务逻辑（扫描、写 `.npmrc`、清缓存），只调用 `platform` 接口；`Run` 按功能号分派、`IsDangerous` 判定 1 / 6 / 7 |
 | `internal/config` | `config.ini` 读写（去重键、保留未知行）、默认 `REPO_ROOT` / `LANG` / `RECURSIVE` / `EXTRA_CLEAN_DIRS` |
-| `internal/i18n` | 中文 / 英文文案字典（唯一来源）：界面 `T()` + 执行日志 `Logs()` |
+| `internal/i18n` | `zh` / `zh-Hant` / `en` 三语文案字典（唯一来源）：界面 `T()` + 执行日志 `Logs()`；别名归一化与非法值回落简中 |
 | `internal/logs` | 执行日志落盘（v2.3.0）：`FileLogger` 将 CLI / GUI 日志同步追加写入 `repo-manager.log` |
 | `internal/ui` | Fyne 桌面 GUI：目录 / 语言 / 预演 / 关于、功能按钮 1–7、二次确认、结果日志区、页脚 |
 | `internal/buildinfo` | `Version`（**产品版本唯一权威源**）、`BuildID`、`Footer()` / `BuildInfo()` |
@@ -58,6 +58,28 @@
 仓库根 `src/` 下的 Next.js 应用是 **v1.x 的参考界面**（纯展示 dashboard，不执行真实清理），自 v2.0.0 起**已弃用**，仅保留作历史参考，不再随产品演进；实际 UI 为 Go + Fyne（见 §2.1）。
 
 > 仍可 `npm install && npm run dev` 启动作 Web 预览，但属遗留路径。`src/lib/data/repos.ts` 中的扫描结果与容量数字是**演示数据（mock）**，不得作为事实引用。
+
+### 2.4 接口契约速查与扩展指南
+
+> 下表只列**调用方向与失败语义**，不是精确函数签名（签名以源码 doc 注释为准），避免规格与代码重复维护。
+
+| 接口 / 函数 | 职责摘要 | 调用方向 | 失败语义 |
+|-------------|----------|----------|----------|
+| `platform.Platform` | 11 个方法：目录枚举 / 删除 / 隐藏与只读属性 / 环境变量持久化 / `DefaultRepoRoot()` 等 | `engine` / `ui` → `platform`（唯一 OS 边界） | 路径不存在或非目录 → 报错；删除失败 → 汇入结果，不中断其余项 |
+| `engine.Run` | 按功能号 1–7 分派到 7 个实现函数 | `cmd` / `ui` → `engine` | 危险功能（1 / 6 / 7）须先二次确认；失败返回三语错误摘要 |
+| `engine.IsDangerous` | 功能 1 / 6 / 7 的危险判定 | `cmd` / `ui` → `engine` | 纯判定，无失败语义 |
+| `config` 读写 | 4 键加载与回写（去重键、保留注释与未知行） | `cmd` / `ui` → `config` | 文件缺失 → 用默认值；解析失败 → 保留默认并警告 |
+| `i18n.T()` / `Logs()` | 按归一化语言码取界面 / 日志文案 | 各层 → `i18n` | 缺失键或非法语言码 → 回落简中 `zh` |
+| `logs.FileLogger` | 追加写 `repo-manager.log`（带时间戳） | `engine` / `ui` → `logs` | 打开失败 → 降级为仅下游输出，不阻断功能 |
+| `buildinfo.Footer()` / `BuildInfo()` | 页脚与 `-h` 版本文本 | `ui` / `cmd` → `buildinfo` | `BuildID` 缺失 → 回退仅版本号 |
+
+**新增功能 / 新平台的步骤**（与 `CONTRIBUTING.md` §3.2 规则 4 一致）：
+
+1. 在 `internal/engine` 增加实现函数并在 `engine.Run` 分派表登记功能号；危险操作纳入 `IsDangerous`。
+2. 涉及 OS 差异时先在 `platform.Platform` 增加方法，再分别实现 `platform_windows.go` / `platform_unix.go`；新平台另加 build tag 文件。
+3. 在 `internal/i18n` 的 `zh` / `zh-Hant` / `en` 三语字典补齐界面与日志键（缺一不可）。
+4. 同步本规格（§3 功能条目、§4.3 参数、§5.3 配置键）与根 `README.MD` 的使用者说明，并按 `CONTRIBUTING.md` §4.6 写测试。
+5. 按 `CONTRIBUTING.md` §2 跑全套门禁与 §9.3 GUI 手动冒烟，最后按 §8.2 bump 版本并更新 `CHANGELOG.MD`。
 
 ---
 
@@ -162,7 +184,7 @@
 
 | 项 | 内容 |
 |----|------|
-| 支持语言 | 中文（`zh`）、英文（`en`） |
+| 支持语言 | 简中（`zh`）、繁中（`zh-Hant`）、英文（`en`）；`tw` / `zh-TW` 归一化为 `zh-Hant` |
 | 切换方式 | GUI 语言下拉框（简中 / 繁中 / 英文）；命令行 `-lang zh\|zh-Hant\|en`；`config.ini` 的 `LANG=` |
 | 默认语言 | `zh` |
 | 文案来源 | `internal/i18n`：界面字典 `T()` + 执行日志字典 `Logs()`；`lang.ini` 为 v1.x 历史保留，Go 程序不读取 |
@@ -179,7 +201,7 @@ GUI 提供 3 种目录来源：使用当前目录、手动输入完整路径（�
 
 | 参数 | 说明 | 示例 |
 |------|------|------|
-| `-lang en\|zh` | 设置语言并写入 `config.ini` | `repo-manager -lang en` |
+| `-lang zh\|zh-Hant\|en` | 设置语言并写入 `config.ini`（`tw` / `zh-TW` 归繁中，其余非法值回落简中） | `repo-manager -lang zh-Hant` |
 | `-dry-run` | 预演模式：仅显示将要执行的操作，不修改任何文件（见 §4.7） | `repo-manager -dry-run 6` |
 | `-recursive` | 递归扫描 monorepo 深层项目（深度 3 层，见 §3.0；优先级高于 `config.ini`） | `repo-manager -recursive 6` |
 | `-h` / `-help` / `--help` | 显示帮助信息（固定英文，含版本与 build 信息） | `repo-manager -h` |
@@ -293,6 +315,7 @@ EXTRA_CLEAN_DIRS=
 **新增键（v2.3.0）**：
 - `RECURSIVE`：`true|1|yes` 启用递归扫描 monorepo 深层项目（深度 3 层，见 §3.0 / §7.3 L3），默认 `false`；CLI `-recursive` 优先级更高。
 - `EXTRA_CLEAN_DIRS`：逗号分隔的自定义清理目录名，并入功能 6 / 7 白名单，**仅限项目目录内部匹配**；留空表示无自定义项。
+- **安全约束（v2.3.2 起）**：只接受目录名，禁止路径分隔符、`..`、绝对路径、盘符（如 `C:`）与 Windows 保留设备名；非法项由 `IsSafeCleanDirName` 拒绝（三语警告后跳过，不影响其余项）。仅匹配项目目录内部的一级子目录，不会删除 `REPO_ROOT` 顶层项，也不覆盖功能 6 / 7 既有白名单。
 
 **`lang.ini`**：首部 `LANG=` 记录当前语言选择；`[en]` / `[zh]` 两节保存中英文文案参考。Go 程序**不从该节读取文案**（文案在 `internal/i18n` 中定义），此文件为 v1.x 历史保留。`-lang` 参数不得覆盖本文件。
 
