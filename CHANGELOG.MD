@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.3.5] - 2026-11-23
+
+### Fixed
+- **三语文档一致性** - 修正 4 处「双语」过时描述：`README.MD` 语言章节与参数表、`OPENSPEC.md` §2.1 i18n 职责与 §4.1 支持语言表、`DESIGN-SYSTEM.md` §3.0 语言按钮；统一为 `zh` / `zh-Hant` / `en`，补 `tw` / `zh-TW` 别名与非法值回落简中
+
+### Added
+- **接口契约速查与扩展指南** - `OPENSPEC.md` §2.4 新增 7 个关键接口 / 函数的调用方向与失败语义摘要，以及「新增功能 / 新平台」5 步扩展清单
+- **配置安全约束** - `OPENSPEC.md` §5.3 补齐 `EXTRA_CLEAN_DIRS` 的允许值形态、拒绝规则与非法项处理
+- **使用示例** - `README.MD` 新增 3 条组合示例（三语 + 预演 + 递归等）、端到端演练 3 步、Release 归档校验命令（Linux/macOS + PowerShell）
+
+### Changed
+- **单一来源** - `README.MD` 配置示例与参数表显式标注 `OPENSPEC.md` §5.3 / §4.3 为唯一行为契约源，本处只作速查与可复制示例
+- **差距状态** - `docs/README.md` §1 声明 `reports/` 为历史产物、不作事实来源；`MAINTAINERS.md` M5 与 `DESIGN-SYSTEM.md` G7 / G9 标注「已接受」及理由
+- **版本同步** - 权威源与 §8.2 全部展示位同步至 `2.3.5`
+
+---
+
 ## [2.3.4] - 2026-11-22
 
 ### Changed

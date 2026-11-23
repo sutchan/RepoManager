@@ -4,7 +4,7 @@
 
 [![Platform](https://img.shields.io/badge/Platform-Win%20%7C%20macOS%20%7C%20Linux-blue?style=flat)](https://github.com/sutchan/RepoManager)
 [![Go](https://img.shields.io/badge/Go-1.25%2B-00ADD8?style=flat&logo=go&logoColor=white)](https://go.dev)
-[![Version](https://img.shields.io/badge/Version-2.3.4-green?style=flat)](https://github.com/sutchan/RepoManager)
+[![Version](https://img.shields.io/badge/Version-2.3.5-green?style=flat)](https://github.com/sutchan/RepoManager)
 [![License](https://img.shields.io/badge/License-MIT-orange?style=flat)](https://github.com/sutchan/RepoManager)
 [![Node](https://img.shields.io/badge/Node.js-18%2B-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org)
 [![i18n](https://img.shields.io/badge/i18n-简中%2F繁中%2FEnglish-9C27B0?style=flat)](https://github.com/sutchan/RepoManager)
@@ -420,6 +420,6 @@ RepoManager/
 
 <div align="center">
 
-Repo Manager v2.3.4 · MIT License · [文档中心](./docs/README.md)
+Repo Manager v2.3.5 · MIT License · [文档中心](./docs/README.md)
 
 </div>
