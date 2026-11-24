@@ -1,4 +1,4 @@
-// internal/platform/platform_test.go v2.3.3
+// internal/platform/platform_test.go v2.3.6
 
 package platform
 
@@ -34,6 +34,26 @@ func TestNormalizeRoot(t *testing.T) {
 	}
 	if got := NormalizeRoot("relative/path"); filepath.IsAbs(got) != filepath.IsAbs(mustAbs(t)) {
 		t.Fatalf("相对路径应转为绝对路径（随进程工作目录），得到 %q", got)
+	}
+}
+
+func TestNormalizeRootFilesystemRoot(t *testing.T) {
+	// 文件系统根不应退化为当前工作目录。
+	root := string(filepath.Separator)
+	if got := NormalizeRoot(root); !IsFilesystemRoot(got) {
+		t.Fatalf("根分隔符应保留根语义，得到 %q", got)
+	}
+	if IsFilesystemRoot(mustAbs(t)) {
+		t.Fatal("普通工作目录不应判定为文件系统根")
+	}
+	if got := NormalizeRoot(""); got != "" {
+		t.Fatalf("空输入应保持为空，得到 %q", got)
+	}
+}
+
+func TestValidateRootRejectsFilesystemRoot(t *testing.T) {
+	if err := ValidateRoot(string(filepath.Separator)); err == nil {
+		t.Fatal("文件系统根目录不应通过校验")
 	}
 }
 

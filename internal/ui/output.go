@@ -1,11 +1,12 @@
 //go:build !nogui
 
-// internal/ui/output.go v2.3.3
+// internal/ui/output.go v2.3.6
 
 package ui
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 
 	"fyne.io/fyne/v2"
@@ -51,19 +52,23 @@ func (p *progressView) Finish() {
 }
 
 // guiLogger 把 engine 日志安全地投递回 UI 线程，并同步进度视图。
+// lines 为有界缓冲，避免逐行全量 SetText 造成的 O(n²) 拷贝；完整日志由 fileLog 落盘。
 type guiLogger struct {
 	out      *widget.Entry
 	mu       *sync.Mutex
 	progress *progressView
+	lines    []string
 }
 
 // Logf 实现 engine.Logger。
 func (g *guiLogger) Logf(format string, args ...any) {
 	msg := fmt.Sprintf(format, args...)
 	g.mu.Lock()
-	defer g.mu.Unlock()
+	g.lines = appendBoundedLog(g.lines, msg, maxLogLines)
+	text := strings.Join(g.lines, "\n") + "\n"
+	g.mu.Unlock()
 	fyne.Do(func() {
-		g.out.SetText(g.out.Text + msg + "\n")
+		g.out.SetText(text)
 	})
 	if g.progress != nil {
 		g.progress.Observe(msg)

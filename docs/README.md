@@ -18,6 +18,7 @@
 | [docs/config.example.ini](./config.example.ini) | 运行配置示例模板 | `config.ini`（本机生成、不入库）的起点，见 `OPENSPEC.md` §5.3 | 不含真实本机路径 |
 | [docs/TROUBLESHOOTING.md](./TROUBLESHOOTING.md) | 使用与构建排障 | 症状 → 原因 → 处理；启动、配置、清理结果、依赖、门禁失败定位 | 功能规格、版本历史 |
 | [docs/MAINTAINERS.md](./MAINTAINERS.md) | 维护者手册 | 命名现状、GitHub About 设置、发布校验、文档治理、门禁与已知差距 | 功能介绍、规范正文 |
+| [docs/PRODUCTION-READINESS.md](./PRODUCTION-READINESS.md) | 生产就绪规范 | 八类非功能要求（代码 / 测试 / 安全 / 性能 / 日志 / 部署 / 版本 / 文档）的现状、目标与发布检查 | 功能行为、操作流程 |
 | [docs/tasks.md](./tasks.md) / [tasks-done.md](./tasks-done.md) | 任务单一来源 / 归档 | 未完成与进行中任务 / 已完成任务归档 | 功能规格、流程规范 |
 | [CHANGELOG.MD](../CHANGELOG.MD) | 唯一版本历史 | 按版本倒序的变更明细 | 功能规格、规范正文 |
 | [landing/README.md](../landing/README.md) | 落地页目录说明 | Web 展示项目落地页的用途、边界、内容约定与门禁登记 | 规范正文、产品业务代码 |
@@ -92,6 +93,7 @@ RepoManager/
 │   ├── MAINTAINERS.md     # 维护者手册
 │   ├── config.example.ini # 运行配置示例模板
 │   ├── tokens.json        # 设计令牌
+│   ├── PRODUCTION-READINESS.md  # 八类非功能要求与发布检查
 │   └── tasks.md / tasks-done.md  # 任务清单与完成归档
 ├── landing/                                    # Web 展示落地页：index.html + assets/（页面 / 样式 / 三语脚本 / 版本）+ README.md
 ├── prototype/README.md                         # 原型目录说明（无规范正文、无代码）

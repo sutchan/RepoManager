@@ -1,4 +1,4 @@
-// internal/platform/platform.go v2.3.3
+// internal/platform/platform.go v2.3.6
 
 // Package platform 收口全部操作系统差异（目录扫描、删除、隐藏属性、环境变量持久化）。
 // engine 只依赖本接口，禁止直接调用 OS 专属命令；新增平台仅需增加对应 build tag 实现。
@@ -91,17 +91,31 @@ func IsNextProject(dir string) bool {
 }
 
 // NormalizeRoot 规范化仓库根目录：去空白、去末尾分隔符、转绝对路径（对齐 OPENSPEC §7.1）。
+// 文件系统根（如 "/" 或 "X:\"）去分隔符后会变空；此时保留根本身，禁止退化为当前工作目录。
 func NormalizeRoot(root string) string {
 	root = strings.TrimSpace(root)
-	root = strings.TrimRight(root, `\/`)
-	if abs, err := filepath.Abs(root); err == nil {
+	if root == "" {
+		return ""
+	}
+	trimmed := strings.TrimRight(root, `\/`)
+	if trimmed == "" {
+		// 输入仅为分隔符 → 是文件系统根，用 filepath.Clean 保留根语义。
+		if cleaned := filepath.Clean(root); cleaned != "." {
+			return cleaned
+		}
+		return root
+	}
+	if abs, err := filepath.Abs(trimmed); err == nil {
 		return abs
 	}
-	return root
+	return trimmed
 }
 
-// ValidateRoot 校验仓库根目录存在且为目录。
+// ValidateRoot 校验仓库根目录存在、为目录且不是文件系统根（危险操作的最小范围约束）。
 func ValidateRoot(root string) error {
+	if IsFilesystemRoot(root) {
+		return fmt.Errorf("禁止将文件系统根目录作为仓库根目录（范围过大）: %s", root)
+	}
 	info, err := os.Stat(root)
 	if err != nil {
 		return fmt.Errorf("路径不存在: %s", root)
@@ -110,4 +124,14 @@ func ValidateRoot(root string) error {
 		return fmt.Errorf("不是目录: %s", root)
 	}
 	return nil
+}
+
+// IsFilesystemRoot 判断路径是否为文件系统根（"/"、"X:\" 或 UNC 共享根）。
+// 用 filepath.Dir 自反性判定：根目录的父目录仍是自身。
+func IsFilesystemRoot(root string) bool {
+	if root == "" {
+		return false
+	}
+	cleaned := filepath.Clean(root)
+	return filepath.Dir(cleaned) == cleaned
 }

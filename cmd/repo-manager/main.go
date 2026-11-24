@@ -1,4 +1,4 @@
-// cmd/repo-manager/main.go v2.3.3
+// cmd/repo-manager/main.go v2.3.6
 
 // 命令 repo-manager 是产品入口：解析参数后分流到命令行模式或 Fyne GUI。
 package main
@@ -33,10 +33,18 @@ func main() {
 		printHelp()
 		return
 	}
+	lang := i18n.Normalize(cfg.Lang)
+	d := i18n.Logs(lang)
+	if err != nil {
+		// 配置文件读取失败时禁止任何回写，避免用默认值覆盖用户设置（对齐 OPENSPEC §5.3）。
+		fmt.Fprintf(os.Stderr, d.LoadCfgErr, err)
+		return
+	}
 	if *langFlag != "" {
 		cfg.Lang = string(i18n.Normalize(*langFlag))
+		lang = i18n.Normalize(cfg.Lang)
 		if saveErr := config.Save(cfgPath, cfg); saveErr != nil {
-			fmt.Fprintf(os.Stderr, i18n.Logs(i18n.Normalize(cfg.Lang)).SaveCfgErr, saveErr)
+			fmt.Fprintf(os.Stderr, i18n.Logs(lang).SaveCfgErr, saveErr)
 		}
 	}
 	// 选项优先级：命令行参数 > config.ini > 默认关闭（对齐 OPENSPEC §4.5 / §5.2）。
@@ -44,12 +52,6 @@ func main() {
 		DryRun:         *dryRunFlag,
 		Recursive:      *recursiveFlag || cfg.Recursive,
 		ExtraCleanDirs: cfg.ExtraCleanDirs,
-	}
-
-	lang := i18n.Normalize(cfg.Lang)
-	d := i18n.Logs(lang)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, d.LoadCfgErr, err)
 	}
 	p := platform.New()
 	fn, pathArg := parseArgs(flag.Args())

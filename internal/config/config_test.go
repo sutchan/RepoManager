@@ -1,4 +1,4 @@
-// internal/config/config_test.go v2.0.0
+// internal/config/config_test.go v2.3.6
 
 package config
 
@@ -59,6 +59,21 @@ func TestSaveLoadRoundtrip(t *testing.T) {
 	}
 	if strings.Contains(content, ".tmp") {
 		t.Fatal("不应残留临时文件内容")
+	}
+}
+
+func TestSaveRefusesWhenReadFails(t *testing.T) {
+	// 将路径指向一个目录：ReadFile 返回非 NotExist 错误，Save 必须拒绝覆盖而非写入空配置。
+	path := filepath.Join(t.TempDir(), "as-dir")
+	if err := os.Mkdir(path, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	cfg := Config{RepoRoot: `D:\new`, Lang: "en"}
+	if err := Save(path, cfg); err == nil {
+		t.Fatal("读旧失败时 Save 应返回错误")
+	}
+	if _, err := os.Stat(path + ".tmp"); !os.IsNotExist(err) {
+		t.Fatal("读旧失败时不应产生临时文件")
 	}
 }
 

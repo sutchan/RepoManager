@@ -21,6 +21,7 @@
 | UI 视觉规范 | `DESIGN-SYSTEM.md` + `tokens.json` | 产品 GUI、参考界面、落地页 | 强制（遗留代码按现状） | 视觉冲突以设计系统为准 |
 | 版本与发布规范 | 本文 §8 + `MAINTAINERS.md` §3 | bump、CHANGELOG、Release | 强制 | 版本权威源为 `internal/buildinfo.Version` |
 | 历史归档 | `CHANGELOG.MD` 旧版本段、`tasks-done.md` | 仅追溯，不作当前事实 | 不追溯改写 | 不得作为现行规范引用 |
+| 生产就绪门槛 | [`PRODUCTION-READINESS.md`](./PRODUCTION-READINESS.md) | 代码 / 测试 / 安全 / 性能 / 日志 / 部署 / 版本 / 文档八类非功能要求 | 强制（含 `[待实现]` 过渡项） | 非功能指标以该文为准，功能冲突以 `OPENSPEC.md` 为准 |
 | 本地记忆 | `.codebuddy/memory/`（见 §10.11） | AI 协作背景与决策记录 | 参考，非规范 | 不覆盖上述任何规范 |
 
 **格式统一约定**：标题层级为 `# 文档名 vX.Y.Z` → `## N. 章节` → `### N.M 小节`；术语以 §5 为唯一来源；链接按实际大小写书写（§5）；页脚版本格式见 §8.2。
@@ -135,6 +136,7 @@ RepoManager/
 │   ├── DESIGN-SYSTEM.md         # UI 设计规范
 │   ├── TROUBLESHOOTING.md       # 使用与构建排障
 │   ├── MAINTAINERS.md           # 维护者手册（命名 / 仓库设置 / 发布 / 文档治理）
+│   ├── PRODUCTION-READINESS.md  # 八类非功能要求与发布前检查
 │   ├── tokens.json              # 设计令牌
 │   ├── config.example.ini       # 运行配置示例模板（4 键）
 │   └── tasks.md / tasks-done.md # 任务单一来源与完成归档
@@ -469,6 +471,7 @@ git diff --check                   # 无空白错误
 - [ ] 未完成事项只记入 `docs/tasks.md`，完成后归档到 `docs/tasks-done.md`；无「规划写成既成事实」的表述
 - [ ] `npm run check:docs` 与 `npm run check:root-clean` 均通过；GitHub Actions 各工作流为绿；发布类变更已按 §8.4 校验 tag 与版本权威源一致性
 - [ ] 无密钥 / Token / 真实用户数据入库；`node_modules`、`.next`、`*.log`、`*.tsbuildinfo` 未被跟踪；`npm run check:root-clean` 通过，临时文件统一在 `.tmp/` / `reports/`
+- [ ] 生产就绪：按 [`PRODUCTION-READINESS.md` §9](./PRODUCTION-READINESS.md) 逐项核对（覆盖率、依赖漏洞、性能指标、日志、回滚、版本展示位、文档登记）；带 `[待实现]` 的项已评估并在 PR 中透明记录
 
 ### 9.3 功能验证（GUI 手动冒烟，跨平台）
 

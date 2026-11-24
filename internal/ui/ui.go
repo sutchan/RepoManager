@@ -1,14 +1,14 @@
 //go:build !nogui
 
-// internal/ui/ui.go v2.3.3
+// internal/ui/ui.go v2.3.6
 
 // Package ui 实现 Fyne 桌面 GUI（对齐 docs/DESIGN-SYSTEM.md §3.0）。
 // 本包需要 C 工具链编译（Fyne 依赖 OpenGL）；无 C 工具链环境用 `go build -tags nogui` 校验。
 package ui
 
 import (
-	"fmt"
 	"sync"
+	"sync/atomic"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -17,9 +17,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"repo-manager/internal/config"
-	"repo-manager/internal/engine"
 	"repo-manager/internal/i18n"
-	"repo-manager/internal/logs"
 	"repo-manager/internal/platform"
 )
 
@@ -45,13 +43,13 @@ func Run(cfg config.Config) {
 	if cfg.RepoRoot == "" {
 		cfg.RepoRoot = p.DefaultRepoRoot()
 	}
+	var running atomic.Bool // 跨 render 复用，语言切换重绘时也阻止并发执行
 
 	// render 按当前语言重建窗口内容（语言切换即整体重绘）。
 	var render func()
 	render = func() {
 		lang := i18n.Normalize(cfg.Lang)
 		dict := i18n.T(lang)
-		d := i18n.Logs(lang)
 		w.SetTitle(dict.AppTitle)
 
 		output := widget.NewMultiLineEntry()
@@ -63,34 +61,14 @@ func Run(cfg config.Config) {
 		dirEntry := widget.NewEntry()
 		dirEntry.SetText(cfg.RepoRoot)
 
-		labels := make([]string, len(langOptions))
-		for i, option := range langOptions {
-			labels[i] = option.label
-		}
-		langSelect := widget.NewSelect(labels, func(s string) {
-			for _, option := range langOptions {
-				if option.label != s {
-					continue
-				}
-				if option.lang == i18n.Normalize(cfg.Lang) {
-					return
-				}
-				cfg.Lang = string(option.lang)
-				if err := config.Save(cfgPath, cfg); err != nil {
-					dialog.ShowError(err, w)
-					return
-				}
-				render()
+		langSelect := newLangSelect(dict, cfg.Lang, func(next i18n.Lang) {
+			cfg.Lang = string(next)
+			if err := config.Save(cfgPath, cfg); err != nil {
+				dialog.ShowError(err, w)
 				return
 			}
+			render()
 		})
-		for _, option := range langOptions {
-			if option.lang == lang {
-				langSelect.SetSelected(option.label)
-				break
-			}
-		}
-		langSelect.PlaceHolder = dict.LangLabel
 
 		browse := widget.NewButton(dict.ChooseDir, func() {
 			dialog.ShowFolderOpen(func(uri fyne.ListableURI, err error) {
@@ -119,69 +97,27 @@ func Run(cfg config.Config) {
 			dialog.ShowInformation(dict.About, dict.AboutText, w)
 		})
 
-		// 预演模式复选框：会话级选择，不写入 config.ini（对齐 OPENSPEC §4.7）。
+		// 预演 / 递归为会话级选项，不写入 config.ini（对齐 OPENSPEC §4.7 / §3.0）。
 		dryRunCheck := widget.NewCheck(dict.DryRunLabel, nil)
 		dryRunCheck.SetChecked(false)
-
-		// 递归扫描复选框：会话级选择（V1 monorepo，深度 3 层）。
 		recursiveCheck := widget.NewCheck(dict.RecursiveLabel, nil)
 		recursiveCheck.SetChecked(cfg.Recursive)
 
-		// runFunction 执行功能；危险操作先弹二次确认，预演模式跳过确认（对齐 OPENSPEC §4.5 / §4.7）。
-		runFunction := func(fn int) {
-			root := platform.NormalizeRoot(dirEntry.Text)
-			if err := platform.ValidateRoot(root); err != nil {
-				dialog.ShowError(err, w)
-				return
-			}
-			cfg.RepoRoot = root
-			opts := engine.Options{
-				DryRun:         dryRunCheck.Checked,
-				Recursive:      recursiveCheck.Checked,
-				ExtraCleanDirs: cfg.ExtraCleanDirs,
-			}
-			do := func(confirmed bool) {
-				if !confirmed {
-					return
-				}
-				progress.Reset()
-				go func() {
-					defer progress.Finish()
-					// V4：执行日志同时追加写入 repo-manager.log。
-					fileLog := logs.NewFileLogger(logs.DefaultPath(), logger)
-					defer fileLog.Close()
-					if err := engine.Run(p, fn, root, lang, opts, fileLog); err != nil {
-						fileLog.Logf(d.ErrorPrefix, err)
-					}
-				}()
-			}
-			if engine.IsDangerous(fn) && !opts.DryRun {
-				warning := dict.WarningF1
-				if fn == 6 {
-					warning = dict.WarningAll
-				} else if fn == 7 {
-					warning = dict.WarningVite
-				}
-				dialog.ShowConfirm(warning, dict.Confirm, do, w)
-				return
-			}
-			do(true)
+		runner := &functionRunner{
+			w: w, p: p, cfg: &cfg, cfgPath: cfgPath,
+			dirEntry: dirEntry, dryRunCheck: dryRunCheck, recursiveCheck: recursiveCheck,
+			progress: progress, logger: logger, running: &running,
+			lang: lang, dict: dict, d: i18n.Logs(lang),
 		}
-
-		fnButtons := container.NewGridWithColumns(2)
-		for i, name := range dict.FuncNames {
-			fn := i + 1
-			fnButtons.Add(widget.NewButton(fmt.Sprintf("[%d] %s", fn, name), func() { runFunction(fn) }))
-		}
+		fnButtons := runner.newFnButtons()
 
 		top := container.NewVBox(
 			container.NewHBox(widget.NewLabel(dict.TargetDir), dirEntry, browse, saveBtn),
 			container.NewHBox(widget.NewLabel(dict.LangLabel), langSelect, aboutBtn),
 			container.NewHBox(widget.NewLabel(dict.RunHint), dryRunCheck, recursiveCheck),
-			// V5：进度条与当前步骤文案，按执行日志的 [n/m] 标记推进
 			container.NewVBox(progress.label, progress.bar),
 		)
-		// 页脚区（Border bottom）：版本号 + build 编号的唯一展示位置，页眉不放版本号
+		// 页脚区（Border bottom）：版本号 + build 编号的唯一展示位置，页眉不放版本号。
 		w.SetContent(container.NewBorder(top,
 			widget.NewLabel(footerText()), nil, nil,
 			container.NewVScroll(container.NewVBox(fnButtons,
@@ -190,4 +126,28 @@ func Run(cfg config.Config) {
 	}
 	render()
 	w.ShowAndRun()
+}
+
+// newLangSelect 构造语言下拉框；选中未变化的语言时不触发回调。
+func newLangSelect(dict i18n.Dict, current string, onChange func(i18n.Lang)) *widget.Select {
+	labels := make([]string, len(langOptions))
+	for i, option := range langOptions {
+		labels[i] = option.label
+	}
+	sel := widget.NewSelect(labels, func(s string) {
+		for _, option := range langOptions {
+			if option.label == s {
+				onChange(option.lang)
+				return
+			}
+		}
+	})
+	for _, option := range langOptions {
+		if option.lang == i18n.Normalize(current) {
+			sel.SetSelected(option.label)
+			break
+		}
+	}
+	sel.PlaceHolder = dict.LangLabel
+	return sel
 }

@@ -327,6 +327,7 @@ A：可执行文件同目录的 `repo-manager.log`，CLI 与 GUI 均追加写入
 | [docs/config.example.ini](./docs/config.example.ini) | 运行配置示例模板（`config.ini` 不入库） |
 | [docs/TROUBLESHOOTING.md](./docs/TROUBLESHOOTING.md) | 使用与构建排障：症状、原因、处理与门禁失败定位 |
 | [docs/MAINTAINERS.md](./docs/MAINTAINERS.md) | 维护者手册：命名现状、仓库设置、发布校验、文档治理、已知差距 |
+| [docs/PRODUCTION-READINESS.md](./docs/PRODUCTION-READINESS.md) | 生产就绪规范：质量、测试覆盖率、安全、性能、日志、部署回滚、版本与文档完整性要求 |
 | [docs/tasks.md](./docs/tasks.md) / [tasks-done.md](./docs/tasks-done.md) | 进行中 / 待办任务清单与已完成任务归档 |
 | [landing/README.md](./landing/README.md) | Web 展示项目落地页目录：用途、边界与内容约定（页面文件规划中） |
 | [.github/CODE_OF_CONDUCT.md](./.github/CODE_OF_CONDUCT.md) | 行为准则 |
@@ -373,6 +374,7 @@ RepoManager/
 │   ├── TROUBLESHOOTING.md             # 使用与构建排障
 │   ├── MAINTAINERS.md                 # 维护者手册
 │   ├── tokens.json                    # 设计令牌
+│   ├── PRODUCTION-READINESS.md        # 生产就绪规范（质量 / 测试 / 安全 / 性能 / 日志 / 部署 / 版本 / 文档）
 │   ├── config.example.ini             # 运行配置示例模板
 │   └── tasks.md / tasks-done.md       # 任务清单与完成归档
 ├── go.mod / go.sum                    # Go 模块与依赖（Fyne v2）

@@ -1,4 +1,4 @@
-// internal/config/config.go v2.3.3
+// internal/config/config.go v2.3.6
 
 // Package config 负责 config.ini 的读写：读旧 → 过滤目标键 → 补写 → 回写，
 // 保留注释与未知行（对齐 OPENSPEC §5.3 与 CONTRIBUTING.md §4.5 约定）。
@@ -85,10 +85,14 @@ func parseDirList(value string) []string {
 }
 
 // Save 以「读旧 → 过滤目标键 → 补写 → 临时文件 → 回写」方式保存，去重同名键。
+// 读旧失败且非「文件不存在」时直接返回，禁止用内存中的配置覆盖磁盘文件。
 func Save(path string, cfg Config) error {
 	var lines []string
-	if data, err := os.ReadFile(path); err == nil {
+	data, err := os.ReadFile(path)
+	if err == nil {
 		lines = strings.Split(strings.ReplaceAll(string(data), "\r\n", "\n"), "\n")
+	} else if !os.IsNotExist(err) {
+		return fmt.Errorf("读取现有配置失败，已取消保存: %w", err)
 	}
 	repoWritten, langWritten, recWritten, extraWritten := false, false, false, false
 	extraLine := "EXTRA_CLEAN_DIRS=" + strings.Join(cfg.ExtraCleanDirs, ",")

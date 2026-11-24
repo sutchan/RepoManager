@@ -77,6 +77,7 @@ frontend
 | Release 资产 | `RepoManager-v<版本>-<os>-<arch>.zip / .tar.gz` 归档（Windows/macOS zip、Linux tar.gz）与 `SHA256SUMS.txt`；`windows/arm64` 因托管 runner 缺交叉工具链、`linux/arm64` 因缺 arm64 架构 GUI 开发库，均暂不产出（发布矩阵仅 4 目标，本地 `scripts/build.ps1` 可补齐） |
 | Release 说明 | 从 `CHANGELOG.MD` 对应版本小节提取，标题为 tag 名 |
 | 本机交叉编译 | `scripts/build.ps1` / `scripts/build.sh`，6 目标输出到 `bin/`；缺交叉编译器时跳过并警告 |
+| 回滚流程 | 见 [`PRODUCTION-READINESS.md` §6.3](./PRODUCTION-READINESS.md)：下载上一稳定版归档 → SHA 校验 → 保留 `config.ini` / 日志 → 覆盖二进制 → 版本确认与最小冒烟 |
 
 **发版前实查**（禁止按会话记忆写版本）：
 
@@ -102,6 +103,7 @@ grep 'const Version' internal/buildinfo/version.go
 | 改流程 / 命令 / CI | [CONTRIBUTING.md](./CONTRIBUTING.md) + [docs/README.md](./README.md) §4 |
 | 新增 / 删除文档 | [docs/README.md](./README.md) §1 文档地图与 §3 目录树、根 `README.MD` 文档索引、本文 §4 |
 | 改落地页 / 新增根目录子目录 | [`landing/README.md`](../landing/README.md) + 四处文档登记 + `scripts/check-root-clean.mjs` 白名单（见 §5） |
+| 改质量 / 安全 / 性能 / 日志 / 部署门槛 | [PRODUCTION-READINESS.md](./PRODUCTION-READINESS.md)（八类非功能要求单一来源）+ 发布检查清单 |
 | 新增 / 完成任务 | [tasks.md](./tasks.md)（唯一未完成来源）/ [tasks-done.md](./tasks-done.md)（归档） |
 | 维护者信息 / 仓库设置 | 本文 |
 | 版本 bump | [CONTRIBUTING.md §8.2](./CONTRIBUTING.md) 全部展示位 + `CHANGELOG.MD` 新小节 |
