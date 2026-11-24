@@ -1,4 +1,4 @@
-# .github/workflows/release.yml v2.3.3
+# .github/workflows/release.yml v2.3.6
 # 发布工作流（行为契约见 docs/CONTRIBUTING.md §8.4）：
 # tag push 或手动触发 → version 读取唯一权威源 → build 多平台矩阵
 # → package 统一打包为 <产品名>-v<版本>-<os>-<arch>.<扩展名> 并保留 artifact

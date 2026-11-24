@@ -12,7 +12,24 @@
 | RV2 | 审查报告 P3-4「`go.mod` testify 依赖分类待核实」复核 | 低 | 已完成（核验无需改动） | 全仓 `.go` 文件零直接 `import "github.com/stretchr/testify"`，仅作传递依赖存在，`// indirect` 标注正确；`go mod tidy` 不会改变该判定 |
 | RV3 | 审查报告 P2-5「测试覆盖差距」治理决策背景 | 中 | 已完成（决策登记） | `MAINTAINERS.md` M5 与 `DESIGN-SYSTEM.md` G9 在 v2.3.5 已标「已接受」；本轮因 A1/A2 引入新错误处理与并发逻辑，将 M5 更新为「部分修复：核心逻辑已补自动化测试，完整 GUI 交互仍按 §9.3 冒烟」 |
 
-> 本节记录 2026-11-24 依据 `reports/code-review-2026-11-23.md` 复核后直接归档的项；其余 10 项登记于 [tasks.md](./tasks.md) 并逐项完成后再归档。
+> 本节记录 2026-11-24 依据 `reports/code-review-2026-11-23.md` 复核后直接归档的项；其余 10 项见第十一节。
+
+## 十一、v2.3.6 审查问题修复归档（2026-11-24 11:20）
+
+| ID | 任务 | 优先级 | 状态 | 结果 |
+|----|------|--------|------|------|
+| A1 | 配置加载失败保护 | 高 | 已完成 | `cmd/repo-manager/main.go` 将 `err` 检查提前到 `-lang` 回写之前，读取失败即提示并返回，禁止任何回写；`internal/config/config.go` 的 `Save` 区分 `os.IsNotExist` 与其他读旧错误，非 NotExist 返回错误并取消保存；新增 `config_test.go::TestSaveRefusesWhenReadFails` 与 `main_test.go` 参数测试 |
+| A2 | GUI 功能按钮互斥 | 高 | 已完成 | 新增 `internal/ui/runner.go`，`functionRunner` 以 `Run` 作用域的 `atomic.Bool` 跨重绘复用；`CompareAndSwap` 保证同时仅一个 `engine.Run`，执行期间 `setButtonsEnabled(false)` 禁用全部功能按钮，结束后恢复 |
+| A3 | 仓库根目录边界 | 中 | 已完成 | `platform.NormalizeRoot` 对仅含分隔符的输入返回 `filepath.Clean` 根本身（不再退化为 cwd），空输入保持空；新增 `IsFilesystemRoot`（`filepath.Dir` 自反性判定）；`ValidateRoot` 拒绝文件系统根；补 `TestNormalizeRootFilesystemRoot` / `TestValidateRootRejectsFilesystemRoot` |
+| A4 | GUI 日志有界缓冲 | 中 | 已完成 | 新增无 build tag 的 `internal/ui/logbuffer.go`（`appendBoundedLog`，上限 500 行）与 `logbuffer_test.go`；`output.go` 的 `guiLogger` 改用有界缓冲 + `strings.Join` 一次性 `SetText`，消除逐行全量拼接的 O(n²)；完整日志仍由 `repo-manager.log` 落盘 |
+| A5 | 测试覆盖与 race 门禁 | 中 | 已完成（核心逻辑） | `cmd/repo-manager/main_test.go` 覆盖 `parseArgs` 表驱动与 `resolveRoot` 优先级；`ci.yml` 的 `check` job 新增 `go test -tags nogui -race ./...`（ubuntu runner 具备 CGO/gcc；本机无 gcc 故本地未跑）；`MAINTAINERS.md` M5 与 `DESIGN-SYSTEM.md` G9 更新为「部分修复」 |
+| A6 | 落地页版本同步 | 低 | 已完成 | 运行 `scripts/gen-landing-version.mjs` 从权威源重新生成 `landing/assets/version.js`（2.3.6 / 10 位 build），格式 `v2.3.6 · build yymmddhhmm` |
+| A7 | workflow 头注释同步 | 低 | 已完成 | `ci.yml` / `release.yml` 首行头注释更新至 v2.3.6 |
+| A8 | GUI `render` 闭包拆分 | 低 | 已完成 | `runner.go` 承载执行上下文与互斥，`ui.go` 抽 `newLangSelect`；`ui.go` 与 `runner.go` 均 ≤200 行，导出契约不变 |
+| A9 | `.next` 路径辅助函数 | 低 | 已完成 | `internal/engine/engine.go` 新增 `nextCachePath`，功能 3/4 共用；`options.go::Run` 补充 `NormalizeRoot` + `ValidateRoot` 前置条件注释 |
+| A10 | 版本 bump 与展示位同步 | 高 | 已完成 | 权威源 bump 至 2.3.6，按 §8.2 同步 `package.json` / `package-lock.json` / README 徽章与页脚 / `tokens.json` / 7 份规范文档标题 / `prototype/README.md` / `landing/README.md` / 被改代码文件头注释；`CHANGELOG.MD` 新增 `[2.3.6]`；校验脚本确认 0 处遗留旧版本 |
+
+> 本节按 2026-11-24 11:20 的代码实况归档；全量门禁（root-clean / gofmt / vet / test / build nogui / build ci / check:docs）全部通过。`docs/tasks.md` 已更新为无待办状态。
 
 ## 一、初始综合审查任务（用户首条指令）
 

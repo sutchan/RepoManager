@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.3.6] - 2026-11-24
+
+### Fixed
+- **配置失效链** - `cmd/repo-manager/main.go` 将配置读取错误检查提前到 `-lang` 回写之前，读取失败时禁止任何回写，避免用默认配置覆盖用户 `config.ini`；`internal/config/config.go` 的 `Save` 显式区分「文件不存在」与其他读取错误，非 NotExist 时返回错误并取消保存（对齐审查报告 P1-1 / P1-2）
+- **仓库根目录边界** - `internal/platform/platform.go` 的 `NormalizeRoot` 对文件系统根（`"/"` / `"X:\"`）返回根本身而非退化为当前工作目录；`ValidateRoot` 增加 `IsFilesystemRoot` 校验，拒绝将文件系统根作为仓库根目录，避免危险操作范围失控（P2-2）
+- **GUI 并发执行** - 新增 `internal/ui/runner.go` 承载执行上下文，以跨重绘复用的 `atomic.Bool` 互斥锁 + 执行期间禁用全部功能按钮，杜绝连点触发多个 `engine.Run` 并发操作同一批目录（P2-3）
+- **GUI 日志性能** - `internal/ui/output.go` 改用有界环形缓冲（`logbuffer.go`，上限 500 行）替代逐行全量 `SetText`，消除 O(n²) 拷贝；完整日志仍由 `repo-manager.log` 落盘（P2-4）
+- **版本展示漂移** - 重新生成 `landing/assets/version.js`，同步 `ci.yml` / `release.yml` 头注释至当前版本（P3-1 / P3-2）
+
+### Added
+- **回归测试** - 新增 `cmd/repo-manager/main_test.go`（`parseArgs` / `resolveRoot` 优先级表驱动）、`internal/config` 读旧失败拒绝覆盖用例、`internal/platform` 根目录边界用例、`internal/ui/logbuffer_test.go` 有界缓冲用例；`ci.yml` 的 `check` job 增加 `go test -tags nogui -race ./...`（CI runner 具备 CGO/gcc）（P2-5）
+
+### Changed
+- **结构拆分** - `internal/ui/ui.go` 的 `render` 闭包拆出 `runner.go`（执行上下文）与 `newLangSelect`（语言下拉），单文件回到 200 行内；`internal/engine` 抽 `nextCachePath` 消除 F3/F4 重复，`Run` 补充前置条件注释（P3-3 / P3-5）
+- **治理决策更新** - `MAINTAINERS.md` M5 从「已接受」更新为「部分修复：核心逻辑已补自动化测试，完整 GUI 交互仍按 §9.3 冒烟」
+- **版本同步** - 权威源与 §8.2 全部展示位 bump 至 `2.3.6`
+
+---
+
 ## [2.3.5] - 2026-11-23
 
 ### Fixed

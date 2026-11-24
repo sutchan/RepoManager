@@ -1,4 +1,4 @@
-// internal/engine/options.go v2.3.3
+// internal/engine/options.go v2.3.6
 
 package engine
 
@@ -32,6 +32,7 @@ func listDirs(p platform.Platform, repoRoot string, opts Options) ([]string, err
 }
 
 // Run 按功能编号（1-7）执行对应功能，lang 决定执行日志语言。
+// 前置条件：调用方须先用 platform.NormalizeRoot + platform.ValidateRoot 校验 repoRoot。
 func Run(p platform.Platform, fn int, repoRoot string, lang i18n.Lang, opts Options, log Logger) error {
 	d := i18n.Logs(lang)
 	if opts.DryRun {

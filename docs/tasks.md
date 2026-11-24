@@ -1,25 +1,32 @@
 # Repo Manager 任务清单 (docs/tasks.md)
 
-> 最后更新：**2026-11-24 11:00**
+> 最后更新：**2026-11-24 11:20**
 > 维护约定：已完成任务归档至 [tasks-done.md](./tasks-done.md)；本文件仅保留进行中 / 待办任务。
-> 全局版本唯一来源：`internal/buildinfo/version.go` 的 `Version`（当前 **2.3.5**，本轮完成后 bump 至 **2.3.6**）。
-> 本轮登记：2026-11-24 11:00 依据 `reports/code-review-2026-11-23.md`（审查基准 `302cd47` / v2.3.4）的 12 项发现，按当前 HEAD `c1df28b` / v2.3.5 逐条复核后登记；P2-1（繁中日志）经复核为误报（`hant.go` 已通过 `init()` 注册 `logDicts[Hant]`）、P3-4（testify 分类）经复核无需改动，两项直接归档至 [tasks-done.md 第十节](./tasks-done.md)。
+> 全局版本唯一来源：`internal/buildinfo/version.go` 的 `Version`（当前 **2.3.6**）。
+> 本轮处理：2026-11-24 11:00 依据 `reports/code-review-2026-11-23.md` 的 12 项发现登记 A1–A10，逐项复核并完成其中 10 项；P2-1（繁中日志误报）与 P3-4（testify 分类无需改动）直接归档至 [tasks-done.md 第十节](./tasks-done.md)。
+> 收口记录：2026-11-24 11:20 全部 12 项审查发现处理完毕（10 项修复 + 2 项核验归档），A1–A10 归档至 [tasks-done.md 第十一节](./tasks-done.md)；**当前无未完成事项**。全量门禁（root-clean / gofmt / vet / test / build nogui / build ci / check:docs）实跑通过，`-race` 因本机无 gcc 纳入 CI 验证。
 
 ---
 
 ## 进行中 / 待办
 
-| ID | 任务 | 来源 | 优先级 | 状态 | 更新时间 | 备注 |
-|----|------|------|--------|------|----------|------|
-| A1 | 配置加载失败保护：`main.go` 错误检查提前 + `config.Save` 读旧错误显式处理 | P1-1 / P1-2 | 高 | 进行中 | 2026-11-24 11:00 | 杜绝 `-lang` 用默认配置覆盖 `config.ini`；补回归测试 |
-| A2 | GUI 功能按钮互斥，禁止并发执行危险操作 | P2-3 | 高 | 待处理 | 2026-11-24 11:00 | `atomic.Bool` 执行锁 + 执行期间禁用按钮 |
-| A3 | `NormalizeRoot` 文件系统根退化修复 + `ValidateRoot` 拒绝根目录 | P2-2 | 中 | 待处理 | 2026-11-24 11:00 | 根目录不再退化为 cwd；补边界测试 |
-| A4 | GUI 日志逐行全量 `SetText` 改有界缓冲，消除 O(n²) | P2-4 | 中 | 待处理 | 2026-11-24 11:00 | 最近 N 行环形显示，完整日志仍落盘 |
-| A5 | 补 `cmd/` 与新增逻辑自动化测试（含 race 验证） | P2-5 | 中 | 待处理 | 2026-11-24 11:00 | 与 A1/A2 配套；更新 M5/G9「已接受」决策为部分修复 |
-| A6 | 落地页版本展示同步（2.3.3 → 当前版本） | P3-1 | 低 | 待处理 | 2026-11-24 11:00 | 运行 `scripts/gen-landing-version.mjs` 重新生成 |
-| A7 | workflow 头注释版本同步（v2.3.3 → 当前版本） | P3-2 | 低 | 待处理 | 2026-11-24 11:00 | `ci.yml` / `release.yml` 首行 |
-| A8 | GUI `render` 闭包拆分，单文件控制在 200 行内 | P3-3 | 低 | 待处理 | 2026-11-24 11:00 | 抽 `runner.go` 承载执行上下文 |
-| A9 | 抽取 `.next` 缓存路径辅助函数 + `Run` 前置条件注释 | P3-5 | 低 | 待处理 | 2026-11-24 11:00 | 消除 F3/F4 重复 |
-| A10 | 版本 bump 2.3.6 并按 §8.2 同步全部展示位 | §8.1 / §8.2 | 高 | 待处理 | 2026-11-24 11:00 | 含 CHANGELOG 新增小节、被改代码文件头注释 |
+| ID | 任务 | 优先级 | 状态 | 更新时间 | 备注 |
+|----|------|--------|------|----------|------|
+| — | 当前无待办 | — | — | 2026-11-24 11:20 | 新增任务须先登记于此并按优先级排序；完成后移入 [tasks-done.md](./tasks-done.md) |
 
-> 已知限制（`windows/arm64` 无交叉工具链、`linux/arm64` 缺 arm64 架构开发库）登记于 [MAINTAINERS.md §6](./MAINTAINERS.md)，不属待办。
+## 本轮完成概览（v2.3.6）
+
+| ID | 任务 | 来源 | 归档 |
+|----|------|------|------|
+| A1 | 配置加载失败保护（`main.go` 错误顺序 + `config.Save` 读旧错误） | P1-1 / P1-2 | [tasks-done.md 第十一节](./tasks-done.md) |
+| A2 | GUI 功能按钮互斥（跨重绘 `atomic.Bool` + 执行期间禁用按钮） | P2-3 | 同上 |
+| A3 | `NormalizeRoot` 文件系统根退化 + `ValidateRoot` 拒绝根目录 | P2-2 | 同上 |
+| A4 | GUI 日志有界缓冲，消除 O(n²) | P2-4 | 同上 |
+| A5 | 补 `cmd/` 与核心逻辑测试 + CI `-race` 门禁 | P2-5 | 同上 |
+| A6 | 落地页版本展示同步 | P3-1 | 同上 |
+| A7 | workflow 头注释版本同步 | P3-2 | 同上 |
+| A8 | GUI `render` 闭包拆分（`runner.go` + `newLangSelect`） | P3-3 | 同上 |
+| A9 | `.next` 缓存路径辅助函数 + `Run` 前置条件注释 | P3-5 | 同上 |
+| A10 | 版本 bump 2.3.6 并按 §8.2 同步全部展示位 | §8.1 / §8.2 | 同上 |
+
+> 已知限制（`windows/arm64` 无交叉工具链、`linux/arm64` 缺 arm64 架构开发库）登记于 [MAINTAINERS.md §6](./MAINTAINERS.md)，不属待办。本机无 gcc，`go test -race` 已纳入 `ci.yml`（ubuntu runner）验证，不属待办。

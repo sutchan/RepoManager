@@ -1,4 +1,4 @@
-// internal/engine/engine.go v2.3.3
+// internal/engine/engine.go v2.3.6
 
 // Package engine 实现功能 1 ～ 7 的平台无关业务逻辑；OS 差异一律经 platform.Platform。
 package engine
@@ -11,6 +11,9 @@ import (
 	"repo-manager/internal/i18n"
 	"repo-manager/internal/platform"
 )
+
+// nextCachePath 返回 Next.js 项目目录的缓存路径；功能 3/4 共用，避免重复拼接。
+func nextCachePath(projectDir string) string { return filepath.Join(projectDir, ".next") }
 
 // Logger 由 UI / CLI 注入，用于输出执行日志。
 type Logger interface {

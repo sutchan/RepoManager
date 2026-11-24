@@ -1,4 +1,4 @@
-# Repo Manager 开发规范与贡献指南 v2.3.5
+# Repo Manager 开发规范与贡献指南 v2.3.6
 
 > 本文是 Repo Manager 仓库的**唯一开发规范来源**，规定「如何改代码、如何写文档、如何提交与评审」。
 > 本文存放于 `docs/`；所有贡献者（含 AI 协作会话）在动手前必须阅读本文。
@@ -77,6 +77,7 @@ npm run check:root-clean                    # 根目录清洁度（CI 首步）
 gofmt -l ./cmd ./internal                   # 输出应为空（CI 用 test -z "$(...)" 判定）
 go vet -tags nogui ./...                    # 静态检查
 go test -tags nogui -count=1 ./...          # 单元 / 临时目录集成测试
+go test -tags nogui -race -count=1 ./...    # race 检测（需 CGO + gcc，无 gcc 时留待 CI）
 go build -tags nogui ./...                  # 编译（nogui 排除 GUI 包）
 go build -tags ci ./...                     # 编译 GUI 代码层（software driver，无需 C 工具链）
 npm ci                                      # 安装参考界面依赖（CI）
@@ -436,7 +437,7 @@ git diff --check                   # 无空白错误
 
 **当前状态：已落地（v2.3.3）**——实现为两个工作流：
 
-- [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)：`push`（`main` 与 `v*` tag）、`pull_request` 与 `workflow_dispatch` 触发；`check` job 执行 §9.1 全部仓库级门禁（nogui），`windows-smoke` job 在 Windows runner 补跑 `go test -tags nogui` 与 `go build -tags ci`，`gui-build` job 在 ubuntu 安装 OpenGL / X11 / Wayland 开发库后以**默认构建标签**完整编译 Fyne GUI。`go-gl/glfw v3.4` 在 Linux 默认双后端，缺 `libwayland-dev` / `libxkbcommon-dev` 会在 `wl_platform.h` 处编译失败，排障见 [TROUBLESHOOTING.md §2](./TROUBLESHOOTING.md)。
+- [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)：`push`（`main` 与 `v*` tag）、`pull_request` 与 `workflow_dispatch` 触发；`check` job 执行 §9.1 全部仓库级门禁（nogui，含 `go test -tags nogui -race`，ubuntu runner 具备 CGO/gcc），`windows-smoke` job 在 Windows runner 补跑 `go test -tags nogui` 与 `go build -tags ci`，`gui-build` job 在 ubuntu 安装 OpenGL / X11 / Wayland 开发库后以**默认构建标签**完整编译 Fyne GUI。`go-gl/glfw v3.4` 在 Linux 默认双后端，缺 `libwayland-dev` / `libxkbcommon-dev` 会在 `wl_platform.h` 处编译失败，排障见 [TROUBLESHOOTING.md §2](./TROUBLESHOOTING.md)。
 - [`.github/workflows/release.yml`](../.github/workflows/release.yml)：tag push 或 `workflow_dispatch` 触发；`version` job 读取版本权威源，`build` job 按 4 目标矩阵产出二进制，`package` job 调用 `scripts/package-release.sh` 打包归档并把 `release-archives` 作为 artifact 保留，`release` job（仅 tag push）校验同 SHA 其它工作流全绿、tag == 版本权威源 == `package.json`，从 `CHANGELOG.MD` 提取对应小节作 Release 说明；`gh release create` 只上传 `*.zip` / `*.tar.gz` 归档与校验文件，预发布以 `--prerelease` 标记区分。门禁不在本工作流重复执行。
 - **全绿语义**：`release` job 以 `needs: [version, build, package]` 保证发布工作流自身全绿，并通过 `gh api` 校验同 SHA 其它工作流全部 `completed|success`；新增工作流会被该轮询自动纳入阻断范围。
 - **已知缺口**：GitHub 托管 runner 无 `aarch64-w64-mingw32-gcc`，不产出 `windows/arm64`；`linux/arm64` 缺 arm64 架构的 X11 / Wayland / OpenGL 开发库，为避免该目标失败拖垮整个 `build` job，v2.3.3 起从发布矩阵移除（本地 `scripts/build.ps1` 仍可补齐）；`SHA256SUMS.txt` 仅覆盖实际产出的归档。

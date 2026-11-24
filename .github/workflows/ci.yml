@@ -1,4 +1,4 @@
-# .github/workflows/ci.yml v2.3.3
+# .github/workflows/ci.yml v2.3.6
 # 仓库级门禁（行为契约见 docs/CONTRIBUTING.md §8.4 / §9.1）：
 # check 跑全套静态 / 测试门禁；windows-smoke 在 Windows runner 验证平台层代码；
 # gui-build 在 Linux 验证默认标签的完整 Fyne GUI 编译。
@@ -47,6 +47,10 @@ jobs:
 
       - name: go test (nogui)
         run: go test -tags nogui -count=1 ./...
+
+      # race 检测需要 CGO + gcc；ubuntu runner 具备，本机无 gcc 时留待 CI 验证。
+      - name: go test -race (nogui)
+        run: go test -tags nogui -race -count=1 ./...
 
       - name: go build (nogui)
         run: go build -tags nogui ./...

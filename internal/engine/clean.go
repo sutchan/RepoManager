@@ -1,4 +1,4 @@
-// internal/engine/clean.go v2.3.3
+// internal/engine/clean.go v2.3.6
 
 package engine
 
@@ -23,7 +23,7 @@ func CleanNextCache(p platform.Platform, repoRoot string, lang i18n.Lang, opts O
 		if !platform.IsNextProject(dir) {
 			continue
 		}
-		next := filepath.Join(dir, ".next")
+		next := nextCachePath(dir)
 		if opts.DryRun {
 			if _, err := os.Stat(next); err == nil {
 				log.Logf(d.DryRunDelete, next)
@@ -68,7 +68,7 @@ func RestoreNextCache(p platform.Platform, repoRoot string, lang i18n.Lang, opts
 		if !platform.IsNextProject(dir) {
 			continue
 		}
-		next := filepath.Join(dir, ".next")
+		next := nextCachePath(dir)
 		info, err := os.Stat(next)
 		if err != nil || info.IsDir() {
 			continue // 不存在或是正常缓存目录，无需处理

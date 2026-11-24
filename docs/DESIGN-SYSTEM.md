@@ -1,4 +1,4 @@
-# Repo Manager 设计系统 (Design System) v2.3.5
+# Repo Manager 设计系统 (Design System) v2.3.6
 
 > **本文定位**：Repo Manager 的**唯一 UI 设计规范来源**，规定设计令牌、界面结构与交互标准。
 > **v2.0.0 起**：实际 UI 为 **Go + Fyne 桌面 GUI**（`internal/ui`），配色沿用本文 §2.1 设计令牌；仓库根 `src/` 的 Next.js 参考界面为 **v1.x 遗留、已弃用**，§3.1 / §3.2 等 Next.js 章节仅作历史参考。
@@ -217,7 +217,7 @@ Go 版 GUI 位于 `internal/ui`，遵循本文 §2.1 配色与 §4 交互标准�
 | G6 | `lg` 侧栏、1200px 容器为历史设计，实际是 1024px 无侧栏 | §5 | 已按实现修正文档 |
 | G7 | Tabs 缺少完整 ARIA（`html lang` 已于 v2.3.3 随语言同步） | §6 | **已接受**：Tabs 属已弃用的参考界面遗留组件（见 `OPENSPEC.md` §2.3），不再投入修复 |
 | G8 | ~~清理按钮无 `onClick`，界面为纯展示~~ | §3.2 | **v2.0.0 已解决**：Go + Fyne 版实现真实清理（含二次确认）；Next.js 参考界面保持纯展示并已弃用 |
-| G9 | CLI `-h` 帮助固定英文（不随 `-lang` 切换），递归深度已统一为 3 层；`cmd/` 与 `internal/ui` 无自动化测试 | §3.0 / §4.1 | **已接受**：帮助固定英文为既定行为（见 `OPENSPEC.md` §4.3）；深度文本 v2.3.3 已统一；测试覆盖差距见 `MAINTAINERS.md` M5，发版前按 [CONTRIBUTING.md §9.3](./CONTRIBUTING.md) 手动冒烟 |
+| G9 | CLI `-h` 帮助固定英文（不随 `-lang` 切换），递归深度已统一为 3 层；`cmd/` 与 `internal/ui` 自动化测试覆盖 | §3.0 / §4.1 | **v2.3.6 部分修复**：帮助固定英文为既定行为（见 `OPENSPEC.md` §4.3）；深度文本 v2.3.3 已统一；`cmd` 参数与纯函数已补测试，完整 GUI 交互仍按 [CONTRIBUTING.md §9.3](./CONTRIBUTING.md) 手动冒烟，决策见 `MAINTAINERS.md` M5 |
 
 > 本清单是「规范与实现一致」的核对表：修复任一项时，同步更新本文对应章节与本表，并在 `CHANGELOG.MD` 记录。
 
