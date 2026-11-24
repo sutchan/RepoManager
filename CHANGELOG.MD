@@ -14,6 +14,9 @@ All notable changes to this project will be documented in this file.
 - **README 语言描述** - 功能亮点中的「中文 / English 双语」修正为简中 / 繁中 / 英文三语；移除与 `git remote -v` 实况矛盾的维护者命名描述
 - **SECURITY.md 版本展示位** - 由 v2.3.5 同步至 v2.3.7；`CONTRIBUTING.md` §8.2 展示位清单新增 `SECURITY.md`，避免后续 bump 再次遗漏
 - **版本同步** - 权威源与全部展示位同步至 `2.3.7`
+- **落地页版本文件** - `landing/assets/version.js` 从权威源重新生成，由 2.3.6 同步至 2.3.7（10 位 build 编号）
+- **package-lock 依赖自洽** - 修复历史 bump 误伤：`@jridgewell/remapping` 的 `version` 由 2.3.6 改回 2.3.5，与 tarball `remapping-2.3.5.tgz` 一致；全量扫描确认无其他不自洽条目
+- **文档失真修正** - `PRODUCTION-READINESS.md` §3.2/§3.3 中 SECURITY.md 的「现状不足 / 立即修」更新为已完成；`MAINTAINERS.md` §2 仓库描述「中文/英文双语界面」改为三语
 
 ---
 

@@ -33,7 +33,7 @@
 ### 仓库描述（Description）
 
 ```
-🧰 一键清理前端项目冗余：统一管理全局 node_modules、禁用 .next/.vite 缓存、清理 dist/build 垃圾。Go 编译的跨平台单文件工具（Windows / macOS / Linux，Fyne GUI + 命令行），支持 Next.js / React / Vue / Vite / Angular / Svelte，中文/英文双语界面。
+🧰 一键清理前端项目冗余：统一管理全局 node_modules、禁用 .next/.vite 缓存、清理 dist/build 垃圾。Go 编译的跨平台单文件工具（Windows / macOS / Linux，Fyne GUI + 命令行），支持 Next.js / React / Vue / Vite / Angular / Svelte，简中/繁中/英文三语界面。
 ```
 
 ### 主页（Website）

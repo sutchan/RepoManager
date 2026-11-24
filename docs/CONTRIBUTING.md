@@ -401,7 +401,8 @@ git diff --check                   # 无空白错误
 - `docs/tokens.json` → `version`
 - `docs/DESIGN-SYSTEM.md`、`docs/README.md`、`docs/OPENSPEC.md`、`docs/CONTRIBUTING.md`、`docs/TROUBLESHOOTING.md`、`docs/MAINTAINERS.md`、`prototype/README.md` → 标题版本
 - `docs/tasks.md` → 头部「当前版本」说明
-- `.github/` 下新增的 Community Health 文件 → 标题或首行注释版本
+- `.github/SECURITY.md` → 标题版本 + 支持版本表「最新 2.3.x」的历史多次遗漏，bump 时须显式核对
+- `.github/` 下其他 Community Health 文件 → 标题或首行注释版本
 - 被改动**代码文件**的头注释版本号
 
 **禁止**：全仓库批量刷写所有源码文件的头注释；未改动文件头注释保持不变（头注释是文件自版本，不等于产品版本，看到旧版本与新版本并存属正常，不是版本漂移）。
