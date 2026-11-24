@@ -1,4 +1,4 @@
-# Repo Manager 维护者手册 (Maintainers) v2.3.6
+# Repo Manager 维护者手册 (Maintainers) v2.3.7
 
 > **定位**：仓库维护者的操作与决策记录——命名现状、GitHub 仓库设置、发版校验、文档治理、门禁与目录卫生。
 > 使用者请从 [README.MD](../README.MD) 开始；功能行为以 [OPENSPEC.md](./OPENSPEC.md) 为准；编码 / 提交 / 审查规范以 [CONTRIBUTING.md](./CONTRIBUTING.md) 为准；未完成的任务以 [tasks.md](./tasks.md) 为唯一来源。
@@ -101,7 +101,7 @@ grep 'const Version' internal/buildinfo/version.go
 | 改功能行为 | [OPENSPEC.md](./OPENSPEC.md) §3 / §4 / §7 + 根 `README.MD` 功能详解 + `CHANGELOG.MD` |
 | 改 UI / 令牌 | [DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md) + [tokens.json](./tokens.json) |
 | 改流程 / 命令 / CI | [CONTRIBUTING.md](./CONTRIBUTING.md) + [docs/README.md](./README.md) §4 |
-| 新增 / 删除文档 | [docs/README.md](./README.md) §1 文档地图与 §3 目录树、根 `README.MD` 文档索引、本文 §4 |
+| 新增 / 删除文档 | [docs/README.md](./README.md) §1 文档地图与 §3 目录树、[CONTRIBUTING.md §3.1](./CONTRIBUTING.md)、本文 §4（根 `README.MD` 不再维护文档索引） |
 | 改落地页 / 新增根目录子目录 | [`landing/README.md`](../landing/README.md) + 四处文档登记 + `scripts/check-root-clean.mjs` 白名单（见 §5） |
 | 改质量 / 安全 / 性能 / 日志 / 部署门槛 | [PRODUCTION-READINESS.md](./PRODUCTION-READINESS.md)（八类非功能要求单一来源）+ 发布检查清单 |
 | 新增 / 完成任务 | [tasks.md](./tasks.md)（唯一未完成来源）/ [tasks-done.md](./tasks-done.md)（归档） |

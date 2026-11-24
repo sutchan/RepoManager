@@ -1,4 +1,4 @@
-# Repo Manager 文档中心 v2.3.6
+# Repo Manager 文档中心 v2.3.7
 
 > 本目录是 Repo Manager **所有规范与规格文档的唯一归档位置**。
 > 仓库根只保留面向使用者的入口 [README.MD](../README.MD)、变更历史 [CHANGELOG.MD](../CHANGELOG.MD) 与 [LICENSE](../LICENSE)。
@@ -166,7 +166,7 @@ CI 实际执行的门禁命令以 [`.github/workflows/ci.yml`](../.github/workfl
 7. 禁止创建 `.github/readme.md`（与根 README 重复）；`*.code-workspace` 是工作区配置，禁止删除（当前文件名为 `RepoManager.code-workspace`）。
 8. GitHub 平台入口（行为准则、安全、支持、Issue/PR 模板、CODEOWNERS）放 `.github/`，规范正文放 `docs/`；改动社区健康文件时同步本页 §1.1 与 [CONTRIBUTING.md §3.1](./CONTRIBUTING.md) 的文件清单。禁止在 `.github/` 复制 `docs/CONTRIBUTING.md` 正文。
 9. `.github/*.yml`（FUNDING / Issue Forms / config）改动后须验证 YAML 可解析，且不得填写未经核实的账号、邮箱或承诺响应时间。
-10. **新增 / 删除 / 重命名文档**须同时更新：本页 §1 文档地图、§3 目录树、根 `README.MD` 文档索引与目录树、[MAINTAINERS.md §4](./MAINTAINERS.md) 变更对照表；新增文档标题带当前版本号，并在 `CHANGELOG.MD` 对应版本的 `Docs` 分组记录。
+10. **新增 / 删除 / 重命名文档**须同时更新：本页 §1 文档地图、§3 目录树、[CONTRIBUTING.md §3.1](./CONTRIBUTING.md)、[MAINTAINERS.md §4](./MAINTAINERS.md) 变更对照表；根 `README.MD` 面向使用者，不再维护文档索引与目录树。新增文档标题带当前版本号，并在 `CHANGELOG.MD` 对应版本的 `Docs` 分组记录。
 11. **任务单一来源**：未完成 / 进行中任务只写 [tasks.md](./tasks.md)，完成后归档到 [tasks-done.md](./tasks-done.md)；禁止在其他文档维护待办清单或把「规划」写成既成事实。
 12. **数据真实性**：文档中的数量、行数、命令数、容量、耗时等数据须实算或有可核实来源，禁止估算、虚构；发现代码与文档冲突时以代码为准，并同步修文档或登记到 [tasks.md](./tasks.md)。
 13. **目录卫生**：新增根目录工程文件须同时核对 `.gitignore` 与 `scripts/check-root-clean.mjs` 白名单；每次改动文档后跑 `npm run check:docs` 与 `npm run check:root-clean`。

@@ -1,4 +1,4 @@
-# Repo Manager 开发规范与贡献指南 v2.3.6
+# Repo Manager 开发规范与贡献指南 v2.3.7
 
 > 本文是 Repo Manager 仓库的**唯一开发规范来源**，规定「如何改代码、如何写文档、如何提交与评审」。
 > 本文存放于 `docs/`；所有贡献者（含 AI 协作会话）在动手前必须阅读本文。
@@ -189,7 +189,7 @@ RepoManager/
    - **文档文件（`.md/.markdown/.mdx/.rst`）不拆分**，即使超过 200 行也保持单文件完整连贯。
    - `.bat` 为批处理脚本，不纳入源码 200 行规则，但仍须按标签分节、保持可读。
 6. **临时文件统一落固定子目录**：一次性脚本、探针、调试日志、中间产物一律写入 `.tmp/`；工具正式产物（审计报告、覆盖率、`*-result.json` 等）写入 `reports/` / `coverage/` / `test-results/`。写入前先 `mkdir -p`，本轮产生的 `.tmp/` 内容在任务结束前清理；需长期留存的证据改写进 `docs/` 或测试断言。目录忽略规则以 `.gitignore` 实况为准，并在 ESLint / `tsconfig.json` / `check-doc-links.mjs` 中排除，避免临时脚本让门禁假红。**禁止**在仓库根或顶层散落 `.tmp-*.mjs`、`tmp-*.js`、`*.log`、`audit-*.json` 等；根目录白名单由 `scripts/check-root-clean.mjs` 强制校验（CI 首步），新增根目录工程文件须同时核对 `.gitignore` 与白名单。产品运行时的 `config.ini` / `repo-manager.log` 属 exe 同目录便携配置，不在此约束内。
-7. **新增 / 删除 / 重命名文档**须同步四处：[`docs/README.md`](./README.md) §1 文档地图与 §3 目录树、根 [`README.MD`](../README.MD) 文档索引与目录树、本文 §3.1、[`MAINTAINERS.md`](./MAINTAINERS.md) §4 变更对照表；新增文档标题带当前版本号，并在 `CHANGELOG.MD` 对应版本的 `Docs` 分组记录。**新增根目录子目录**（如 `landing/`）还须登记 `scripts/check-root-clean.mjs` 的 `ALLOWED_DIRS` 白名单并核对 `.gitignore`。同一事实只在一处维护，其余用链接引用。
+7. **新增 / 删除 / 重命名文档**须同步三处：[`docs/README.md`](./README.md) §1 文档地图与 §3 目录树、本文 §3.1、[`MAINTAINERS.md`](./MAINTAINERS.md) §4 变更对照表；根 `README.MD` 面向使用者与构建者，只保留少量入口链接，**不再维护文档索引与目录树**。新增文档标题带当前版本号，并在 `CHANGELOG.MD` 对应版本的 `Docs` 分组记录。**新增根目录子目录**（如 `landing/`）还须登记 `scripts/check-root-clean.mjs` 的 `ALLOWED_DIRS` 白名单并核对 `.gitignore`。同一事实只在一处维护，其余用链接引用。
 8. **命名层次**：产品名 `Repo Manager`、Go 模块与二进制 `repo-manager`、Git 远程 `sutchan/RepoManager`；本机目录名 `RepoManager` 与工作区文件 `RepoManager.code-workspace` 与产品名对应，v2.3.3 已完成技术标识同步。对照与决策见 [`MAINTAINERS.md` §1](./MAINTAINERS.md)；当前无未完成项，见 [`tasks.md`](./tasks.md)。
 
 ---
@@ -468,7 +468,7 @@ git diff --check                   # 无空白错误
 - [ ] 版本号已 bump，`package.json` / README 徽章 / CHANGELOG / 展示位一致
 - [ ] `CHANGELOG.MD` 已新增对应小节；`README.MD` / `docs/OPENSPEC.md` 使用说明随功能变化更新
 - [ ] 文档链接按实际大小写与相对层级书写，新增文档归入 `docs/`
-- [ ] 新增 / 删除 / 重命名文档已同步 `docs/README.md` §1 / §3、根 `README.MD` 索引与目录树、本文 §3.1、`docs/MAINTAINERS.md` §4；排障类变更同步 `docs/TROUBLESHOOTING.md`
+- [ ] 新增 / 删除 / 重命名文档已同步 `docs/README.md` §1 / §3、本文 §3.1、`docs/MAINTAINERS.md` §4（根 `README.MD` 只保留使用者入口链接）；排障类变更同步 `docs/TROUBLESHOOTING.md`
 - [ ] 未完成事项只记入 `docs/tasks.md`，完成后归档到 `docs/tasks-done.md`；无「规划写成既成事实」的表述
 - [ ] `npm run check:docs` 与 `npm run check:root-clean` 均通过；GitHub Actions 各工作流为绿；发布类变更已按 §8.4 校验 tag 与版本权威源一致性
 - [ ] 无密钥 / Token / 真实用户数据入库；`node_modules`、`.next`、`*.log`、`*.tsbuildinfo` 未被跟踪；`npm run check:root-clean` 通过，临时文件统一在 `.tmp/` / `reports/`
@@ -503,7 +503,7 @@ git diff --check                   # 无空白错误
 6. 禁止创建 `.github/readme.md`；`*.code-workspace` 是工作区配置，禁止删除（当前文件名 `RepoManager.code-workspace`）。
 7. 改动文档后必须执行 `npm run check:docs`（相对链接含大小写）与 `npm run check:root-clean`（根目录无散落条目），校验方法见 [`docs/README.md` §5](./README.md)。
 8. **任务单一来源**：未完成 / 进行中事项只写 `docs/tasks.md`，完成后归档到 `docs/tasks-done.md`；其他文档不得另建待办清单。
-9. **新增 / 删除 / 重命名文档**按 §3.2 规则 7 同步四处登记，并在 `CHANGELOG.MD` 对应版本的 `Docs` 分组记录。
+9. **新增 / 删除 / 重命名文档**按 §3.2 规则 7 同步三处登记，并在 `CHANGELOG.MD` 对应版本的 `Docs` 分组记录。
 10. 版本同步清单按 §8.2 执行，含 `docs/TROUBLESHOOTING.md` / `docs/MAINTAINERS.md` / `landing/README.md` 标题与 `docs/tasks.md` 头部版本说明。
 11. **本地记忆文档**：`.codebuddy/memory/`（已被 `.gitignore` 忽略，不入库）记录 AI 协作的背景、核心决策与时间线，是**参考信息而非规范来源**，不得覆盖本文 / `OPENSPEC.md` / `DESIGN-SYSTEM.md`。记忆文档须按主题归类、标注时效性与可信度，并引用本文 §1 作为规范入口；本文只在 §1.1 表中提及它，**不建立指向未入库文件的可点击链接**（GitHub 上会 404）。
 

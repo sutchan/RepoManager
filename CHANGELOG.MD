@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.3.7] - 2026-11-24
+
+### Changed
+- **README 面向使用者重写** - 根 `README.MD` 从 428 行精简为使用者 / 构建者入口：保留功能、安装与源码构建、快速上手、配置与命令行、FAQ、注意事项；移除文档索引表、目录结构、社区与维护者章节（改由 `docs/README.md` 与各规范文档承载）
+- **文档登记规则收紧** - 新增 / 删除文档由「四处登记」改为「三处登记」（`docs/README.md` §1/§3、`CONTRIBUTING.md` §3.1、`MAINTAINERS.md` §4）；根 README 不再维护文档索引与目录树；相关规则在 `CONTRIBUTING.md` §1.1 表 / §3.2 / §9.2 / §10、`docs/README.md` §5、`MAINTAINERS.md` §4、`DESIGN-SYSTEM.md` §8 与 `PRODUCTION-READINESS.md` §8 同步
+
+### Fixed
+- **README 语言描述** - 功能亮点中的「中文 / English 双语」修正为简中 / 繁中 / 英文三语；移除与 `git remote -v` 实况矛盾的维护者命名描述
+- **SECURITY.md 版本展示位** - 由 v2.3.5 同步至 v2.3.7；`CONTRIBUTING.md` §8.2 展示位清单新增 `SECURITY.md`，避免后续 bump 再次遗漏
+- **版本同步** - 权威源与全部展示位同步至 `2.3.7`
+
+---
+
 ## [2.3.6] - 2026-11-24
 
 ### Fixed

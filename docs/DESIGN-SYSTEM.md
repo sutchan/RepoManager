@@ -1,4 +1,4 @@
-# Repo Manager 设计系统 (Design System) v2.3.6
+# Repo Manager 设计系统 (Design System) v2.3.7
 
 > **本文定位**：Repo Manager 的**唯一 UI 设计规范来源**，规定设计令牌、界面结构与交互标准。
 > **v2.0.0 起**：实际 UI 为 **Go + Fyne 桌面 GUI**（`internal/ui`），配色沿用本文 §2.1 设计令牌；仓库根 `src/` 的 Next.js 参考界面为 **v1.x 遗留、已弃用**，§3.1 / §3.2 等 Next.js 章节仅作历史参考。
@@ -230,4 +230,4 @@ Go 版 GUI 位于 `internal/ui`，遵循本文 §2.1 配色与 §4 交互标准�
 - 修改布局或断点：同步 §5 表格。
 - 变更页脚版本 / build 编号格式：同步 `CONTRIBUTING.md` §8.2、`OPENSPEC.md` §4.6、本文 §3.0 / §3.2、`internal/buildinfo`、`next.config.ts` 与 `scripts/build.*`。
 - 本文与 `docs/tokens.json` 的 `version` 随产品版本 bump 同步（见 `CONTRIBUTING.md` §8.2）。
-- 新增 / 重命名文档：按 [`CONTRIBUTING.md` §3.2 规则 7](./CONTRIBUTING.md) 同步四处登记（[`docs/README.md`](./README.md) §1 / §3、根 [`README.MD`](../README.MD) 索引与目录树、`CONTRIBUTING.md` §3.1、[`MAINTAINERS.md` §4](./MAINTAINERS.md)），并跑 `npm run check:docs`；使用或构建症状写入 [`TROUBLESHOOTING.md`](./TROUBLESHOOTING.md)。
+- 新增 / 重命名文档：按 [`CONTRIBUTING.md` §3.2 规则 7](./CONTRIBUTING.md) 同步三处登记（[`docs/README.md`](./README.md) §1 / §3、`CONTRIBUTING.md` §3.1、[`MAINTAINERS.md` §4](./MAINTAINERS.md)），并跑 `npm run check:docs`；使用或构建症状写入 [`TROUBLESHOOTING.md`](./TROUBLESHOOTING.md)。
