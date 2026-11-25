@@ -11,6 +11,10 @@
 | 文档 | 定位 | 写什么 | 不写什么 |
 |------|------|--------|----------|
 | [README.MD](../README.MD) | 使用者入口 | 功能介绍、快速开始、参数、FAQ、文档索引 | 开发规范、版本历史明细 |
+| [docs/ARCHITECTURE.md](./ARCHITECTURE.md) | 项目概述与架构（**唯一来源**） | 背景与目标、技术栈选型、分层架构与依赖方向、模块划分、业务流程图、关键逻辑、评估与优化建议 | 功能行为契约、编码规范、操作步骤 |
+| [docs/INSTALL.md](./INSTALL.md) | 安装部署指南 | 环境依赖清单、获取与安装、配置步骤、多环境部署、部署验证、升级卸载 | 功能规格、接口参数表 |
+| [docs/CLI-REFERENCE.md](./CLI-REFERENCE.md) | CLI 接口契约（**唯一来源**） | 命令语法、flags、退出码、输出流约定、配置契约、调用示例；含「无 HTTP API、OpenAPI 不适用」声明 | GUI 操作步骤、功能行为细则 |
+| [docs/USER-GUIDE.md](./USER-GUIDE.md) | 用户操作指南 | 角色与权限说明、安全须知、GUI / CLI 流程图与分步操作、典型场景 | 排障正文、参数表 |
 | [docs/OPENSPEC.md](./OPENSPEC.md) | 产品功能规格 | 7 项功能的行为契约、交互、环境变量、兼容性、已知限制 | 编码风格、提交/分支规则 |
 | [docs/CONTRIBUTING.md](./CONTRIBUTING.md) | 开发规范（**唯一来源**） | 编码风格、命名约定、目录组织、提交格式、分支管理、代码审查、版本规则、发布流程、术语表、安全红线 | 功能介绍、设计令牌 |
 | [docs/DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md) | UI 设计规范（**唯一来源**） | 设计令牌、组件库、交互、响应式、a11y、规范与实现差距清单 | 业务功能、开发流程 |
@@ -59,6 +63,8 @@ GitHub 会自动识别仓库根、`docs/` 与 `.github/` 下的特定文件。�
 | 你是… | 建议路径 |
 |-------|----------|
 | 使用者，想快速用起来 | [README.MD](../README.MD)「快速开始」→「功能详解」→「常见问题 FAQ」 |
+| 使用者，想系统了解部署与操作 | [INSTALL.md](./INSTALL.md) 依赖与安装 → [USER-GUIDE.md](./USER-GUIDE.md) 操作流程 → 遇到问题看 [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) |
+| 想了解架构 / 技术选型 / 优化路线 | [ARCHITECTURE.md](./ARCHITECTURE.md) §1-§6 概述与架构 → §7 评估与优化建议 |
 | 使用中遇到问题 / 门禁失败 | [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) 按症状定位 → 仍无法解决再看 [SUPPORT.md](../.github/SUPPORT.md) |
 | 贡献者，准备改代码 | [CONTRIBUTING.md](./CONTRIBUTING.md) §2 环境 → §3 目录 → §4～§5 编码与命名 → §6～§9 提交/分支/审查 |
 | 想确认某项功能的行为 | [OPENSPEC.md](./OPENSPEC.md) §3 功能规格 → §7 已知限制 |
@@ -86,6 +92,10 @@ RepoManager/
 ├── .nvmdrc / RepoManager.code-workspace       # 本机 Node 版本标记 / VS Code 工作区配置（禁止删除）
 ├── docs/                                       # 本目录：所有规范与规格
 │   ├── README.md          # 文档中心（本文）
+│   ├── ARCHITECTURE.md    # 项目概述与架构设计（含评估与优化建议）
+│   ├── INSTALL.md         # 安装部署指南
+│   ├── CLI-REFERENCE.md   # CLI 接口契约
+│   ├── USER-GUIDE.md      # 用户操作指南
 │   ├── OPENSPEC.md        # 产品功能规格
 │   ├── CONTRIBUTING.md    # 开发规范
 │   ├── DESIGN-SYSTEM.md   # UI 设计规范

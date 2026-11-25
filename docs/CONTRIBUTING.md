@@ -132,6 +132,10 @@ RepoManager/
 │       └── feature_request.yml  # 功能建议表单
 ├── docs/                        # 所有规范与规格文档归档
 │   ├── README.md                # 文档中心（文档地图、职责边界、阅读路径）
+│   ├── ARCHITECTURE.md          # 项目概述与架构设计（含评估与优化建议）
+│   ├── INSTALL.md               # 安装部署指南
+│   ├── CLI-REFERENCE.md         # CLI 接口契约
+│   ├── USER-GUIDE.md            # 用户操作指南
 │   ├── OPENSPEC.md              # 产品功能规格
 │   ├── CONTRIBUTING.md          # 本文：开发规范
 │   ├── DESIGN-SYSTEM.md         # UI 设计规范
