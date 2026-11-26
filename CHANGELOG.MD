@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.3.9] - 2026-11-26
+
+### Fixed
+- **命名描述一致性** - 修正 `docs/README.md` §1.2、`CONTRIBUTING.md` §3.2 规则 8、`landing/README.md` §2 中把平台仓库名 `sutchan/RepoManager` 写成 Git 远程的表述；明确本地远程以 `git remote -v` 为准（当前 `sutchan/RepoCleaner.git`），与 `MAINTAINERS.md` §1 / `CONTRIBUTING.md` §7.2 对齐
+- **任务状态表述** - 移除 `CONTRIBUTING.md` §3.2 规则 8 中「当前无未完成项」的过时说法，统一指向 `tasks.md` 唯一任务来源
+
+### Docs
+- **标准化文档体系核验** - 逐项核验用户要求的 6 大模块：项目概述与架构（`ARCHITECTURE.md`）、安装部署（`INSTALL.md`）、功能模块（`ARCHITECTURE.md` §4–§6 / `OPENSPEC.md`）、CLI 接口契约与 OpenAPI 3.1 风格映射（`CLI-REFERENCE.md`）、用户操作指南（`USER-GUIDE.md`）、FAQ 与排障（`TROUBLESHOOTING.md` §0–§7）；优化建议 S1–S15 与待验证 T1–T5 已按优先级 / 责任人 / 计划完成时间登记于 `tasks.md`，本轮无新增待办
+- **版本同步** - 权威源与 §8.2 全部展示位同步至 `2.3.9`，落地页版本文件重新生成
+
+---
+
 ## [2.3.8] - 2026-11-26
 
 ### Added

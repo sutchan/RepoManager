@@ -3,13 +3,14 @@
 > 最后更新：**2026-11-26**
 > 登记记录：2026-11-25 依据 [ARCHITECTURE.md §7](./ARCHITECTURE.md) 快照登记 S1–S9；2026-11-26 依据同文 §7.4 补充评估登记 S10–S15，并新增「待验证技术细节」T1–T5。责任人默认为维护者（@sutchan）+ AI 协作会话，计划完成时间为明确日期；完成后归档至 [tasks-done.md](./tasks-done.md)。
 > 维护约定：已完成任务归档至 [tasks-done.md](./tasks-done.md)；本文件仅保留进行中 / 待办任务。
-> 全局版本唯一来源：`internal/buildinfo/version.go` 的 `Version`（当前 **2.3.8**）。
+> 全局版本唯一来源：`internal/buildinfo/version.go` 的 `Version`（当前 **2.3.9**）。
 > 本轮处理：2026-11-24 11:00 依据 `reports/code-review-2026-11-23.md` 的 12 项发现登记 A1–A10，逐项复核并完成其中 10 项；P2-1（繁中日志误报）与 P3-4（testify 分类无需改动）直接归档至 [tasks-done.md 第十节](./tasks-done.md)。
 > 收口记录：2026-11-24 11:20 全部 12 项审查发现处理完毕（10 项修复 + 2 项核验归档），A1–A10 归档至 [tasks-done.md 第十一节](./tasks-done.md)；该时点无未完成事项（**当前待办以下表 S1–S15 为准**）。全量门禁（root-clean / gofmt / vet / test / build nogui / build ci / check:docs）实跑通过，`-race` 因本机无 gcc 纳入 CI 验证。
 > 核查记录：2026-11-24 11:33 按指令复核任务进度——无已完成任务需归档、无未完成任务需调整优先级 / 状态、无剩余任务可推进；本次仅同步时间戳并修正 `tasks-done.md` 头部时间戳漂移，任务状态维持不变。
 > 核查记录：2026-11-24 15:01 再次按指令复核——结论同上（无待办 / 无归档 / 无推进），仅同步时间戳；2 个文档文件的时间戳改动已提交并推送入库，`origin/main` 同步。
 > 核查记录：2026-11-26 全仓文档一致性审计——实算 `*_test.go` 共 14 个（含 1 个辅助文件）、`Test*` 函数 42 个、覆盖 8 个包，同步修正 [OPENSPEC.md §9.3](./OPENSPEC.md) 与 [PRODUCTION-READINESS.md §2.1](./PRODUCTION-READINESS.md) 的过时计数（10/31/6 包）；核实 `-tags ci` 为 Fyne 内置标签（`app/app_software.go` 于 `ci` 下改用 headless 测试驱动 + software painter，均纯 Go 无 cgo），`TROUBLESHOOTING.md` / `ARCHITECTURE.md` / `CONTRIBUTING.md` / `OPENSPEC.md` / `docs/README.md` / `MAINTAINERS.md` 相关描述属实无误；Release 资产命名与 `scripts/package-release.sh` 实况一致（amd64→x64），无冲突。任务状态不变，本轮无新增待办。
 > 本轮记录：2026-11-26 系统性文档完善——版本 bump 至 v2.3.8、修复配置读取失败退出码、补齐 OpenAPI 3.1 CLI 契约映射（`CLI-REFERENCE.md` 附录 A）、FAQ 快速索引（`TROUBLESHOOTING.md` §0）与角色权限矩阵（`USER-GUIDE.md` §1.1）；登记 S10–S15 与 T1–T5，并将 S3 / S6–S9 的「择期」改为明确日期。历史「当前无未完成事项」仅指 2026-11-24 时点。
+> 核验记录：2026-11-26 v2.3.9 系统性文档标准化核验——6 大内容模块与质量标准逐项对照通过；修正 3 处把平台仓库名误写为 Git 远程的表述（`docs/README.md` §1.2、`CONTRIBUTING.md` §3.2 规则 8、`landing/README.md` §2）与 1 处「当前无未完成项」过时表述；版本同步至 2.3.9。无新增待办，S1–S15 / T1–T5 状态不变。
 
 ---
 

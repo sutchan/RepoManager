@@ -1,4 +1,4 @@
-# Repo Manager 安装部署指南 v2.3.8
+# Repo Manager 安装部署指南 v2.3.9
 
 > 适用对象：从零把 Repo Manager 跑起来的使用者与 CI 维护者。产品行为契约见 [OPENSPEC.md](./OPENSPEC.md)；接口参数见 [CLI-REFERENCE.md](./CLI-REFERENCE.md)；操作步骤见 [USER-GUIDE.md](./USER-GUIDE.md)。
 

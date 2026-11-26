@@ -1,4 +1,4 @@
-# Repo Manager 开发规范与贡献指南 v2.3.8
+# Repo Manager 开发规范与贡献指南 v2.3.9
 
 > 本文是 Repo Manager 仓库的**唯一开发规范来源**，规定「如何改代码、如何写文档、如何提交与评审」。
 > 本文存放于 `docs/`；所有贡献者（含 AI 协作会话）在动手前必须阅读本文。
@@ -194,7 +194,7 @@ RepoManager/
    - `.bat` 为批处理脚本，不纳入源码 200 行规则，但仍须按标签分节、保持可读。
 6. **临时文件统一落固定子目录**：一次性脚本、探针、调试日志、中间产物一律写入 `.tmp/`；工具正式产物（审计报告、覆盖率、`*-result.json` 等）写入 `reports/` / `coverage/` / `test-results/`。写入前先 `mkdir -p`，本轮产生的 `.tmp/` 内容在任务结束前清理；需长期留存的证据改写进 `docs/` 或测试断言。目录忽略规则以 `.gitignore` 实况为准，并在 ESLint / `tsconfig.json` / `check-doc-links.mjs` 中排除，避免临时脚本让门禁假红。**禁止**在仓库根或顶层散落 `.tmp-*.mjs`、`tmp-*.js`、`*.log`、`audit-*.json` 等；根目录白名单由 `scripts/check-root-clean.mjs` 强制校验（CI 首步），新增根目录工程文件须同时核对 `.gitignore` 与白名单。产品运行时的 `config.ini` / `repo-manager.log` 属 exe 同目录便携配置，不在此约束内。
 7. **新增 / 删除 / 重命名文档**须同步三处：[`docs/README.md`](./README.md) §1 文档地图与 §3 目录树、本文 §3.1、[`MAINTAINERS.md`](./MAINTAINERS.md) §4 变更对照表；根 `README.MD` 面向使用者与构建者，只保留少量入口链接，**不再维护文档索引与目录树**。新增文档标题带当前版本号，并在 `CHANGELOG.MD` 对应版本的 `Docs` 分组记录。**新增根目录子目录**（如 `landing/`）还须登记 `scripts/check-root-clean.mjs` 的 `ALLOWED_DIRS` 白名单并核对 `.gitignore`。同一事实只在一处维护，其余用链接引用。
-8. **命名层次**：产品名 `Repo Manager`、Go 模块与二进制 `repo-manager`、Git 远程 `sutchan/RepoManager`；本机目录名 `RepoManager` 与工作区文件 `RepoManager.code-workspace` 与产品名对应，v2.3.3 已完成技术标识同步。对照与决策见 [`MAINTAINERS.md` §1](./MAINTAINERS.md)；当前无未完成项，见 [`tasks.md`](./tasks.md)。
+8. **命名层次**：产品名 `Repo Manager`、Go 模块与二进制 `repo-manager`、平台仓库名 `sutchan/RepoManager`；本地 Git 远程以 `git remote -v` 为准（当前 `sutchan/RepoCleaner.git`，见 [MAINTAINERS.md §1](./MAINTAINERS.md) 与本文 §7.2）。本机目录名 `RepoManager` 与工作区文件 `RepoManager.code-workspace` 与产品名对应，v2.3.3 已完成技术标识同步。未完成事项见 [`tasks.md`](./tasks.md)。
 
 ---
 

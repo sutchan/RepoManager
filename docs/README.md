@@ -1,4 +1,4 @@
-# Repo Manager 文档中心 v2.3.8
+# Repo Manager 文档中心 v2.3.9
 
 > 本目录是 Repo Manager **所有规范与规格文档的唯一归档位置**。
 > 仓库根只保留面向使用者的入口 [README.MD](../README.MD)、变更历史 [CHANGELOG.MD](../CHANGELOG.MD) 与 [LICENSE](../LICENSE)。
@@ -54,7 +54,7 @@ GitHub 会自动识别仓库根、`docs/` 与 `.github/` 下的特定文件。�
 
 ### 1.2 命名与仓库现状
 
-产品名是 `Repo Manager`，Go 模块 / 二进制是 `repo-manager`，Git 远程是 `sutchan/RepoManager`；本机目录名 `RepoManager` 与工作区文件 `RepoManager.code-workspace` 与产品名对应，v2.3.3 已完成技术标识同步（模块 / import / 命令 / 日志 / 远程 / 应用内文案）。完整对照与决策见 [MAINTAINERS.md §1](./MAINTAINERS.md)。文档标题与正文一律按产品名 `Repo Manager` 书写，命令、路径与链接按实况书写。
+产品名是 `Repo Manager`，Go 模块 / 二进制是 `repo-manager`，平台仓库名 / 文档链接目标是 `sutchan/RepoManager`；**本地 Git 远程以 `git remote -v` 实况为准**（当前 `sutchan/RepoCleaner.git`）。本机目录名 `RepoManager` 与工作区文件 `RepoManager.code-workspace` 与产品名对应，v2.3.3 已完成模块 / import / 命令 / 日志 / 应用内文案同步。完整对照与决策见 [MAINTAINERS.md §1](./MAINTAINERS.md)。文档标题与正文一律按产品名 `Repo Manager` 书写，命令、路径与链接按实况书写。
 
 ---
 
