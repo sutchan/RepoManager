@@ -434,8 +434,8 @@ npm run check:docs                          # 校验所有 Markdown 相对链接
 
 ### 9.3 覆盖范围说明
 
-- 当前共 **10 个 `*_test.go`**（其中 1 个为测试辅助文件）、**31 个 `Test*` 函数**，覆盖 6 个包：`internal/buildinfo`（页脚格式）、`internal/config`（配置读写与新键）、`internal/engine`（功能 1～7、预演、递归与自定义目录）、`internal/i18n`（字典完整性）、`internal/logs`（日志落盘）、`internal/platform`（目录枚举与路径校验）。CI 以 `-tags nogui` 运行 `go test`。
-- `cmd/repo-manager` 与 `internal/ui` **无自动化测试**，依赖 [§9.2](./CONTRIBUTING.md) 的手动冒烟清单；数据按当前仓库实算，新增测试后须同步本段。
+- 当前共 **14 个 `*_test.go`**（其中 1 个为测试辅助文件 `internal/engine/testkit_test.go`）、**42 个 `Test*` 函数**，覆盖 8 个包：`internal/buildinfo`（页脚格式）、`internal/config`（配置读写与新键）、`internal/engine`（功能 1～7、预演、递归与自定义目录）、`internal/i18n`（字典完整性）、`internal/logs`（日志落盘）、`internal/platform`（目录枚举与路径校验）、`cmd/repo-manager`（`parseArgs` / `resolveRoot` 参数与优先级）、`internal/ui`（有界日志缓冲与进度解析等纯逻辑）。CI 以 `-tags nogui` 运行 `go test`。
+- `cmd/repo-manager` 与 `internal/ui` 的**入口纯逻辑已覆盖**（见上），但完整 GUI 交互（对话框 / 按钮点击 / 事件循环）仍依赖 [§9.2](./CONTRIBUTING.md) 的手动冒烟清单；数据按当前仓库实算，新增测试后须同步本段。
 - 历史版本文档中的「功能 1～7 ✅ 通过」是当时的手工验证结论，不作为当前自动化覆盖证据。
 
 ---

@@ -31,9 +31,9 @@
 ## 2. 测试策略（单元 / 集成 / 端到端）与覆盖率
 
 ### 2.1 已具备
-- 当前 **10 个 `*_test.go`、31 个 `Test*` 函数**，覆盖 `buildinfo` / `config` / `engine` / `i18n` / `logs` / `platform` 六个包（`OPENSPEC.md` §9.3）；CI 以 `-tags nogui` 运行 `go test -count=1`。
+- 当前 **14 个 `*_test.go`、42 个 `Test*` 函数**，覆盖 `buildinfo` / `config` / `engine` / `i18n` / `logs` / `platform` / `cmd/repo-manager` / `internal/ui` 八个包（`OPENSPEC.md` §9.3）；CI 以 `-tags nogui` 运行 `go test -count=1`（含 `-race`）。
 - §4.6 要求业务函数可测：扫描 / 白名单 / 配置 / 文案等纯逻辑须有测试，平台差异用接口隔离。
-- GUI 与 CLI 入口无自动化测试，发版前按 `CONTRIBUTING.md` §9.3 做**跨平台手动冒烟**（隔离临时目录）。
+- CLI 入口纯逻辑（`parseArgs` / `resolveRoot`）与 GUI 纯逻辑（日志缓冲 / 进度解析）已覆盖测试；完整 GUI 交互与跨平台发版前仍按 `CONTRIBUTING.md` §9.3 做**手动冒烟**（隔离临时目录）。
 
 ### 2.2 现状不足
 - **无覆盖率采集与门槛**：未生成覆盖率报告，`go test -coverprofile` 未接入 CI。

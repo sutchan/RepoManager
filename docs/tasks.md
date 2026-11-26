@@ -1,6 +1,6 @@
 # Repo Manager 任务清单 (docs/tasks.md)
 
-> 最后更新：**2026-11-25**
+> 最后更新：**2026-11-26**
 > 登记记录：2026-11-25 依据 [ARCHITECTURE.md §7](./ARCHITECTURE.md) 评估快照登记 S1-S9 优化项（文档系统性完善的配套评估结论）；责任人默认为维护者 + AI 协作会话，计划完成时间见下表，完成后归档至 [tasks-done.md](./tasks-done.md)。
 > 维护约定：已完成任务归档至 [tasks-done.md](./tasks-done.md)；本文件仅保留进行中 / 待办任务。
 > 全局版本唯一来源：`internal/buildinfo/version.go` 的 `Version`（当前 **2.3.7**）。
@@ -8,6 +8,7 @@
 > 收口记录：2026-11-24 11:20 全部 12 项审查发现处理完毕（10 项修复 + 2 项核验归档），A1–A10 归档至 [tasks-done.md 第十一节](./tasks-done.md)；**当前无未完成事项**。全量门禁（root-clean / gofmt / vet / test / build nogui / build ci / check:docs）实跑通过，`-race` 因本机无 gcc 纳入 CI 验证。
 > 核查记录：2026-11-24 11:33 按指令复核任务进度——无已完成任务需归档、无未完成任务需调整优先级 / 状态、无剩余任务可推进；本次仅同步时间戳并修正 `tasks-done.md` 头部时间戳漂移，任务状态维持不变。
 > 核查记录：2026-11-24 15:01 再次按指令复核——结论同上（无待办 / 无归档 / 无推进），仅同步时间戳；2 个文档文件的时间戳改动已提交并推送入库，`origin/main` 同步。
+> 核查记录：2026-11-26 全仓文档一致性审计——实算 `*_test.go` 共 14 个（含 1 个辅助文件）、`Test*` 函数 42 个、覆盖 8 个包，同步修正 [OPENSPEC.md §9.3](./OPENSPEC.md) 与 [PRODUCTION-READINESS.md §2.1](./PRODUCTION-READINESS.md) 的过时计数（10/31/6 包）；核实 `-tags ci` 为 Fyne 内置标签（`app/app_software.go` 于 `ci` 下改用 headless 测试驱动 + software painter，均纯 Go 无 cgo），`TROUBLESHOOTING.md` / `ARCHITECTURE.md` / `CONTRIBUTING.md` / `OPENSPEC.md` / `docs/README.md` / `MAINTAINERS.md` 相关描述属实无误；Release 资产命名与 `scripts/package-release.sh` 实况一致（amd64→x64），无冲突。任务状态不变，本轮无新增待办。
 
 ---
 
