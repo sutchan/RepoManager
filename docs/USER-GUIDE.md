@@ -1,4 +1,4 @@
-# Repo Manager 用户操作指南 v2.3.7
+# Repo Manager 用户操作指南 v2.3.8
 
 > 面向日常使用者。功能行为细则见 [OPENSPEC.md](./OPENSPEC.md)；参数速查见 [CLI-REFERENCE.md](./CLI-REFERENCE.md)；FAQ 见根 [README.MD](../README.MD)「常见问题 FAQ」，故障排除见 [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)。
 
@@ -25,6 +25,17 @@ Repo Manager 是**单用户本地工具**：没有账号体系、没有内置角
 | 安装了 Node.js + npm | 功能 1 / 2 / 5 | 未安装 npm 时功能 1/5 报错（`npm` 不在 PATH） |
 
 企业设备若由 IT 统一管控环境变量与文件权限，请先与 IT 确认；工具不会绕过任何 OS 权限限制。
+
+### 1.1 角色与权限矩阵（按使用场景）
+
+| 角色 | 典型动作 | 所需 OS / 仓库权限 | 不应执行 |
+|------|----------|--------------------|----------|
+| 使用者 | 功能 1–7、预演、语言切换 | `REPO_ROOT` 读写；功能 1/2/5 另需 Node/npm 与用户级环境变量权限 | 对他人项目目录直接执行删除类功能（1/6/7） |
+| 维护者 | 配置 `EXTRA_CLEAN_DIRS`、审阅 `repo-manager.log`、升级版本 | 配置文件与日志读取权、发布仓库写权限 | 在真实项目根目录验证删除操作 |
+| 发布者 | 打 `vX.Y.Z` tag、核对 Release 资产 | 仓库写权限；同 SHA 工作流全绿、版本一致性校验通过 | 门禁未绿时手工上传资产 |
+| 自动化任务（CI） | 跑门禁、交叉编译、打包归档 | 只读检出 + Actions artifact 权限 | 创建 Release（仅 tag push 的 `release` job 可执行） |
+
+> 本工具**没有**应用层账号、角色开关或鉴权流程；上表只是「使用场景 → 所需 OS / 仓库权限」的映射，不引入新的权限体系。
 
 ## 2. 安全须知
 

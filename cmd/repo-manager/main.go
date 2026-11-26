@@ -1,4 +1,4 @@
-// cmd/repo-manager/main.go v2.3.6
+// cmd/repo-manager/main.go v2.3.8
 
 // 命令 repo-manager 是产品入口：解析参数后分流到命令行模式或 Fyne GUI。
 package main
@@ -38,7 +38,8 @@ func main() {
 	if err != nil {
 		// 配置文件读取失败时禁止任何回写，避免用默认值覆盖用户设置（对齐 OPENSPEC §5.3）。
 		fmt.Fprintf(os.Stderr, d.LoadCfgErr, err)
-		return
+		// 配置损坏属于真实失败，必须以非零码退出，避免脚本把失败误判为成功。
+		os.Exit(1)
 	}
 	if *langFlag != "" {
 		cfg.Lang = string(i18n.Normalize(*langFlag))

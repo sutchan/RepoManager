@@ -1,4 +1,4 @@
-# Repo Manager 接口文档（CLI 契约）v2.3.7
+# Repo Manager 接口文档（CLI 契约）v2.3.8
 
 > **关于 OpenAPI**：OpenAPI 规范描述 HTTP API。Repo Manager 是本地桌面 / CLI 工具，**没有 HTTP 接口**（无网络监听、无 RPC，见 [ARCHITECTURE.md §1.3](./ARCHITECTURE.md)），因此**不适用 OpenAPI 规范**，本文以等效的 CLI 接口契约承载「路径 / 方法 / 参数 / 返回 / 错误码 / 调用示例」信息。若未来引入 HTTP API（如本地守护服务），须另立 OpenAPI 文档并登记 [tasks.md](./tasks.md)。
 > 接口事实来源为 `cmd/repo-manager/main.go` 与 `internal/engine/options.go`；本文与代码冲突时以代码为准。
@@ -10,6 +10,7 @@
 - [3. 输出流与日志约定](#3-输出流与日志约定)
 - [4. 配置文件契约](#4-配置文件契约)
 - [5. 调用示例](#5-调用示例)
+- [附录 A. OpenAPI 3.1 风格 CLI 契约映射（非 HTTP 接口）](#附录-a-openapi-31-风格-cli-契约映射非-http-接口)
 
 ---
 
@@ -51,7 +52,7 @@ repo-manager [flags] [功能号 1-7] [路径]
 | 退出码 | 场景 |
 |:------:|------|
 | `0` | 成功结束；**含用户在确认提示回答非 `Y`（打印「已取消」后正常返回）** |
-| `1` | 三类失败：① 根目录校验失败（不存在 / 非目录 / 文件系统根）；② 非交互环境读确认输入失败（stdin EOF / 关闭，明确**不算用户取消**）；③ `engine.Run` 执行出错 |
+| `1` | 四类失败：① `config.ini` 读取失败（v2.3.8 起，禁止回写并以非零码终止；`-h` 在读配置前返回，仍为 0）；② 根目录校验失败（不存在 / 非目录 / 文件系统根）；③ 非交互环境读确认输入失败（stdin EOF / 关闭，明确**不算用户取消**）；④ `engine.Run` 执行出错 |
 
 脚本侧应把非 0 一律视为失败；「取消」与「成功」同为 0，需依赖输出文案区分（改进建议见 [ARCHITECTURE.md §7.2 S7](./ARCHITECTURE.md)）。
 
@@ -108,3 +109,58 @@ if ($LASTEXITCODE -ne 0) { "预演失败" }
 ```
 
 > 所有示例严禁指向真实项目根目录做删除验证；先在隔离临时目录演练（[INSTALL.md §5](./INSTALL.md)）。
+
+---
+
+## 附录 A. OpenAPI 3.1 风格 CLI 契约映射（非 HTTP 接口）
+
+> **适用范围声明**：本产品**没有** HTTP 服务、监听端口、RPC 或请求体（见 [ARCHITECTURE.md §1.3](./ARCHITECTURE.md)）。本附录**不是 HTTP API 定义**，也不提供 `servers` 地址；它把 §1–§5 的 CLI 契约映射为 OpenAPI 3.1 的字段结构，便于按行业标准审阅「路径 / 方法 / 参数 / 返回 / 错误码 / 示例」六要素。不得据此发起网络请求。真正的机器可读结构化输出（`-json`）仍是待办 S7。
+
+### A.1 六要素映射表
+
+| OpenAPI 要素 | 本产品对应物 | 现行文档 |
+|--------------|--------------|----------|
+| `paths` | 本地命令调用形态 `repo-manager [flags] [功能号 1-7] [路径]`；帮助路径 `repo-manager -h` | §1 |
+| `operation.method` | **无 HTTP 方法**；等价动作为「启动一次本地进程并执行功能号」 | §1 / §1.2 |
+| `parameters` | flags：`-lang` / `-dry-run` / `-recursive` / `-h`；位置参数：功能号、路径 | §1.1 / §1.2 |
+| `requestBody` | 不适用；交互式输入为 stdin 的 `Y/N` 确认（仅功能 1/6/7） | §3 |
+| `responses` | stdout 执行日志 + stderr 错误 + 进程退出码，无 MIME body | §2 / §3 |
+| `error codes` | 退出码 `0` / `1` 与日志前缀 `[错误]` / `[警告]` / `[预演]` | §2 / §3 |
+| `examples` | bash / PowerShell 调用示例 | §5 |
+
+### A.2 参数定义（OpenAPI parameter 风格）
+
+| name | in | required | schema | 约束与副作用 |
+|------|----|:--------:|--------|--------------|
+| `lang` | flag | 否 | enum `zh` \| `zh-Hant` \| `en` | `tw` / `zh-TW` 归一化为 `zh-Hant`；非法值回落 `zh`；**写回 `config.ini`** |
+| `dry-run` | flag | 否 | boolean | 零副作用；危险操作跳过二次确认 |
+| `recursive` | flag | 否 | boolean | 递归 3 层；深度可配置列为 S6 |
+| `h` / `help` | flag | 否 | boolean | 输出帮助 + 版本页脚后退出 0；在读取配置之前处理 |
+| `function` | positional | 否 | integer `1`–`7` | 缺省启动 GUI；非 1–7 的首参按路径解析（已知行为，改进列 S12） |
+| `repoRoot` | positional | 否 | string (path) | 优先级：命令行 > `config.ini:REPO_ROOT` > 平台默认 |
+
+### A.3 返回定义（OpenAPI response 风格）
+
+| 等价状态码 | 触发条件 | 输出 / 副作用 |
+|:----------:|----------|---------------|
+| `0` | 执行成功；或用户在确认提示回答非 `Y` | stdout：`[n/m]` 进度与结果日志；同时追加写 `repo-manager.log` |
+| `1` | 配置读取失败 / 根目录无效 / stdin EOF / `engine.Run` 出错 | stderr：`[错误] ...`；配置失败时不回写配置；无结构化错误 body |
+
+日志行格式为 `YYYY-MM-DD HH:MM:SS <消息>`（`logs.go`）；`Content-Type` 不适用，因为响应是进程输出而非 HTTP 消息体。
+
+### A.4 调用示例
+
+与 §5 一致，例如：
+
+```bash
+# 预演（等价「只读调用」）：零副作用
+repo-manager -dry-run 6 ~/Github
+
+# 危险操作（等价「写入调用」）：stdin 回答 Y 才执行
+repo-manager 1 E:\Github
+
+# 显式语言偏好（副作用：写回 config.ini）
+repo-manager -lang zh-Hant
+```
+
+> 若后续引入本地守护服务 / HTTP API，须另立符合 OpenAPI 3.1 的服务端文档（`servers` + `paths` + `components.schemas`），并同步登记 [tasks.md](./tasks.md)；本附录不得被改写成虚构的网络接口说明。

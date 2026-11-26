@@ -4,7 +4,7 @@
 
 [![Platform](https://img.shields.io/badge/Platform-Win%20%7C%20macOS%20%7C%20Linux-blue?style=flat)](https://github.com/sutchan/RepoManager)
 [![Go](https://img.shields.io/badge/Go-1.25%2B-00ADD8?style=flat&logo=go&logoColor=white)](https://go.dev)
-[![Version](https://img.shields.io/badge/Version-2.3.7-green?style=flat)](https://github.com/sutchan/RepoManager)
+[![Version](https://img.shields.io/badge/Version-2.3.8-green?style=flat)](https://github.com/sutchan/RepoManager)
 [![License](https://img.shields.io/badge/License-MIT-orange?style=flat)](https://github.com/sutchan/RepoManager)
 [![i18n](https://img.shields.io/badge/i18n-简中%2F繁中%2FEnglish-9C27B0?style=flat)](https://github.com/sutchan/RepoManager)
 
@@ -207,7 +207,7 @@ A：加 `-dry-run` 或勾选 GUI「预演模式」；只输出计划操作，不
 **Q：日志在哪里？**
 A：可执行文件同目录的 `repo-manager.log`，追加写入并带时间戳；公开提交前请脱敏。
 
-更多症状处理见[排障手册](./docs/TROUBLESHOOTING.md)。
+更多症状与按主题检索的 FAQ 索引见[排障手册 §0](./docs/TROUBLESHOOTING.md#0-常见问题快速索引)。
 
 ---
 
@@ -230,6 +230,6 @@ A：可执行文件同目录的 `repo-manager.log`，追加写入并带时间戳
 
 <div align="center">
 
-Repo Manager v2.3.7 · MIT License · [MIT 许可证](./LICENSE) · [文档中心](./docs/README.md)
+Repo Manager v2.3.8 · MIT License · [MIT 许可证](./LICENSE) · [文档中心](./docs/README.md)
 
 </div>

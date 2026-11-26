@@ -1,4 +1,4 @@
-# Repo Manager 项目概述与架构设计 v2.3.7
+# Repo Manager 项目概述与架构设计 v2.3.8
 
 > 本文回答「这是什么、为什么这样设计、如何运转」；功能行为契约见 [OPENSPEC.md](./OPENSPEC.md)，安装部署见 [INSTALL.md](./INSTALL.md)，CLI 接口契约见 [CLI-REFERENCE.md](./CLI-REFERENCE.md)，操作步骤见 [USER-GUIDE.md](./USER-GUIDE.md)。
 > 与代码冲突时以代码为准，并按 [CONTRIBUTING.md §1.1](./CONTRIBUTING.md) 裁决同步本文。
@@ -57,6 +57,8 @@ Repo Manager 是一个**本地单文件桌面 / CLI 工具**，围绕 `REPO_ROOT
 | 配置 | INI（`internal/config` 自实现） | 4 个键、保留注释与未知行、原子替换，无需解析库 |
 
 **弃用说明**：仓库根 `src/`（Next.js 参考界面）自 v2.0.0 起弃用，仅作 UI 参考保留，不参与产品构建；`RepoCleaner.bat` / `lang.ini` 为 v1.x 遗留参考。
+
+**构建 / 发布矩阵口径**：`scripts/build.sh` / `scripts/build.ps1` 定义 6 个本地交叉目标；CI 发布矩阵当前仅 4 个（缺 `linux/arm64`、`windows/arm64`，原因见 [MAINTAINERS.md §6](./MAINTAINERS.md)）。二者差异属实，非文档漂移；统一排期见 §7.4 S15。
 
 ---
 
@@ -222,6 +224,21 @@ flowchart LR
 | 编号 | 问题背景 | 实施方案 | 预期效果 | 优先级 |
 |------|----------|----------|----------|:------:|
 | S9 | 部分源码文件头注释版本落后于权威源（如 `main.go` 标 `v2.3.6`） | 按 [CONTRIBUTING.md §8.2](./CONTRIBUTING.md)：仅被改动文件的头注释随改动更新，禁止全仓刷写；下次触碰相关文件时顺带同步 | 头注释与权威源差异逐步收敛，不引入大 diff | P3 |
+
+### 7.4 补充评估（2026-11-26，基于 v2.3.8）
+
+> 本节为系统性文档完善时的代码复核快照；§7.1–§7.3 为 2026-11-25 历史快照并按规则保留原貌（其中 S9 的 `main.go v2.3.6` 示例已于 v2.3.8 随改动同步）。除注明外均为**未实施建议**，排期统一见 [tasks.md](./tasks.md)。
+
+| 编号 | 问题背景 | 实施方案（技术选型与步骤） | 预期效果 | 优先级 |
+|------|----------|------------------------------|----------|:------:|
+| S10 | 功能 1 / 6 的局部失败仅写警告日志后继续，`Run` 仍返回 nil（`engine.go:61-63/78-81/94-96`、`clean.go` 同类），CLI 退出 0；与功能 5 汇总失败并返回 error 的契约不一致 | 仿 `install.go` 的 `failed` 汇总：对 `SetUserEnv` / 写 `.npmrc` / 删除三类步骤累计失败项，末尾统一输出摘要并返回 `errors.New(summary)`；补集成测试断言退出码 | 局部失败不再静默；脚本可凭退出码 1 识别部分失败（可量化：失败可见率 0% → 100%） | P2 |
+| S11 | `npm install -g` 使用 `exec.Command(...).CombinedOutput()`（`install.go:47-51`），无超时、无取消；网络异常时可能无限挂起 | 用 `context.WithTimeout`（默认 10 分钟，可选配置键）配合 `exec.CommandContext`；超时返回明确错误并进入 S10 的失败汇总 | 单组安装最长 10 分钟后失败退出；CI 可设更短超时，消除挂起 | P2 |
+| S12 | 非法功能号被当作路径（`main.go:72-79`），GUI 模式下该路径未传给 `runGUI`（`main.go:58-64`），用户输入无声失效；无 `-version` 快捷 flag | 对既非 1–7 又非有效目录的首参输出用法错误并以非零码退出；GUI 接收路径回填初始 `REPO_ROOT`；补 `-version`（与 `-h` 共用 `buildinfo.BuildInfo()`） | 参数错误可见、可诊断；版本查询步骤由「读帮助全文」简化为一条 flag | P2 |
+| S13 | `i18n.T` / `Logs` 为**整字典级**回退（`i18n.go:98-103`、`log.go`），新增字段漏译会显示空串，与 §4「繁中缺词条回退简中」的既有表述不符 | 实现字段级 fallback：字典缺键时按 `zh-Hant` → `zh` 逐字段取值；新增三语键集合 parity 测试并纳入 `ci.yml` | 单语漏译不再产生空串；键漂移在 CI 阶段被拦截 | P2 |
+| S14 | `src/` 参考界面无 `*.test.*` / `*.spec.*`，其 i18n 与数据层回归无自动门禁（已弃用但仍在仓库） | 为 `src/lib/i18n.ts` 与 `src/lib/data/*` 增加 Vitest 单测（键 parity、数据形状），仅测逻辑不测 UI；纳入 `ci.yml` 的 npm 步骤 | 弃用资产不再无人看管；新增 1 个 CI 步骤，逻辑回归自动化 | P3 |
+| S15 | 构建脚本定义 6 个交叉目标（`build.sh:20-27` / `build.ps1:18-25`），release 矩阵仅 4 个（`release.yml:46-50`），易被误判为文档漂移 | 已在 §2 与 [INSTALL.md §4](./INSTALL.md) 标注「本地 6 / CI 4」口径；后续在 S8 评估安装包时决定补齐 arm64 依赖或长期保留差异说明 | 差异有单一解释位；发布矩阵与脚本口径不再互相矛盾 | P3 |
+
+> 本轮已直接实施（不列入待办）：配置读取失败退出码由 0 改为 1（`cmd/repo-manager/main.go`）、FAQ 统一索引（`TROUBLESHOOTING.md` §0）、角色权限矩阵（`USER-GUIDE.md` §1.1）、OpenAPI 3.1 CLI 契约映射（`CLI-REFERENCE.md` 附录 A）。历史快照 S1–S9 与本轮 S10–S15 的实施状态以 [tasks.md](./tasks.md) 为准。
 
 > 优先级含义：P1 = 阻断交付，P2 = 下一版本应处理，P3 = 择机排期。当前无 P1。
 

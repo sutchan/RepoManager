@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.3.8] - 2026-11-26
+
+### Added
+
+- **OpenAPI 3.1 CLI 契约映射** - `CLI-REFERENCE.md` 新增附录 A：明确本产品无 HTTP 接口，以 OpenAPI 3.1 风格给出命令路径、等价请求方法、参数、返回格式、错误码与调用示例，避免虚构网络接口
+- **统一 FAQ 索引与角色权限矩阵** - `TROUBLESHOOTING.md` 新增 FAQ 快速索引，`USER-GUIDE.md` §1 补使用者 / 维护者 / 发布者 / 自动化任务权限矩阵
+- **优化建议 S10–S15** - `ARCHITECTURE.md` §7 按标准格式新增 6 项（错误汇总、安装超时、非法参数、字段级 i18n 回退、前端测试、构建矩阵），`tasks.md` 同步登记责任人、优先级与计划完成日期
+- **待验证技术细节** - `tasks.md` 新增 T1–T5（Windows CGO、macOS 交叉 SDK、tag 事件轮询、-race CI、三语键一致性）
+
+### Fixed
+
+- **配置读取失败退出码** - `main.go` 由 `return`（退出码 0）改为 `os.Exit(1)`，与 `CLI-REFERENCE.md` §2 的退出码契约一致，避免脚本把失败误判为成功
+
+### Docs
+
+- **版本同步** - 权威源与全部展示位同步至 `2.3.8`；`landing/assets/version.js` 重新生成（10 位 build 编号）
+- **任务治理** - `tasks.md` 修正历史收口记录与待办表并存的表述，S3 / S6–S9 的计划完成时间改为明确日期
+
 ## [2.3.7] - 2026-11-24
 
 ### Changed
