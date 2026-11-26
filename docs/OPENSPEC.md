@@ -35,7 +35,7 @@
 | `cmd/repo-manager/` | 程序入口：`main.go`（flag 解析、位置参数、目录解析、GUI/CLI 分流）；`gui.go`（默认标签，启动 Fyne GUI）；`headless.go`（`nogui` 标签下 `runGUI` 的占位提示，**不是 CLI 实现**） |
 | `internal/platform` | **操作系统差异抽象**（关键）：目录扫描、删除、隐藏/系统/只读属性、环境变量持久化、默认 `REPO_ROOT`，按 `build tag` 分 `platform_windows.go` / `platform_unix.go` 实现；`Platform` 接口共 10 个方法 |
 | `internal/engine` | 功能 1 ～ 功能 7 的**平台无关**业务逻辑（扫描、写 `.npmrc`、清缓存），只调用 `platform` 接口；`Run` 按功能号分派、`IsDangerous` 判定 1 / 6 / 7 |
-| `internal/config` | `config.ini` 读写（去重键、保留未知行）、默认 `REPO_ROOT` / `LANG` / `RECURSIVE` / `EXTRA_CLEAN_DIRS` |
+| `internal/config` | `config.ini` 读写（去重键、保留未知行）、默认 `REPO_ROOT` / `LANG` / `RECURSIVE` / `EXTRA_CLEAN_DIRS` / `SCAN_DEPTH` |
 | `internal/i18n` | `zh` / `zh-Hant` / `en` 三语文案字典（唯一来源）：界面 `T()` + 执行日志 `Logs()`；别名归一化与非法值回落简中 |
 | `internal/logs` | 执行日志落盘（v2.3.0）：`FileLogger` 将 CLI / GUI 日志同步追加写入 `repo-manager.log` |
 | `internal/ui` | Fyne 桌面 GUI：目录 / 语言 / 预演 / 关于、功能按钮 1–7、二次确认、结果日志区、页脚 |
@@ -100,7 +100,7 @@
 > 菜单上显示的短文案以 `internal/i18n` 文案字典为准；文档只使用上表名称。
 > v2.0.0 起各功能由 `internal/engine` 的 `EnableGlobalNodeModules` / `ResetNodeConfig` / `CleanNextCache` / `RestoreNextCache` / `InstallGlobalDeps` / `CleanAllCaches` / `CleanViteCache` 实现；上表「批处理标签」列仅为 v1.x 历史对照。
 
-所有功能的作用域默认为：**遍历 `REPO_ROOT` 的直接子目录**（`internal/platform.ListProjectDirs` 用 `os.ReadDir` 枚举），不递归进入更深层级。v2.3.0 起支持可选递归（V1）：`config.ini` 的 `RECURSIVE=true` 或 CLI `-recursive` / GUI 复选框启用 `ListProjectDirsDeep`（深度 3 层，覆盖 `REPO_ROOT/monorepo/packages/app` 典型结构；跳过 `node_modules` / `.next` / `.git` 等依赖与产物目录）。
+所有功能的作用域默认为：**遍历 `REPO_ROOT` 的直接子目录**（`internal/platform.ListProjectDirs` 用 `os.ReadDir` 枚举），不递归进入更深层级。v2.3.0 起支持可选递归（V1）：`config.ini` 的 `RECURSIVE=true` 或 CLI `-recursive` / GUI 复选框启用 `ListProjectDirsDeep`（深度默认 3 层（1–8 可配），覆盖 `REPO_ROOT/monorepo/packages/app` 典型结构；跳过 `node_modules` / `.next` / `.git` 等依赖与产物目录）。
 
 ### 3.1 功能 1：启用全局 node_modules
 
@@ -203,7 +203,7 @@ GUI 提供 3 种目录来源：使用当前目录、手动输入完整路径（�
 |------|------|------|
 | `-lang zh\|zh-Hant\|en` | 设置语言并写入 `config.ini`（`tw` / `zh-TW` 归繁中，其余非法值回落简中） | `repo-manager -lang zh-Hant` |
 | `-dry-run` | 预演模式：仅显示将要执行的操作，不修改任何文件（见 §4.7） | `repo-manager -dry-run 6` |
-| `-recursive` | 递归扫描 monorepo 深层项目（深度 3 层，见 §3.0；优先级高于 `config.ini`） | `repo-manager -recursive 6` |
+| `-recursive` | 递归扫描 monorepo 深层项目（深度默认 3 层（1–8 可配），见 §3.0；优先级高于 `config.ini`） | `repo-manager -recursive 6` |
 | `-h` / `-help` / `--help` | 显示帮助信息（固定英文，含版本与 build 信息） | `repo-manager -h` |
 | `1`-`7` | 直接运行对应功能（命令行模式，跳过 GUI） | `repo-manager 1` |
 | 路径 | 指定仓库根目录（支持含空格路径，需引号包裹）；**仅在给出功能号时生效** | `repo-manager 6 "D:\My Projects"` |
@@ -313,9 +313,9 @@ EXTRA_CLEAN_DIRS=
 ```
 
 **新增键（v2.3.0）**：
-- `RECURSIVE`：`true|1|yes` 启用递归扫描 monorepo 深层项目（深度 3 层，见 §3.0 / §7.3 L3），默认 `false`；CLI `-recursive` 优先级更高。
+- `RECURSIVE`：`true|1|yes` 启用递归扫描 monorepo 深层项目（深度默认 3 层（1–8 可配），见 §3.0 / §7.3 L3），默认 `false`；CLI `-recursive` 优先级更高。
 - `EXTRA_CLEAN_DIRS`：逗号分隔的自定义清理目录名，并入功能 6 / 7 白名单，**仅限项目目录内部匹配**；留空表示无自定义项。
-- **安全约束（v2.3.2 起）**：只接受目录名，禁止路径分隔符、`..`、绝对路径、盘符（如 `C:`）与 Windows 保留设备名；非法项由 `IsSafeCleanDirName` 拒绝（三语警告后跳过，不影响其余项）。仅匹配项目目录内部的一级子目录，不会删除 `REPO_ROOT` 顶层项，也不覆盖功能 6 / 7 既有白名单。
+- **安全约束（v2.3.2 起）**：只接受目录名，禁止路径分隔符、`..`、绝对路径、盘符（如 `C:`）与 Windows 保留设备名；非法项由 `IsSafeCleanDirPath` 拒绝（三语警告后跳过，不影响其余项）。仅匹配项目目录内部的一级子目录，不会删除 `REPO_ROOT` 顶层项，也不覆盖功能 6 / 7 既有白名单。
 
 **`lang.ini`**：首部 `LANG=` 记录当前语言选择；`[en]` / `[zh]` 两节保存中英文文案参考。Go 程序**不从该节读取文案**（文案在 `internal/i18n` 中定义），此文件为 v1.x 历史保留。`-lang` 参数不得覆盖本文件。
 
@@ -345,7 +345,7 @@ EXTRA_CLEAN_DIRS=
 |--------|------|------|
 | `NODE_PATH` | 全局模块路径 | 功能 1 写入用户环境（Windows：`setx`；macOS / Linux：写 shell profile）；功能 2 删除 |
 | `TEMP` | 临时目录 | 系统环境变量，写入 `.npmrc` 的 `tmp=` |
-| `REPO_ROOT` / `LANG` / `RECURSIVE` / `EXTRA_CLEAN_DIRS` | **不是环境变量**，是 `config.ini` 的 4 个配置键（见 §5.3） | `config.ini`；`LANG` 可由 `-lang`、`REPO_ROOT` 可由 CLI 位置路径覆盖 |
+| `REPO_ROOT` / `LANG` / `RECURSIVE` / `EXTRA_CLEAN_DIRS` / `SCAN_DEPTH` | **不是环境变量**，是 `config.ini` 的 5 个配置键（见 §5.3） | `config.ini`；`LANG` 可由 `-lang`、`REPO_ROOT` 可由 CLI 位置路径覆盖 |
 
 ### 6.2 生成 / 修改的文件
 
@@ -353,7 +353,7 @@ EXTRA_CLEAN_DIRS=
 |------|------|------|
 | `.npmrc` | 各项目根目录 | 配置 npm 使用全局模块（功能 1 写、功能 2 删） |
 | `.next` | 各 Next.js 项目根目录 | 功能 3 创建为带隐藏属性的**文件**以阻止缓存；功能 4 清除属性后删除（属性操作按平台实现） |
-| `config.ini` | 可执行文件同目录 | 保存 `REPO_ROOT` / `LANG` / `RECURSIVE` / `EXTRA_CLEAN_DIRS`（4 键；保存时去重并保留注释与未知行） |
+| `config.ini` | 可执行文件同目录 | 保存 `REPO_ROOT` / `LANG` / `RECURSIVE` / `EXTRA_CLEAN_DIRS` / `SCAN_DEPTH`（5 键；保存时去重并保留注释与未知行） |
 | `repo-manager.log` | 可执行文件同目录 | v2.3.0 起 CLI / GUI 执行日志追加写入，带时间戳；打开失败时降级为仅下游输出，不阻断功能 |
 
 ---
@@ -434,7 +434,7 @@ npm run check:docs                          # 校验所有 Markdown 相对链接
 
 ### 9.3 覆盖范围说明
 
-- 当前共 **14 个 `*_test.go`**（其中 1 个为测试辅助文件 `internal/engine/testkit_test.go`）、**42 个 `Test*` 函数**，覆盖 8 个包：`internal/buildinfo`（页脚格式）、`internal/config`（配置读写与新键）、`internal/engine`（功能 1～7、预演、递归与自定义目录）、`internal/i18n`（字典完整性）、`internal/logs`（日志落盘）、`internal/platform`（目录枚举与路径校验）、`cmd/repo-manager`（`parseArgs` / `resolveRoot` 参数与优先级）、`internal/ui`（有界日志缓冲与进度解析等纯逻辑）。CI 以 `-tags nogui` 运行 `go test`。
+- 当前共 **18 个 `*_test.go`**（其中 1 个为测试辅助文件 `internal/engine/testkit_test.go`）、**55 个 `Test*` 函数**，覆盖 8 个包：`internal/buildinfo`（页脚格式）、`internal/config`（配置读写与新键）、`internal/engine`（功能 1～7、预演、递归与自定义目录）、`internal/i18n`（字典完整性）、`internal/logs`（日志落盘）、`internal/platform`（目录枚举与路径校验）、`cmd/repo-manager`（`parseArgs` / `resolveRoot` 参数与优先级）、`internal/ui`（有界日志缓冲与进度解析等纯逻辑）。CI 以 `-tags nogui` 运行 `go test`。
 - `cmd/repo-manager` 与 `internal/ui` 的**入口纯逻辑已覆盖**（见上），但完整 GUI 交互（对话框 / 按钮点击 / 事件循环）仍依赖 [§9.2](./CONTRIBUTING.md) 的手动冒烟清单；数据按当前仓库实算，新增测试后须同步本段。
 - 历史版本文档中的「功能 1～7 ✅ 通过」是当时的手工验证结论，不作为当前自动化覆盖证据。
 

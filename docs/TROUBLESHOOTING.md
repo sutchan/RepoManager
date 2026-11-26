@@ -51,7 +51,7 @@
 | 目录没切换 | 优先级为 CLI 位置路径 > `config.ini` 的 `REPO_ROOT` > 平台默认（Windows `E:\Github`、Unix `~/Github`）；无功能号时路径被忽略 | 在 GUI 中选择并「保存」，或与功能号同用 CLI 位置路径 |
 | 提示「路径不存在」/「不是目录」 | `platform.ValidateRoot` 校验失败 | CLI 报错并以非 0 退出；GUI 弹窗后返回目录选择。路径含空格时用引号包裹参数 |
 
-`config.ini` 共 4 个键：`REPO_ROOT`、`LANG`、`RECURSIVE`、`EXTRA_CLEAN_DIRS`。保存时程序会去重同名键、保留注释与未知行；CLI 执行完成后会把本次根目录写回。
+`config.ini` 共 5 个键：`REPO_ROOT`、`LANG`、`RECURSIVE`、`EXTRA_CLEAN_DIRS`。保存时程序会去重同名键、保留注释与未知行；CLI 执行完成后会把本次根目录写回。
 
 ---
 
@@ -59,7 +59,7 @@
 
 | 症状 | 原因 | 处理 |
 |------|------|------|
-| monorepo 深层项目没被清理 | 默认只枚举 `REPO_ROOT` 的直接子目录 | 启用 `-recursive`、GUI「递归扫描」复选框或 `RECURSIVE=true|1|yes`；递归深度 3 层，跳过 `node_modules` / `.next` / `.git` 等依赖与产物目录 |
+| monorepo 深层项目没被清理 | 默认只枚举 `REPO_ROOT` 的直接子目录 | 启用 `-recursive`、GUI「递归扫描」复选框或 `RECURSIVE=true|1|yes`；递归深度默认 3 层（1–8 可配），跳过 `node_modules` / `.next` / `.git` 等依赖与产物目录 |
 | 帮助里的递归深度与规格不一致（v2.3.2 前） | `-h` 帮助文本曾写「depth 2」，实际调用为 3 层 | v2.3.3 已统一为 3 层（帮助、执行日志、代码与测试注释），见 [OPENSPEC.md §3.0](./OPENSPEC.md)；帮助固定英文，不随 `-lang` 切换 |
 | 自定义目录没有被清理 | `EXTRA_CLEAN_DIRS` 只追加**目录名**（逗号分隔），且仅匹配项目目录内部 | 不要写路径或 `REPO_ROOT` 顶层目录名；留空表示无自定义项 |
 | 功能 6 / 7 清掉的项不完全一致 | 两者白名单不同且有重叠（`dist`、`build`、`.nuxt`） | 属预期设计：功能 6 面向全量清理、功能 7 面向构建缓存，清单见 [OPENSPEC.md §3.6 / §3.7](./OPENSPEC.md) |

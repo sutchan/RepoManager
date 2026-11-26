@@ -41,7 +41,7 @@ Repo Manager 是**单用户本地工具**：没有账号体系、没有内置角
 
 1. **删除类功能是 1、6、7**：功能 1 会删除各项目本地 `node_modules`，功能 6/7 按白名单清缓存与锁文件；执行前必有确认（GUI 弹窗 / CLI 询问 `Y`）。
 2. **先用预演**：任何删除类操作前先跑 `-dry-run`（CLI）确认目标清单；GUI 确认弹窗的警告文案按功能不同（[ARCHITECTURE.md §5.2](./ARCHITECTURE.md)）。
-3. **白名单边界**：功能 6/7 只清理固定白名单目录（`node_modules`、`.next`、`.nuxt`、`dist`、`build`、`.vite`、`.turbo` 等）与锁文件；`EXTRA_CLEAN_DIRS` 仅接受安全的单级目录名，`..`、绝对路径、Windows 保留名一律被丢弃并告警。
+3. **白名单边界**：功能 6/7 只清理固定白名单目录（`node_modules`、`.next`、`.nuxt`、`dist`、`build`、`.vite`、`.turbo` 等）与锁文件；`EXTRA_CLEAN_DIRS` 接受安全单级目录名与受限相对子路径，`..`、绝对路径、Windows 保留名一律被丢弃并告警。
 4. 功能 3 的「阻止重建」通过隐藏文件实现，恢复用功能 4；不要手工删除该隐藏文件（直接用功能 4）。
 5. 危险操作不可撤销——删除的目录不进回收站。
 
@@ -96,7 +96,7 @@ flowchart LR
 - 预演永远先行：`-dry-run` 对全部功能零副作用；
 - 退出码只有 `0`（成功 / 取消）与 `1`（失败），含义见 [CLI-REFERENCE.md §2](./CLI-REFERENCE.md)；
 - 脚本集成时注意：非交互环境下危险操作的确认会因 stdin 不可读而**退出 1**（不静默取消）；
-- `-lang` 会持久化；`RECURSIVE` / `-recursive` 控制是否扫描子目录（深度 3 层）。
+- `-lang` 会持久化；`RECURSIVE` / `-recursive` 控制是否扫描子目录（深度默认 3 层（1–8 可配））。
 
 ## 5. 典型场景流程
 

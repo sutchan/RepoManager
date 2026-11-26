@@ -31,10 +31,13 @@ repo-manager [flags] [功能号 1-7] [路径]
 |------|------|------|------|
 | `-lang` | — | `zh`（默认）/ `zh-Hant` / `en`；`tw`、`zh-TW` 归一化为 `zh-Hant`，非法值回落 `zh` | 界面语言；**会持久化写回 `config.ini`** |
 | `-dry-run` | — | 布尔 | 预演模式：功能 1-7 全部改为输出 `[预演] 将...`，零副作用，且跳过危险操作确认 |
-| `-recursive` | — | 布尔 | 项目目录递归扫描（深度 3 层） |
+| `-recursive` | — | 布尔 | 项目目录递归扫描（默认深度 3 层，1–8 可配） |
+| `-scan-depth` | — | 整数 1–8（`0` 使用配置值/默认 3） | 递归扫描深度；优先级高于 `config.ini:SCAN_DEPTH`（S6） |
+| `-json` | — | 布尔 | 仅 CLI 模式：stdout 输出结构化 JSON（`function` / `root` / `ok` / `messages` / `error`），退出码不变（S7） |
+| `-version` | — | — | 直接输出 `buildinfo.BuildInfo()` 后退出 0（S12） |
 | `-h` | `-help` | — | 输出帮助与版本页脚（`vX.Y.Z · build yymmddhhmm`）后退出 |
 
-> 无 `-version` flag；版本信息仅出现在 `-h` 的 `buildinfo.BuildInfo()` 输出中（`main.go:132`）。
+> `-json` 模式下危险操作确认提示与错误诊断仍走 stderr，避免污染 stdout 的 JSON 文档。
 
 ### 1.2 位置参数
 
@@ -47,14 +50,14 @@ repo-manager [flags] [功能号 1-7] [路径]
 
 ## 2. 退出码定义
 
-仅 3 个退出码（`main.go`）：
+仅 3 个退出码（`main.go`），`-json` 不改变该契约：
 
 | 退出码 | 场景 |
 |:------:|------|
-| `0` | 成功结束；**含用户在确认提示回答非 `Y`（打印「已取消」后正常返回）** |
-| `1` | 四类失败：① `config.ini` 读取失败（v2.3.8 起，禁止回写并以非零码终止；`-h` 在读配置前返回，仍为 0）；② 根目录校验失败（不存在 / 非目录 / 文件系统根）；③ 非交互环境读确认输入失败（stdin EOF / 关闭，明确**不算用户取消**）；④ `engine.Run` 执行出错 |
+| `0` | 成功结束；含用户在确认提示回答非 `Y`（正常文本模式打印「已取消」；`-json` 模式在 stdout 输出 `ok: true` 且 `messages` 含取消文案） |
+| `1` | 五类失败：① `config.ini` 读取失败（禁止回写并以非零码终止；`-h` 仍返回 0）；② 根目录校验失败（不存在 / 非目录 / 文件系统根）；③ 非交互环境读确认输入失败（stdin EOF / 关闭，**不算用户取消**）；④ `engine.Run` 执行出错；⑤ 非法功能号（数字但不在 1–7，S12） |
 
-脚本侧应把非 0 一律视为失败；「取消」与「成功」同为 0，需依赖输出文案区分（改进建议见 [ARCHITECTURE.md §7.2 S7](./ARCHITECTURE.md)）。
+脚本侧应把非 0 一律视为失败；「取消」与「成功」同为 0，可用 `-json` 的 `messages` 字段区分（S7 已落地）。
 
 ---
 
@@ -74,9 +77,9 @@ repo-manager [flags] [功能号 1-7] [路径]
 ## 4. 配置文件契约
 
 - 路径：可执行文件同目录 `config.ini`（便携式）；格式 INI，`键=值`，`#` 注释保留。
-- 键恰为 4 个：`REPO_ROOT` / `LANG` / `RECURSIVE` / `EXTRA_CLEAN_DIRS`，语义见 [INSTALL.md §3](./INSTALL.md)。
+- 键共 5 个：`REPO_ROOT` / `LANG` / `RECURSIVE` / `EXTRA_CLEAN_DIRS` / `SCAN_DEPTH`，语义见 [INSTALL.md §3](./INSTALL.md)。
 - 写入为原子替换（临时文件 + `os.Rename`）；读取失败（非「文件不存在」）时 CLI 禁止回写并报错退出，防止损坏配置被覆盖。
-- `RECURSIVE` 接受 `true` / `1` / `yes`；`EXTRA_CLEAN_DIRS` 逐项安全校验，不合格直接丢弃并告警。
+- `RECURSIVE` 接受 `true` / `1` / `yes`；`EXTRA_CLEAN_DIRS` 支持安全单级目录名与受限相对子路径（逐段校验，拒绝 `..` / 绝对路径 / 保留设备名），不合格直接丢弃并告警（S3）；`SCAN_DEPTH` 取 1–8，非法值回落 3（S6）。
 
 ---
 
@@ -158,7 +161,9 @@ paths:
 |------|----|:--------:|--------|--------------|
 | `lang` | flag | 否 | enum `zh` \| `zh-Hant` \| `en` | `tw` / `zh-TW` 归一化为 `zh-Hant`；非法值回落 `zh`；**写回 `config.ini`** |
 | `dry-run` | flag | 否 | boolean | 零副作用；危险操作跳过二次确认 |
-| `recursive` | flag | 否 | boolean | 递归 3 层；深度可配置列为 S6 |
+| `recursive` | flag | 否 | boolean | 递归扫描；深度由 `scanDepth` 控制（默认 3） |
+| `scanDepth` | flag | 否 | integer 1–8 | 递归深度；`0` 使用 `config.ini:SCAN_DEPTH` 或默认 3（S6） |
+| `json` | flag | 否 | boolean | 仅 CLI：stdout 输出 `jsonResult`，退出码不变（S7） |
 | `h` / `help` | flag | 否 | boolean | 输出帮助 + 版本页脚后退出 0；在读取配置之前处理 |
 | `function` | positional | 否 | integer `1`–`7` | 缺省启动 GUI；非 1–7 的首参按路径解析（已知行为，改进列 S12） |
 | `repoRoot` | positional | 否 | string (path) | 优先级：命令行 > `config.ini:REPO_ROOT` > 平台默认 |
@@ -171,6 +176,20 @@ paths:
 | `1` | 配置读取失败 / 根目录无效 / stdin EOF / `engine.Run` 出错 | stderr：`[错误] ...`；配置失败时不回写配置；无结构化错误 body |
 
 日志行格式为 `YYYY-MM-DD HH:MM:SS <消息>`（`logs.go`）；`Content-Type` 不适用，因为响应是进程输出而非 HTTP 消息体。
+
+`-json` 模式下 stdout 固定为单个对象（对应 `components.schemas.jsonResult`）：
+
+```json
+{
+  "function": 6,
+  "root": "E:\\Github",
+  "ok": true,
+  "messages": ["[n/m] ..."],
+  "error": ""
+}
+```
+
+字段：`function`（功能号，GUI 模式不适用）、`root`（本次根目录）、`ok`（等价退出状态）、`messages`（执行日志数组）、`error`（仅失败时出现）。危险操作确认提示与错误诊断仍走 stderr，不污染该对象。
 
 ### A.4 调用示例
 

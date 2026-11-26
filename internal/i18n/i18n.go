@@ -1,4 +1,4 @@
-// internal/i18n/i18n.go v2.3.3
+// internal/i18n/i18n.go v2.3.11
 
 // Package i18n 是唯一的 UI 文案来源（zh / zh-Hant / en），禁止在 ui / engine 层硬编码文案。
 package i18n
@@ -94,6 +94,7 @@ var dicts = map[Lang]Dict{
 // T 返回指定语言界面文案；非法语言回落中文。
 func T(l Lang) Dict {
 	if d, ok := dicts[l]; ok {
+		fillMissing(&d, dicts[Zh])
 		return d
 	}
 	return dicts[Zh]

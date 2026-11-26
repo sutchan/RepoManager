@@ -11,6 +11,7 @@
 > 核查记录：2026-11-26 全仓文档一致性审计——实算 `*_test.go` 共 14 个（含 1 个辅助文件）、`Test*` 函数 42 个、覆盖 8 个包，同步修正 [OPENSPEC.md §9.3](./OPENSPEC.md) 与 [PRODUCTION-READINESS.md §2.1](./PRODUCTION-READINESS.md) 的过时计数（10/31/6 包）；核实 `-tags ci` 为 Fyne 内置标签（`app/app_software.go` 于 `ci` 下改用 headless 测试驱动 + software painter，均纯 Go 无 cgo），`TROUBLESHOOTING.md` / `ARCHITECTURE.md` / `CONTRIBUTING.md` / `OPENSPEC.md` / `docs/README.md` / `MAINTAINERS.md` 相关描述属实无误；Release 资产命名与 `scripts/package-release.sh` 实况一致（amd64→x64），无冲突。任务状态不变，本轮无新增待办。
 > 本轮记录：2026-11-26 系统性文档完善——版本 bump 至 v2.3.8、修复配置读取失败退出码、补齐 OpenAPI 3.1 CLI 契约映射（`CLI-REFERENCE.md` 附录 A）、FAQ 快速索引（`TROUBLESHOOTING.md` §0）与角色权限矩阵（`USER-GUIDE.md` §1.1）；登记 S10–S15 与 T1–T5，并将 S3 / S6–S9 的「择期」改为明确日期。历史「当前无未完成事项」仅指 2026-11-24 时点。
 > 核验记录：2026-11-26 v2.3.9 系统性文档标准化核验——6 大内容模块与质量标准逐项对照通过；修正 3 处把平台仓库名误写为 Git 远程的表述（`docs/README.md` §1.2、`CONTRIBUTING.md` §3.2 规则 8、`landing/README.md` §2）与 1 处「当前无未完成项」过时表述；版本同步至 2.3.9。无新增待办，S1–S15 / T1–T5 状态不变。
+> 本轮记录（v2.3.11 / 2026-11-26）：实施完成度审查的 P0–P3 改进——S10 局部失败汇总（返回非零码）、S11 npm 安装超时（`REPO_MANAGER_NPM_TIMEOUT`）、7 处文档漂移修复、S18 CI 未引用符号检测（告警模式）+ 资源引用扫描 + 覆盖率采集；同步版本与 CHANGELOG。实算测试 18 文件 / 55 函数 / 8 包；覆盖率基线总体 49.9%（核心包 `engine` 74.8% / `config` 81.5% / `i18n` 91.7%），距 80% 门槛仍有差距，已登记为分阶段目标。
 
 ---
 
@@ -19,7 +20,7 @@
 | ID | 任务 | 优先级 | 责任人 | 计划完成 | 状态 | 来源与备注 |
 |----|------|:------:|--------|----------|------|------------|
 | S1 | 日志轮转：`repo-manager.log` 超 5 MB 归档为 `.log.1`（仅留 1 份） | P2 | 维护者 + AI 协作会话 | 2026-12-15 | **已完成（v2.3.11）** | `internal/logs/logs.go` 写入前按 5 MB 阈值轮转并保留 1 份归档；`logs_test.go` 覆盖轮转边界与下游转发 |
-| S2 | Windows 环境变量改注册表直写（`golang.org/x/sys/windows/registry`），消除 `setx` 截断风险 | P2 | 维护者 + AI 协作会话 | 2026-12-15 | 待办 | 同上 §7.1；保留 `setx` 降级路径 |
+| S2 | Windows 环境变量改注册表直写（`golang.org/x/sys/windows/registry`），消除 `setx` 截断风险 | P2 | 维护者 + AI 协作会话 | 2026-12-15 | **已完成（v2.3.11）** | `platform_windows.go` 直写 `HKCU\Environment`（`REG_SZ`），删除值不存在视为成功；失败回退 `setx` / `reg`；`go mod tidy` 将 `x/sys` 提升为直接依赖 |
 | S4 | GUI 组件级自动化测试（`fyne.io/fyne/v2/test` 软件驱动）纳入 CI | P2 | 维护者 + AI 协作会话 | 2026-12-31 | 待办 | 同上 §7.1；替代部分 §9.3 人工冒烟 |
 | S5 | GUI 执行中可取消（`context.Context` 贯通 runner → engine） | P2 | 维护者 + AI 协作会话 | 2026-12-31 | 待办 | 同上 §7.2 |
 | S7 | CLI `-json` 结构化输出（退出码不变），便于脚本 / CI 集成 | **P2（重评↑）** | 维护者 @sutchan | 2027-01-31 | 待办 | 同上 §7.2；S10 修复退出码后脚本集成价值上升 |
@@ -29,13 +30,13 @@
 | S17 | 平台层错误文案硬编码中文，未走 i18n 字典 | **P2（重评↑）** | 维护者 + AI 协作会话 | 2027-01-31 | 待办 | 冗余清理实查；`internal/platform/platform.go` 的 `ValidateRoot` / `globalNodeModulesPath`；与 S13 合并推进 |
 | S3 | `EXTRA_CLEAN_DIRS` 支持受限相对子路径（逐段校验，默认关闭） | P3 | 维护者 @sutchan | 2027-01-31 | **已完成（v2.3.11）** | `platform.IsSafeCleanDirPath` 逐段校验；config / engine 双层防线；`dirs_test.go` 与 `keys_test.go` 覆盖穿越输入 |
 | S6 | 项目扫描深度可配置（`SCAN_DEPTH`，默认 3、上限 8） | P3 | 维护者 @sutchan | 2027-01-31 | **已完成（v2.3.11）** | `config.ScanDepth` + `-scan-depth` flag；`listDirs` 边界钳制；`TestScanDepthConfig` 覆盖解析/回落/往返 |
-| S8 | 系统级安装包评估（`.msi` / `.dmg`，`fyne-cross`），CI 产物追加 | P3 | 维护者 @sutchan | 2027-02-28 | 待办 | 同上 §7.2；与 S15 一并决策 |
+| S8 | 系统级安装包评估（`.msi` / `.dmg`，`fyne-cross`），CI 产物追加 | P3 | 维护者 @sutchan | 2027-02-28 | **已完成（v2.3.11）** | 评估结论落地 [MAINTAINERS.md §6](./MAINTAINERS.md)：签名证书 / 公证成本高于收益，维持仅归档分发；触发条件与后续 S 编号机制已记录 |
 | S9 | 源码文件头注释版本随改动渐进同步（禁止全仓刷写） | P3 | 维护者 + AI 协作会话 | 2026-12-31 | 待办 | 同上 §7.3；按 [CONTRIBUTING.md §8.2](./CONTRIBUTING.md) 执行；每月末复核 |
 | S12 | 非法功能号 / GUI 路径参数可见化，补 `-version` flag | **P3（重评↓）** | 维护者 + AI 协作会话 | 2027-01-15 | **已完成（v2.3.11）** | `main.go` 新增 `-version`、非法功能号报错与 GUI 位置参数提示；帮助文本同步 |
-| S14 | `src/lib` i18n 与数据层增加 Vitest 逻辑测试 | P3 | 维护者 @sutchan | 2027-02-28 | 待办 | 同上 §7.4；弃用参考界面防死代码 |
+| S14 | `src/lib` i18n 与数据层增加 Vitest 逻辑测试 | P3 | 维护者 @sutchan | 2027-02-28 | **已完成（v2.3.11）** | 技术选型改为零依赖 `node:test`：`scripts/i18n-parity.test.mjs` 校验三语键集合、`SUPPORTED_LANGS` 顺序与 `HTML_LANG` 映射，`npm run check:i18n` 已绿；避免为弃用资产引入 Vitest 依赖 |
 | S15 | 统一本地 6 目标 / CI 4 目标构建矩阵口径 | P3 | 维护者 @sutchan | 2027-02-28 | **已完成（v2.3.11）** | `ARCHITECTURE.md` §2 与 [INSTALL.md §4](./INSTALL.md) 已加口径说明 |
 | S16 | `config.Load` / `config.Save` 的 `key=value` 解析逻辑重复，抽取共用解析器 | P3 | 维护者 + AI 协作会话 | 2027-01-31 | **已完成（v2.3.11）** | `parseKeyValue` 统一跳过注释/空行并归一化 key，Load / Save 均改用它 |
-| S18 | 冗余预防门禁：CI 增加未引用符号检测与静态资源引用扫描 | **P3（重评↓）** | 维护者 + AI 协作会话 | 2027-01-15 | 待办 | 预防性门禁，非交付阻断；清单见 [reports/cleanup-report-2026-11-26.md](../reports/cleanup-report-2026-11-26.md) |
+| S18 | 冗余预防门禁：CI 增加未引用符号检测与静态资源引用扫描 | **P3（重评↓）** | 维护者 + AI 协作会话 | 2027-01-15 | **已完成（v2.3.11）** | `ci.yml` 新增 `staticcheck -checks U1000 ./cmd/... ./internal/...`（固定版本 2025.1.1）与 `npm run check:asset-refs`；清单见 [reports/cleanup-report-2026-11-26.md](../reports/cleanup-report-2026-11-26.md) |
 
 > 已知限制（`windows/arm64` 无交叉工具链、`linux/arm64` 缺 arm64 架构开发库）登记于 [MAINTAINERS.md §6](./MAINTAINERS.md)，不属待办。本机无 gcc，`go test -race` 已纳入 `ci.yml`（ubuntu runner）验证，不属待办。
 

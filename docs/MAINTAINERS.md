@@ -141,3 +141,13 @@ grep 'const Version' internal/buildinfo/version.go
 | M6 | ~~已修复~~ v2.3.3：产品名与技术标识、远程、应用内文案全量统一 | 同步清单见 §1 |
 
 > 修复任一项时同步更新本表、[tasks.md](./tasks.md) 与 [CHANGELOG.MD](../CHANGELOG.MD)；本表只记录决策，不替代任务跟踪。
+
+### 安装包评估结论（S8，2026-11-26）
+
+| 平台 / 格式 | 工具链与前置条件 | 成本 / 风险 | 结论 |
+|-------------|------------------|-------------|------|
+| Windows `.msi` | WiX Toolset 3.x / `wixl`；SmartScreen 信誉需代码签名证书 | 新增安装脚本维护、签名密钥隔离、CI 额外步骤 | 暂不实施；继续提供 `RepoManager-v<版本>-windows-x64.zip`，解压即用契合开发者工具习惯 |
+| macOS `.dmg` | `hdiutil`（runner 自带）+ Developer ID 签名与公证（开发者账号年费） | 未签名 DMG 在 Gatekeeper 下需手动放行，体验反而更差 | 暂不实施；继续提供 `RepoManager-v<版本>-macos-<arch>.zip` |
+| 启动前提 | 企业分发需求或用户明确要求，且签名材料由维护者提供 | 签名密钥不得入库，经仓库 Secrets 注入 | 触发后另立 S 编号任务，与 S15 矩阵口径一并决策 |
+
+> 评估已形成明确决策：当前仅归档分发是主动选择，不是待办缺口；S8 于 v2.3.11 归档。

@@ -31,12 +31,12 @@
 ## 2. 测试策略（单元 / 集成 / 端到端）与覆盖率
 
 ### 2.1 已具备
-- 当前 **14 个 `*_test.go`、42 个 `Test*` 函数**，覆盖 `buildinfo` / `config` / `engine` / `i18n` / `logs` / `platform` / `cmd/repo-manager` / `internal/ui` 八个包（`OPENSPEC.md` §9.3）；CI 以 `-tags nogui` 运行 `go test -count=1`（含 `-race`）。
+- 当前 **18 个 `*_test.go`、55 个 `Test*` 函数**，覆盖 `buildinfo` / `config` / `engine` / `i18n` / `logs` / `platform` / `cmd/repo-manager` / `internal/ui` 八个包（`OPENSPEC.md` §9.3）；CI 以 `-tags nogui` 运行 `go test -count=1`（含 `-race`）。
 - §4.6 要求业务函数可测：扫描 / 白名单 / 配置 / 文案等纯逻辑须有测试，平台差异用接口隔离。
 - CLI 入口纯逻辑（`parseArgs` / `resolveRoot`）与 GUI 纯逻辑（日志缓冲 / 进度解析）已覆盖测试；完整 GUI 交互与跨平台发版前仍按 `CONTRIBUTING.md` §9.3 做**手动冒烟**（隔离临时目录）。
 
 ### 2.2 现状不足
-- **无覆盖率采集与门槛**：未生成覆盖率报告，`go test -coverprofile` 未接入 CI。
+- **覆盖率已采集、门槛待立**：v2.3.11 起 CI 生成 `reports/coverage.out` 并输出摘要；2026-11-26 本机基线总体 **49.9%**（`engine` 74.8% / `config` 81.5% / `i18n` 91.7% / `logs` 78.8% / `platform` 67.8% / `buildinfo` 55.6%），尚未设强制门槛。
 - **无分层定义**：单元 / 集成 / 端到端的边界、目录约定、禁用真实仓库根验证等只在零散段落出现。
 - 无 e2e 自动化；GUI 回归完全依赖人工，易漏三语 / 二次确认 / 路径边界。
 - 无 flaky 测试处理规则，无「测试失败时的回归用例补充」要求。
@@ -46,8 +46,8 @@
   - 单元：`internal/*` 包内纯逻辑，不访问真实文件系统写操作；表驱动、并行安全用 `t.Parallel()`。
   - 集成：`internal/platform` + `internal/engine` 用 `t.TempDir()` 构造假项目，验证扫描 / 白名单 / 二次确认前置条件；禁止使用真实 `REPO_ROOT`。
   - 端到端：CLI 用 `os/exec` 调 `go run ./cmd/repo-manager`，GUI 按 §9.3 手动冒烟；e2e 只在隔离临时目录执行。
-- `[待实现]` CI 增加 `go test -tags nogui -coverprofile=reports/coverage.out ./...` 与 `go tool cover -func` 摘要；产物写 `reports/`（已忽略）。
-- `[待实现]` 覆盖率门槛：包均值 ≥ 80%，`engine` / `platform` / `config` 三个高风险包 ≥ 85%；`cmd` / `ui` 暂不设阈值（手动冒烟覆盖）。数据型描述按当前实况同步 `OPENSPEC.md` §9.3。
+- `[已实现 v2.3.11]` CI 已增加 `go test -tags nogui -coverprofile=reports/coverage.out ./...` 与 `go tool cover -func` 摘要；产物写 `reports/`（已忽略）。
+- `[待实现]` 覆盖率门槛：包均值 ≥ 80%，`engine` / `platform` / `config` 三个高风险包 ≥ 85%；`cmd` / `ui` 暂不设阈值（手动冒烟覆盖）。当前基线总体 49.9%，与门槛仍有差距，门槛须分阶段推进；数据型描述按实况同步 `OPENSPEC.md` §9.3。
 - `[待实现]` 每次 P1 缺陷修复须附回归测试；flaky 测试先 `t.Skip` 并登记 `tasks.md`，禁止直接删除。
 
 ---
@@ -57,7 +57,7 @@
 ### 3.1 已具备
 - [`SECURITY.md`](../.github/SECURITY.md) 定义私密报告渠道、安全边界（不越界删除、二次确认、白名单、隔离验证）与不适用情形。
 - `CONTRIBUTING.md` §11 安全红线：无密钥入库、输入校验、删除目标只来自枚举、危险操作二次确认。
-- `EXTRA_CLEAN_DIRS` 有路径穿越防护（`IsSafeCleanDirName`，见 `OPENSPEC.md` §5.3）。
+- `EXTRA_CLEAN_DIRS` 有路径穿越防护（`IsSafeCleanDirPath`，见 `OPENSPEC.md` §5.3）。
 - 日志与 Issue 提交要求脱敏（移除真实路径 / 用户名 / 密钥，`TROUBLESHOOTING.md` §7）。
 
 ### 3.2 现状不足
@@ -84,7 +84,7 @@
 
 ### 4.2 现状不足
 - **无可量化指标**：启动耗时、扫描 N 个项目的耗时、GUI 首屏时间、内存峰值、功能成功率、崩溃率均未定义。
-- 无性能回归门禁与基线数据；递归扫描深度 3 层的最坏情况未做容量说明。
+- 无性能回归门禁与基线数据；递归扫描深度默认 3 层（1–8 可配）的最坏情况未做容量说明。
 
 ### 4.3 目标与检查清单（数值为拟定目标，须实测后转强制）
 | 指标 | 拟定目标 | 现状 | 落地方式 |

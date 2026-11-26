@@ -1,6 +1,6 @@
 //go:build !nogui
 
-// internal/ui/runner.go v2.3.10
+// internal/ui/runner.go v2.3.11
 
 package ui
 

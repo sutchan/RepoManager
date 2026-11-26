@@ -1,4 +1,4 @@
-// internal/logs/logs_test.go v2.3.3
+// internal/logs/logs_test.go v2.3.11
 
 package logs
 

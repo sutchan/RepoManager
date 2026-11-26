@@ -164,6 +164,7 @@ var logDicts = map[Lang]LogDict{
 // Logs 返回指定语言的执行日志文案；非法语言回落中文。
 func Logs(l Lang) LogDict {
 	if d, ok := logDicts[l]; ok {
+		fillMissing(&d, logDicts[Zh])
 		return d
 	}
 	return logDicts[Zh]

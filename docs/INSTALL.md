@@ -100,12 +100,13 @@ build 编号（10 位 `yymmddhhmm`）与版本号由脚本经 `-ldflags -X repo-
 |----|------------|------|------|
 | `REPO_ROOT` | 目录路径 | Windows `E:\Github`，Unix `~/Github` | 项目根目录（多个项目的父目录）；CLI 位置参数可临时覆盖 |
 | `LANG` | `zh` / `zh-Hant` / `en`（`tw`、`zh-TW` 归一化为 `zh-Hant`，非法值回落 `zh`） | `zh` | 界面语言；`-lang` 会持久化回写 |
-| `RECURSIVE` | `true` / `1` / `yes` | 关闭 | 项目目录递归扫描（深度 3 层）；`-recursive` 与其「或」 |
-| `EXTRA_CLEAN_DIRS` | 逗号分隔的单级目录名 | 空 | 并入功能 7 清理白名单；**仅接受安全目录名**，`..`、绝对路径、Windows 保留名等会被丢弃并告警（[ARCHITECTURE.md §6.1](./ARCHITECTURE.md)） |
+| `RECURSIVE` | `true` / `1` / `yes` | 关闭 | 项目目录递归扫描（默认 3 层，可配 1–8）；`-recursive` 与其「或」 |
+| `EXTRA_CLEAN_DIRS` | 逗号分隔的单级目录名或受限相对子路径 | 空 | 并入功能 7 清理白名单；逐段安全校验，`..`、绝对路径、Windows 保留名等会被丢弃并告警（[ARCHITECTURE.md §6.1](./ARCHITECTURE.md)） |
+| `SCAN_DEPTH` | 整数 1–8 | `3` | 递归扫描深度；CLI `-scan-depth` 优先，越界回落默认（S6） |
 
 两个随产物落地的数据文件（均自动生成，删除即重置）：
 
-- `config.ini` — 上述 4 键；
+- `config.ini` — 上述 5 键；
 - `repo-manager.log` — 运行日志（带时间戳追加；GUI / CLI 执行均写入）。
 
 ## 4. 多环境部署方案

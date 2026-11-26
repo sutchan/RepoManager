@@ -24,6 +24,7 @@ func main() {
 	dryRunFlag := flag.Bool("dry-run", false, "预演模式：仅显示将要执行的操作，不修改任何文件")
 	recursiveFlag := flag.Bool("recursive", false, "递归扫描 monorepo 深层项目（深度可配，默认 3 层）")
 	scanDepthFlag := flag.Int("scan-depth", 0, "递归扫描深度（1-8；0 使用 config.ini 或默认 3）")
+	jsonFlag := flag.Bool("json", false, "CLI 结构化 JSON 输出到 stdout（退出码不变）")
 	showHelp := flag.Bool("h", false, "显示帮助")
 	flag.BoolVar(showHelp, "help", false, "显示帮助")
 	showVersion := flag.Bool("version", false, "显示版本与构建信息")
@@ -80,7 +81,7 @@ func main() {
 	root := resolveRoot(p, cfg, pathArg)
 
 	if fn > 0 {
-		runCLI(p, cfgPath, &cfg, fn, root, lang, opts)
+		runCLI(p, cfgPath, &cfg, fn, root, lang, opts, *jsonFlag)
 		return
 	}
 	runGUI(cfg)
@@ -113,14 +114,22 @@ func resolveRoot(p platform.Platform, cfg config.Config, pathArg string) string 
 }
 
 // runCLI 命令行模式：危险操作保留二次确认，预演模式跳过（对齐 OPENSPEC §4.5 / §4.7）。
-func runCLI(p platform.Platform, cfgPath string, cfg *config.Config, fn int, root string, lang i18n.Lang, opts engine.Options) {
+func runCLI(p platform.Platform, cfgPath string, cfg *config.Config, fn int, root string, lang i18n.Lang, opts engine.Options, useJSON bool) {
 	d := i18n.Logs(lang)
 	if err := platform.ValidateRoot(root); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		if useJSON {
+			emitJSONResult(fn, root, nil, err)
+		} else {
+			fmt.Fprintln(os.Stderr, err)
+		}
 		os.Exit(1)
 	}
 	if engine.IsDangerous(fn) && !opts.DryRun {
-		fmt.Print(d.ConfirmCLI)
+		if useJSON {
+			fmt.Fprintln(os.Stderr, d.ConfirmCLI)
+		} else {
+			fmt.Print(d.ConfirmCLI)
+		}
 		reader := bufio.NewReader(os.Stdin)
 		answer, readErr := reader.ReadString('\n')
 		if !strings.EqualFold(strings.TrimSpace(answer), "Y") {
@@ -129,15 +138,35 @@ func runCLI(p platform.Platform, cfgPath string, cfg *config.Config, fn int, roo
 				fmt.Fprintln(os.Stderr, d.ConfirmUnavailable)
 				os.Exit(1)
 			}
-			fmt.Println(d.Cancelled)
+			if useJSON {
+				emitJSONResult(fn, root, []string{d.Cancelled}, nil)
+			} else {
+				fmt.Println(d.Cancelled)
+			}
 			return
 		}
 	}
 	// V4：执行日志同时追加写入可执行文件同目录的 repo-manager.log。
 	fileLog := logs.NewFileLogger(logs.DefaultPath(), engine.StdLogger{})
 	defer fileLog.Close()
-	if err := engine.Run(p, fn, root, lang, opts, fileLog); err != nil {
-		fmt.Fprintf(os.Stderr, d.ErrorPrefix+"\n", err)
+	logger := engine.Logger(fileLog)
+	var mem *memLogger
+	if useJSON {
+		mem = &memLogger{}
+		logger = teeLogger{primary: fileLog, secondary: mem}
+	}
+	runErr := engine.Run(p, fn, root, lang, opts, logger)
+	if useJSON {
+		var msgs []string
+		if mem != nil {
+			msgs = mem.msgs
+		}
+		emitJSONResult(fn, root, msgs, runErr)
+	}
+	if runErr != nil {
+		if !useJSON {
+			fmt.Fprintf(os.Stderr, d.ErrorPrefix+"\n", runErr)
+		}
 		os.Exit(1)
 	}
 	// 命令行模式记住本次使用的目录
@@ -163,6 +192,7 @@ func printHelp() {
 	fmt.Println("  -recursive  Recursive scan (monorepo, default depth 3)")
 	fmt.Println("  -scan-depth N  Recursive depth 1-8 (0 uses config.ini / default 3)")
 	fmt.Println("  -version  Show version and build info")
+	fmt.Println("  -json     Emit structured JSON on stdout (CLI mode only)")
 	fmt.Println("  -h        Show this help")
 	fmt.Println()
 	fmt.Println("Examples:")

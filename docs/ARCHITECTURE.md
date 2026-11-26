@@ -99,7 +99,7 @@ graph TD
 
 ### 3.3 配置与持久化
 
-`config.ini` 位于**可执行文件同目录**（便携式，`internal/config/config.go:29-35`），恰好 4 个键：`REPO_ROOT` / `LANG` / `RECURSIVE` / `EXTRA_CLEAN_DIRS`。保存采用「读旧 → 过滤 → 补写 → 写临时文件 → `os.Rename` 原子替换」（`config.go:89-157`），读旧失败即取消保存，防止损坏文件被覆盖。运行日志 `repo-manager.log` 同样落在 exe 同目录（`internal/logs/logs.go:18-24`）。
+`config.ini` 位于**可执行文件同目录**（便携式，`internal/config/config.go:29-35`），共 5 个键：`REPO_ROOT` / `LANG` / `RECURSIVE` / `EXTRA_CLEAN_DIRS` / `SCAN_DEPTH`。保存采用「读旧 → 过滤 → 补写 → 写临时文件 → `os.Rename` 原子替换」（`config.go:89-157`），读旧失败即取消保存，防止损坏文件被覆盖。运行日志 `repo-manager.log` 同样落在 exe 同目录（`internal/logs/logs.go:18-24`）。
 
 ---
 
@@ -109,7 +109,7 @@ graph TD
 |----|------|----------|
 | `cmd/repo-manager` | flag 解析、配置与语言装载、CLI 分发、GUI / Headless 分流、退出码 | `main.go` / `gui.go` / `headless.go` |
 | `internal/engine` | 功能 1-7 的业务实现、危险操作判定（功能 1/6/7）、dry-run 分支、局部失败汇总与安装超时 | `engine.go` / `clean.go` / `install.go` / `options.go` / `failures.go` |
-| `internal/config` | 4 键 INI 读写、原子保存、`EXTRA_CLEAN_DIRS` 解析与安全过滤 | `config.go` |
+| `internal/config` | 5 键 INI 读写、原子保存、`EXTRA_CLEAN_DIRS` 解析与安全过滤 | `config.go` |
 | `internal/platform` | 平台接口 10 方法 + Windows / Unix 实现、路径安全校验、项目目录枚举 | `platform.go` / `platform_windows.go` / `platform_unix.go` / `dirs.go` |
 | `internal/ui` | Fyne 界面：整体重绘布局、执行互斥、暗色主题、GUI 日志缓冲（500 行有界）、`[n/m]` 进度 | `ui.go` / `runner.go` / `theme.go` / `output.go` / `logbuffer.go` |
 | `internal/i18n` | 三语词条与归一化（`tw`/`zh-TW` → `zh-Hant`，其余回落 `zh`；繁中缺词条回退简中） | `i18n.go` / `log.go` |
@@ -177,7 +177,7 @@ flowchart LR
 
 所有清理目标只来自**枚举**，不接受任意路径：
 
-1. `EXTRA_CLEAN_DIRS` 解析时逐项过 `platform.IsSafeCleanDirName`（`internal/platform/dirs.go:13-36`）：拒绝空值 / 首尾空白 / `.` / `..` / 长度超过 255 / 含 `/\:` / 绝对路径 / Windows 保留设备名（CON、PRN、AUX、NUL、COM1-9、LPT1-9）/ 控制字符，不合格项**直接丢弃**；
+1. `EXTRA_CLEAN_DIRS` 解析时逐项过 `platform.IsSafeCleanDirPath`（`internal/platform/dirs.go:13-36`）：拒绝空值 / 首尾空白 / `.` / `..` / 长度超过 255 / 含 `/\:` / 绝对路径 / Windows 保留设备名（CON、PRN、AUX、NUL、COM1-9、LPT1-9）/ 控制字符，不合格项**直接丢弃**；
 2. 功能 6 / 7 执行时**二次校验**，仍不合格的输出 `[警告] 已忽略不安全的自定义清理目录名`（`clean.go:109-119`）；
 3. `ValidateRoot`（`platform.go:114-137`）拒绝文件系统根、不存在路径与非目录。
 
