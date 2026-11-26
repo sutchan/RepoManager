@@ -1,6 +1,6 @@
 # Repo Manager 任务清单 (docs/tasks.md)
 
-> 最后更新：**2026-11-26 17:02**（本轮任务推进收口；已完成项归档至 [tasks-done.md](./tasks-done.md) 第十四节）
+> 最后更新：**2026-11-26 17:12**（修正指向 gitignored 产物的链接，避免 CI `check:docs` 失效）
 > 登记记录：2026-11-25 依据 [ARCHITECTURE.md §7](./ARCHITECTURE.md) 快照登记 S1–S9；2026-11-26 依据同文 §7.4 补充评估登记 S10–S15，并新增「待验证技术细节」T1–T5。责任人默认为维护者（@sutchan）+ AI 协作会话，计划完成时间为明确日期；完成后归档至 [tasks-done.md](./tasks-done.md)。
 > 维护约定：已完成任务归档至 [tasks-done.md](./tasks-done.md)；本文件仅保留进行中 / 待办任务。
 > 全局版本唯一来源：`internal/buildinfo/version.go` 的 `Version`（当前 **2.3.11**）。
@@ -36,7 +36,7 @@
 | S14 | `src/lib` i18n 与数据层增加 Vitest 逻辑测试 | P3 | 维护者 @sutchan | 2027-02-28 | **已完成（v2.3.11）** | 技术选型改为零依赖 `node:test`：`scripts/i18n-parity.test.mjs` 校验三语键集合、`SUPPORTED_LANGS` 顺序与 `HTML_LANG` 映射，`npm run check:i18n` 已绿；避免为弃用资产引入 Vitest 依赖 |
 | S15 | 统一本地 6 目标 / CI 4 目标构建矩阵口径 | P3 | 维护者 @sutchan | 2027-02-28 | **已完成（v2.3.11）** | `ARCHITECTURE.md` §2 与 [INSTALL.md §4](./INSTALL.md) 已加口径说明 |
 | S16 | `config.Load` / `config.Save` 的 `key=value` 解析逻辑重复，抽取共用解析器 | P3 | 维护者 + AI 协作会话 | 2027-01-31 | **已完成（v2.3.11）** | `parseKeyValue` 统一跳过注释/空行并归一化 key，Load / Save 均改用它 |
-| S18 | 冗余预防门禁：CI 增加未引用符号检测与静态资源引用扫描 | **P3（重评↓）** | 维护者 + AI 协作会话 | 2027-01-15 | **已完成（v2.3.11）** | `ci.yml` 新增 `staticcheck -checks U1000 ./cmd/... ./internal/...`（固定版本 2025.1.1）与 `npm run check:asset-refs`；清单见 [reports/cleanup-report-2026-11-26.md](../reports/cleanup-report-2026-11-26.md) |
+| S18 | 冗余预防门禁：CI 增加未引用符号检测与静态资源引用扫描 | **P3（重评↓）** | 维护者 + AI 协作会话 | 2027-01-15 | **已完成（v2.3.11）** | `ci.yml` 新增 `staticcheck -tags nogui -checks U1000`（强制门禁）与 `npm run check:asset-refs`；清单见 `reports/cleanup-report-2026-11-26.md`（本地产物，不入版本库，故不作 Markdown 链接） |
 
 > 已知限制（`windows/arm64` 无交叉工具链、`linux/arm64` 缺 arm64 架构开发库）登记于 [MAINTAINERS.md §6](./MAINTAINERS.md)，不属待办。本机无 gcc，`go test -race` 已纳入 `ci.yml`（ubuntu runner）验证，不属待办。
 
