@@ -1,4 +1,4 @@
-// cmd/repo-manager/main.go v2.3.8
+// cmd/repo-manager/main.go v2.3.10
 
 // 命令 repo-manager 是产品入口：解析参数后分流到命令行模式或 Fyne GUI。
 package main

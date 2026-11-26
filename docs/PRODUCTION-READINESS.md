@@ -1,4 +1,4 @@
-# Repo Manager 生产就绪规范 (Production Readiness) v2.3.9
+# Repo Manager 生产就绪规范 (Production Readiness) v2.3.10
 
 > **定位**：定义产品达到「可投入生产环境」所需的质量门槛与验收口径，是八类非功能要求的**单一来源**。
 > **权威关系**：本文说「要达到什么程度」；[`CONTRIBUTING.md`](./CONTRIBUTING.md) 说「怎么开发与评审」；[`MAINTAINERS.md`](./MAINTAINERS.md) 说「怎么发布与维护」；[`OPENSPEC.md`](./OPENSPEC.md) 是功能行为契约。

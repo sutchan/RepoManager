@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.3.10] - 2026-11-26
+
+### Removed
+- **未引用静态资源** - 删除 `public/` 下 5 个 Next.js 模板默认 SVG（`file` / `globe` / `next` / `vercel` / `window`），全仓 0 引用；`public/` 目录随之移除
+- **未使用 UI 组件** - 删除 `src/components/ui/table.tsx`、`src/components/ui/code-block.tsx`（页面无引用），并移除 `card.tsx` 中无引用的 `CardDescription`
+- **未消费数据模块** - 删除 `src/lib/data/features.ts`、`steps.ts`、`project-types.ts`（barrel 导出但无消费点），`src/lib/data/index.ts` 仅保留 `repos` 导出
+- **未消费样式与令牌** - 删除 `src/app/globals.css` 中无引用的 `.animate-fade-in-up` / `.animate-spin-slow` 及其关键帧；删除 `internal/ui/theme.go` 中未被引用的 `colorMuted` 令牌
+- **本地产物** - 清理未跟踪的本地产物（`*.tsbuildinfo`、`.tmp/` 临时目录），均在 `.gitignore` 覆盖范围内
+
+### Changed
+- **重复逻辑合并** - 新增 `internal/ui/root.go` 的 `resolveRoot`，统一「保存配置」与「执行功能」两处重复的根目录归一化 + 校验；`cmd/repo-manager/main.go` 消除同一语言值的重复 `i18n.Normalize` 调用
+
+### Docs
+- **文档同步** - `DESIGN-SYSTEM.md` §2.6 / §3.1 / §7（G3 / G5）、`CONTRIBUTING.md` §3.1 / §4.2 / §5、`docs/README.md` §3、`OPENSPEC.md` §5.2、`landing/README.md` §2 同步清理结果；版本展示位同步至 `2.3.10`
+
+---
+
 ## [2.3.9] - 2026-11-26
 
 ### Fixed

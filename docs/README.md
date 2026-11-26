@@ -1,4 +1,4 @@
-# Repo Manager 文档中心 v2.3.9
+# Repo Manager 文档中心 v2.3.10
 
 > 本目录是 Repo Manager **所有规范与规格文档的唯一归档位置**。
 > 仓库根只保留面向使用者的入口 [README.MD](../README.MD)、变更历史 [CHANGELOG.MD](../CHANGELOG.MD) 与 [LICENSE](../LICENSE)。
@@ -111,7 +111,6 @@ RepoManager/
 │   ├── app/               # layout.tsx / page.tsx / globals.css
 │   ├── components/        # icons.tsx + ui/
 │   └── lib/               # i18n.ts / utils.ts / data/
-├── public/                                     # 静态资源
 ├── scripts/                                    # check-*.mjs（门禁）+ build.ps1 / build.sh（交叉编译）+ package-release.sh / gen-landing-version.mjs
 ├── .tmp/                                       # 会话级临时文件唯一落点（内容不入库，用完即清）
 ├── reports/                                    # 工具正式产物目录（内容不入库）

@@ -1,4 +1,4 @@
-# Repo Manager 设计系统 (Design System) v2.3.9
+# Repo Manager 设计系统 (Design System) v2.3.10
 
 > **本文定位**：Repo Manager 的**唯一 UI 设计规范来源**，规定设计令牌、界面结构与交互标准。
 > **v2.0.0 起**：实际 UI 为 **Go + Fyne 桌面 GUI**（`internal/ui`），配色沿用本文 §2.1 设计令牌；仓库根 `src/` 的 Next.js 参考界面为 **v1.x 遗留、已弃用**，§3.1 / §3.2 等 Next.js 章节仅作历史参考。
@@ -94,7 +94,7 @@ mono: ui-monospace, "JetBrains Mono", "SF Mono", Consolas, monospace
 ### 2.6 动效 — 已实现（部分未消费）
 
 - `globals.css` 定义 `--dur-fast: 150ms`、`--dur: 250ms`，缓动 `cubic-bezier(0.4,0,0.2,1)`。
-- 已定义关键帧：`fade-in-up`（卡片入场，`.animate-fade-in-up`）、`spin`（旋转加载，`.animate-spin-slow`）——**当前页面未使用**。
+- 关键帧 `fade-in-up`（卡片入场）与 `spin`（旋转加载）及其 `.animate-*` 类**已于 v2.3.10 随未消费样式一并清理**；如需动效，按 §2.6 令牌自行定义并在页面消费。
 - 组件过渡实际使用 Tailwind `transition-all duration-150` / `transition-colors`；按钮 `active:scale-[0.98]`。
 - 焦点态：`:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px }`。
 - 文本选中：`::selection` 用 `color-mix` 混合 `primary` 35%。
@@ -122,12 +122,12 @@ Go 版 GUI 位于 `internal/ui`，遵循本文 §2.1 配色与 §4 交互标准�
 | 组件 | 用途 | 当前页面是否使用 |
 |------|------|------------------|
 | `button.tsx` | 变体 `default/primary/secondary/destructive/ghost/outline`；尺寸 `sm/md/lg/icon`；`forwardRef` 透传原生属性 | ✅ |
-| `card.tsx` | `Card` / `CardHeader` / `CardTitle` / `CardDescription` / `CardContent` | ✅（Description 未使用） |
+| `card.tsx` | `Card` / `CardHeader` / `CardTitle` / `CardContent` | ✅（`CardDescription` 无引用，v2.3.10 已移除） |
 | `badge.tsx` | `primary/secondary/destructive/success/warning` 状态徽章 | ✅ |
 | `tabs.tsx` | `Tabs`（受控 `value` + 非受控 `defaultValue`）/ `TabsList` / `TabsTrigger` / `TabsContent` | ✅ |
 | `alert.tsx` | `Alert`（tone）+ `AlertTitle` + `AlertDescription`，`role="alert"` | ✅（仅 warning） |
-| `table.tsx` | `Table` / `THead` / `TBody` / `TR` / `TH` / `TD` | ❌ 已提供，未在页面使用 |
-| `code-block.tsx` | 等宽代码展示 + 剪贴板复制（客户端组件） | ❌ 已提供，未在页面使用 |
+| ~~`table.tsx`~~ | `Table` / `THead` / `TBody` / `TR` / `TH` / `TD` | ❌ v2.3.10 已清理（页面无引用） |
+| ~~`code-block.tsx`~~ | 等宽代码展示 + 剪贴板复制（客户端组件） | ❌ v2.3.10 已清理（页面无引用） |
 
 > 所有基础组件透传 `...props`，因此可传入 `id`、`aria-*` 等属性（`CONTRIBUTING.md` §4.2 / §4.4）。
 
@@ -157,7 +157,7 @@ Go 版 GUI 位于 `internal/ui`，遵循本文 §2.1 配色与 §4 交互标准�
 - 单页 dashboard，`Tabs` 在「扫描结果」与「优化建议」间切换（非受控 `defaultValue="scan"`）。
 - 语言开关实时切换中/英（`useState` 受控，切换全部 UI 文案）。
 - 按钮 hover / active 过渡；焦点可见轮廓。
-- `CodeBlock` 的复制按钮有「复制 / 已复制」状态反馈（`setTimeout` 1.5s 复位），剪贴板不可用则静默降级。
+- ~~`CodeBlock` 的复制按钮有「复制 / 已复制」状态反馈（`setTimeout` 1.5s 复位），剪贴板不可用则静默降级~~ —— 对应组件已于 v2.3.10 清理；如重新引入须保留该状态反馈与静默降级。
 
 ### 4.2 规划（当前未实现）
 
@@ -201,7 +201,7 @@ Go 版 GUI 位于 `internal/ui`，遵循本文 §2.1 配色与 §4 交互标准�
 
 - `layout.tsx` 的 `<html lang="zh">` 是 SSR 初始值；客户端 `page.tsx` 于 v2.3.3 起随语言同步为 `zh` / `zh-Hant` / `en`，屏幕阅读器按当前语言朗读。
 - `TabsList` 未加 `role="tablist"`，Tab 之间缺少 `aria-controls` / 方向键导航。
-- `CodeBlock` 复制按钮的 `aria-label="复制代码"` 未随界面语言切换。
+- ~~`CodeBlock` 复制按钮的 `aria-label="复制代码"` 未随界面语言切换~~ —— 组件已于 v2.3.10 清理；若重新引入须同步 i18n 化的 `aria-label`。
 
 ---
 
@@ -211,9 +211,9 @@ Go 版 GUI 位于 `internal/ui`，遵循本文 §2.1 配色与 §4 交互标准�
 |------|------|------|----------|
 | G1 | 亮色主题仅有 `tokens.json` 规划值，CSS 未实现 | §2.1 | 保持规划标注，或实现 `prefers-color-scheme` 切换 |
 | G2 | `--space-*` / `--radius` 已定义但组件使用具名数值类 | §2.3 / §2.4 | 逐步替换为令牌驱动的工具类 |
-| G3 | `animate-fade-in-up` / `animate-spin-slow` 已定义未消费 | §2.6 | 需要时启用，否则保留为组件库能力 |
+| G3 | ~~`animate-fade-in-up` / `animate-spin-slow` 已定义未消费~~ | §2.6 | **v2.3.10 已清理**：未消费的动画类与关键帧已删除，需要时按 §2.6 令牌重新定义并在页面消费 |
 | G4 | 成功/失败反馈、加载态、错误态、空状态、删除确认均未实现 | §4.2 | 明确列为规划，禁止写成既有能力 |
-| G5 | `table` / `code-block` 组件已提供但页面未使用 | §3.1 | 保留为组件库能力，或按需接入 |
+| G5 | ~~`table` / `code-block` 组件已提供但页面未使用~~ | §3.1 | **v2.3.10 已清理**：页面无引用，两组件随未使用资源一并删除 |
 | G6 | `lg` 侧栏、1200px 容器为历史设计，实际是 1024px 无侧栏 | §5 | 已按实现修正文档 |
 | G7 | Tabs 缺少完整 ARIA（`html lang` 已于 v2.3.3 随语言同步） | §6 | **已接受**：Tabs 属已弃用的参考界面遗留组件（见 `OPENSPEC.md` §2.3），不再投入修复 |
 | G8 | ~~清理按钮无 `onClick`，界面为纯展示~~ | §3.2 | **v2.0.0 已解决**：Go + Fyne 版实现真实清理（含二次确认）；Next.js 参考界面保持纯展示并已弃用 |

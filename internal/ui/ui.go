@@ -1,6 +1,6 @@
 //go:build !nogui
 
-// internal/ui/ui.go v2.3.6
+// internal/ui/ui.go v2.3.10
 
 // Package ui 实现 Fyne 桌面 GUI（对齐 docs/DESIGN-SYSTEM.md §3.0）。
 // 本包需要 C 工具链编译（Fyne 依赖 OpenGL）；无 C 工具链环境用 `go build -tags nogui` 校验。

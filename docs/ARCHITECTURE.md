@@ -1,4 +1,4 @@
-# Repo Manager 项目概述与架构设计 v2.3.9
+# Repo Manager 项目概述与架构设计 v2.3.10
 
 > 本文回答「这是什么、为什么这样设计、如何运转」；功能行为契约见 [OPENSPEC.md](./OPENSPEC.md)，安装部署见 [INSTALL.md](./INSTALL.md)，CLI 接口契约见 [CLI-REFERENCE.md](./CLI-REFERENCE.md)，操作步骤见 [USER-GUIDE.md](./USER-GUIDE.md)。
 > 与代码冲突时以代码为准，并按 [CONTRIBUTING.md §1.1](./CONTRIBUTING.md) 裁决同步本文。

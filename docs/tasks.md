@@ -3,7 +3,7 @@
 > 最后更新：**2026-11-26**
 > 登记记录：2026-11-25 依据 [ARCHITECTURE.md §7](./ARCHITECTURE.md) 快照登记 S1–S9；2026-11-26 依据同文 §7.4 补充评估登记 S10–S15，并新增「待验证技术细节」T1–T5。责任人默认为维护者（@sutchan）+ AI 协作会话，计划完成时间为明确日期；完成后归档至 [tasks-done.md](./tasks-done.md)。
 > 维护约定：已完成任务归档至 [tasks-done.md](./tasks-done.md)；本文件仅保留进行中 / 待办任务。
-> 全局版本唯一来源：`internal/buildinfo/version.go` 的 `Version`（当前 **2.3.9**）。
+> 全局版本唯一来源：`internal/buildinfo/version.go` 的 `Version`（当前 **2.3.10**）。
 > 本轮处理：2026-11-24 11:00 依据 `reports/code-review-2026-11-23.md` 的 12 项发现登记 A1–A10，逐项复核并完成其中 10 项；P2-1（繁中日志误报）与 P3-4（testify 分类无需改动）直接归档至 [tasks-done.md 第十节](./tasks-done.md)。
 > 收口记录：2026-11-24 11:20 全部 12 项审查发现处理完毕（10 项修复 + 2 项核验归档），A1–A10 归档至 [tasks-done.md 第十一节](./tasks-done.md)；该时点无未完成事项（**当前待办以下表 S1–S15 为准**）。全量门禁（root-clean / gofmt / vet / test / build nogui / build ci / check:docs）实跑通过，`-race` 因本机无 gcc 纳入 CI 验证。
 > 核查记录：2026-11-24 11:33 按指令复核任务进度——无已完成任务需归档、无未完成任务需调整优先级 / 状态、无剩余任务可推进；本次仅同步时间戳并修正 `tasks-done.md` 头部时间戳漂移，任务状态维持不变。
@@ -33,6 +33,9 @@
 | S8 | 系统级安装包评估（`.msi` / `.dmg`，`fyne-cross`），CI 产物追加 | P3 | 维护者 @sutchan | 2027-02-28 | 待办 | 同上 §7.2；与 S15 矩阵口径一并决策 |
 | S14 | `src/lib` i18n 与数据层增加 Vitest 逻辑测试 | P3 | 维护者 @sutchan | 2027-02-28 | 待办 | 同上 §7.4；弃用参考界面防死代码 |
 | S15 | 统一本地 6 目标 / CI 4 目标构建矩阵口径（随 S8 决策） | P3 | 维护者 @sutchan | 2027-02-28 | 待办 | 同上 §7.4；§2 与 [INSTALL.md §4](./INSTALL.md) 已加说明 |
+| S16 | `config.Load` / `config.Save` 的 `key=value` 解析逻辑重复，抽取共用解析器 | P3 | 维护者 + AI 协作会话 | 2027-01-31 | 待办 | 冗余清理实查；`internal/config/config.go` |
+| S17 | 平台层错误文案硬编码中文，消费 i18n 未使用键（`Dict.ErrInvalidRoot` 等） | P3 | 维护者 + AI 协作会话 | 2027-01-31 | 待办 | 冗余清理实查；`internal/platform/platform.go` / `internal/i18n/i18n.go`；与 S13 字段级回退合并推进 |
+| S18 | 冗余预防门禁：CI 增加未引用符号检测（`staticcheck` U1000）与静态资源引用扫描 | P2 | 维护者 + AI 协作会话 | 2027-01-15 | 待办 | 防止死代码 / 废弃资源再次累积；本轮清理清单见 [reports/cleanup-report-2026-11-26.md](../reports/cleanup-report-2026-11-26.md) |
 
 > 已知限制（`windows/arm64` 无交叉工具链、`linux/arm64` 缺 arm64 架构开发库）登记于 [MAINTAINERS.md §6](./MAINTAINERS.md)，不属待办。本机无 gcc，`go test -race` 已纳入 `ci.yml`（ubuntu runner）验证，不属待办。
 
@@ -47,6 +50,19 @@
 | T2 | `macos-latest` 上 darwin/amd64 交叉编译的 SDK 可用性 | P3 | 同 T1，核对两项 macOS 归档是否生成 | 维护者 + AI 协作会话 | 2026-12-10 | 待验证 |
 
 > 待验证项与待办的区别：待办是明确的代码 / 文档改动任务；待验证项是对既有 CI 与运行环境事实的确认。验证失败即转化为新的 `S` 编号任务并按优先级排期。
+
+## 本轮完成概览（v2.3.10）
+
+| ID | 任务 | 来源 | 归档 |
+|----|------|------|------|
+| C1 | 删除未引用静态资源（`public/` 5 个模板 SVG） | 冗余清理 | `CHANGELOG.MD` [2.3.10] Removed |
+| C2 | 删除未使用 UI 组件与 `CardDescription` 导出 | 同上 | 同上 |
+| C3 | 删除未消费数据模块并修复 `src/lib/data/index.ts` barrel 断链 | 同上 | 同上 |
+| C4 | 删除未消费动画类与 `colorMuted` 令牌 | 同上 | 同上 |
+| C5 | 合并 GUI 重复根目录校验（新增 `internal/ui/root.go`）与 `main.go` 重复 `i18n.Normalize` | 同上 | [tasks-done.md 第十节](./tasks-done.md) |
+| C6 | 清理本地产物与 `.tmp/` 临时内容 | 同上 | 同上 |
+| C7 | 清理后全量门禁复跑（gofmt / vet / test / build / lint / type-check / 双文档门禁） | 同上 | 同上 |
+| C8 | 版本 bump 至 2.3.10 并同步全部展示位 | 全局版本规则 | `CHANGELOG.MD` [2.3.10] |
 
 ## 本轮完成概览（v2.3.8）
 

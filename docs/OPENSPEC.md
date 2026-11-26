@@ -1,4 +1,4 @@
-# Repo Manager 开放规格说明书 (OpenSpec) v2.3.9
+# Repo Manager 开放规格说明书 (OpenSpec) v2.3.10
 
 > **本文定位**：产品功能规格，定义「做什么」——7 项功能的行为契约、交互方式、环境与兼容性。
 > 开发规范（编码 / 提交 / 分支 / 审查）见 [CONTRIBUTING.md](./CONTRIBUTING.md)；UI 设计规范见 [DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md)；变更历史见 [CHANGELOG.MD](../CHANGELOG.MD)；文档导航见 [docs/README.md](./README.md)。
@@ -297,7 +297,7 @@ RepoManager/
 ├── config.ini                 # 运行时生成于 exe 同目录，本机配置不入库
 ├── repo-manager.log           # 运行时生成于 exe 同目录，追加写执行日志，不入库
 ├── RepoCleaner.bat / lang.ini # v1.x 旧版批处理与文案（已弃用，Go 不读取 lang.ini）
-├── src/ / public/             # 已弃用的参考界面应用与静态资源
+├── src/                        # 已弃用的参考界面应用（Next.js，v2.0.0 起）
 └── README.MD / CHANGELOG.MD / LICENSE
 ```
 

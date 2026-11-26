@@ -1,4 +1,4 @@
-# Repo Manager 落地页目录 (landing/) v2.3.9
+# Repo Manager 落地页目录 (landing/) v2.3.10
 
 > **定位**：保存 Web 展示项目的落地页面（landing page）源码与静态资源，是页面内容的唯一落点。
 > 页面已于 v2.3.3 实现（`index.html` + `assets/`）；本文件只保留用途、边界与门禁约定，规范正文一律放 [`docs/`](../docs/README.md)。部署 / 上线方式仍未确定，属规划项。
@@ -12,7 +12,7 @@
 | [`docs/`](../docs/README.md) | 规格、规范、排障与维护手册 | 页面代码 |
 | [`prototype/`](../prototype/README.md) | 原型说明与原型稿 | 可运行代码、规范正文 |
 | `src/` | 已弃用的 Next.js 参考界面（v1.x 历史） | 新增展示页面 |
-| `public/` | 参考界面静态资源 | 落地页资源 |
+| `public/` | 已随未使用静态资源清理移除（v2.3.10） | 落地页资源（应放 `landing/assets/`） |
 | `landing/`（本目录） | 落地页 HTML / CSS / JS、图片与字体、页面级说明 | 产品业务逻辑、规范正文、临时产物 |
 
 ---

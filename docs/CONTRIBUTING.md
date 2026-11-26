@@ -1,4 +1,4 @@
-# Repo Manager 开发规范与贡献指南 v2.3.9
+# Repo Manager 开发规范与贡献指南 v2.3.10
 
 > 本文是 Repo Manager 仓库的**唯一开发规范来源**，规定「如何改代码、如何写文档、如何提交与评审」。
 > 本文存放于 `docs/`；所有贡献者（含 AI 协作会话）在动手前必须阅读本文。
@@ -145,7 +145,6 @@ RepoManager/
 │   ├── tokens.json              # 设计令牌
 │   ├── config.example.ini       # 运行配置示例模板（4 键）
 │   └── tasks.md / tasks-done.md # 任务单一来源与完成归档
-├── public/                      # 参考界面应用静态资源（SVG）
 ├── landing/                     # Web 展示项目落地页（index.html + assets/；README.md 为目录说明）
 │   ├── README.md
 │   └── assets/                  # 样式 / 三语脚本 / 构建期注入的 version.js
@@ -165,11 +164,11 @@ RepoManager/
 │   ├── app/                     # 路由与全局样式：layout.tsx / page.tsx / globals.css / favicon.ico
 │   ├── components/
 │   │   ├── icons.tsx            # 内联 SVG 图标（零外部图标依赖）
-│   │   └── ui/                  # 无状态基础组件：alert/badge/button/card/code-block/table/tabs
+│   │   └── ui/                  # 无状态基础组件：alert/badge/button/card/tabs
 │   └── lib/
 │       ├── i18n.ts              # 唯一 UI 文案字典（zh / zh-Hant / en）
 │       ├── utils.ts             # 纯工具函数（cn 等）
-│       └── data/                # 单一数据源：features/project-types/steps/repos + index.ts barrel
+│       └── data/                # 单一数据源：repos（扫描结果 / 优化项）+ index.ts barrel
 ├── prototype/                   # 原型目录，仅保留 README.md 说明，无代码、无规范正文
 │   └── README.md
 ├── RepoCleaner.bat              # v1.x 旧版 Windows 脚本（已弃用，保留兼容）
@@ -221,7 +220,7 @@ RepoManager/
 - 组件 props 继承原生属性（如 `React.ButtonHTMLAttributes<HTMLButtonElement>`）并透传 `...props`，保证 `id`、`aria-*` 可传入。
 - 样式用 `cn()`（`src/lib/utils.ts`）合并 className，禁止字符串拼接。
 - 状态尽量局部化；无状态组件不引入 hooks。
-- `Promise` 异常必须捕获处理（如 `CodeBlock` 的 clipboard 写入用 `try/catch`）。
+- `Promise` 异常必须捕获处理（如落地页脚本中的异步调用用 `try/catch`）。
 
 ### 4.3 样式与设计令牌
 
@@ -265,9 +264,9 @@ RepoManager/
 | 类别 | 规范 | 示例 |
 |------|------|------|
 | Go 源文件 / 包 | `snake_case.go`；包名小写单词；平台实现用 `build tag` 后缀 | `platform_windows.go`、`engine.go` |
-| React 组件文件 | `PascalCase.tsx`（本仓库 `src/components/ui/` 沿用既有小写文件名，新增文件优先 PascalCase） | `CodeBlock.tsx` |
+| React 组件文件 | `PascalCase.tsx`（本仓库 `src/components/ui/` 沿用既有小写文件名，新增文件优先 PascalCase） | `Button.tsx` |
 | 工具 / hooks / 普通模块 | `camelCase.ts` | `useLang.ts`、`utils.ts` |
-| 数据模块 | 语义复数或主题名，`kebab-case` 可用 | `features.ts`、`project-types.ts` |
+| 数据模块 | 语义复数或主题名，`kebab-case` 可用 | `repos.ts`、`settings.ts`（示例名） |
 | 类型 / 接口 | `PascalCase`，不加 `I` 前缀 | `ScanResult`、`ButtonProps` |
 | 常量 | `SCREAMING_SNAKE_CASE` | `APP_VERSION`、`DEFAULT_REPO_ROOT` |
 | CSS 类名 / DOM id | `kebab-case` | `security-note`、`app-footer` |
