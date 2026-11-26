@@ -41,9 +41,8 @@ type functionRunner struct {
 
 // run 执行功能：危险操作先二次确认，预演模式跳过；执行期间互斥并禁用全部功能按钮。
 func (r *functionRunner) run(fn int) {
-	root := platform.NormalizeRoot(r.dirEntry.Text)
-	if err := platform.ValidateRoot(root); err != nil {
-		dialog.ShowError(err, r.w)
+	root, ok := resolveRoot(r.w, r.dirEntry.Text)
+	if !ok {
 		return
 	}
 	r.cfg.RepoRoot = root

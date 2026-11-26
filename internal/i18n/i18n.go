@@ -43,7 +43,6 @@ type Dict struct {
 	WarningVite    string
 	Confirm        string
 	Ok             string
-	ErrInvalidRoot string
 	About          string
 	AboutText      string
 	OutputTitle    string
@@ -66,7 +65,6 @@ var dicts = map[Lang]Dict{
 		WarningVite:    "警告: 这将删除 .vite/.turbo/.angular 等构建缓存目录!",
 		Confirm:        "是否继续?",
 		Ok:             "[完成]",
-		ErrInvalidRoot: "错误: 路径不存在!",
 		About:          "关于",
 		AboutText:      "Repo Manager 通过 7 项功能管理全局依赖与前端项目缓存；危险操作执行前会二次确认。版本与构建信息见窗口页脚。",
 		OutputTitle:    "执行输出",
@@ -87,7 +85,6 @@ var dicts = map[Lang]Dict{
 		WarningVite:    "WARNING: This will delete .vite/.turbo/.angular and other build cache directories!",
 		Confirm:        "Continue?",
 		Ok:             "[OK]",
-		ErrInvalidRoot: "ERROR: Path does not exist!",
 		About:          "About",
 		AboutText:      "Repo Manager manages global dependencies and front-end caches with 7 functions; destructive actions require confirmation. Version and build info are shown in the window footer.",
 		OutputTitle:    "Output",

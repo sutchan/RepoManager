@@ -80,9 +80,8 @@ func Run(cfg config.Config) {
 		})
 
 		saveBtn := widget.NewButton(dict.Save, func() {
-			root := platform.NormalizeRoot(dirEntry.Text)
-			if err := platform.ValidateRoot(root); err != nil {
-				dialog.ShowError(err, w)
+			root, ok := resolveRoot(w, dirEntry.Text)
+			if !ok {
 				return
 			}
 			cfg.RepoRoot = root

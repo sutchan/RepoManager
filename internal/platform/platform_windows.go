@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 )
 
@@ -19,21 +18,10 @@ type windowsPlatform struct{}
 // New 返回当前平台的 Platform 实现（由 build tag 分发）。
 func New() Platform { return windowsPlatform{} }
 
-func (windowsPlatform) Name() string            { return "windows" }
 func (windowsPlatform) DefaultRepoRoot() string { return `E:\Github` }
 
 func (windowsPlatform) ListProjectDirs(repoRoot string) ([]string, error) {
-	entries, err := os.ReadDir(repoRoot)
-	if err != nil {
-		return nil, err
-	}
-	var dirs []string
-	for _, e := range entries {
-		if e.IsDir() {
-			dirs = append(dirs, filepath.Join(repoRoot, e.Name()))
-		}
-	}
-	return dirs, nil
+	return listProjectDirs(repoRoot)
 }
 
 func (windowsPlatform) RemoveAll(path string) error  { return os.RemoveAll(path) }
@@ -68,11 +56,7 @@ func (windowsPlatform) RemoveUserEnv(key string) error {
 }
 
 func (windowsPlatform) GlobalNodeModulesPath() (string, error) {
-	out, err := exec.Command("npm", "root", "-g").Output()
-	if err != nil {
-		return "", fmt.Errorf("npm root -g 执行失败: %w", err)
-	}
-	return strings.TrimSpace(string(out)), nil
+	return globalNodeModulesPath()
 }
 
 // run 执行外部命令；失败时附带输出便于定位。

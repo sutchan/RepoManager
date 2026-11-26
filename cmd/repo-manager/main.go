@@ -42,8 +42,8 @@ func main() {
 		os.Exit(1)
 	}
 	if *langFlag != "" {
-		cfg.Lang = string(i18n.Normalize(*langFlag))
-		lang = i18n.Normalize(cfg.Lang)
+		lang = i18n.Normalize(*langFlag)
+		cfg.Lang = string(lang)
 		if saveErr := config.Save(cfgPath, cfg); saveErr != nil {
 			fmt.Fprintf(os.Stderr, i18n.Logs(lang).SaveCfgErr, saveErr)
 		}

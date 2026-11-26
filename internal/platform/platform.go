@@ -7,15 +7,38 @@ package platform
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"sort"
 	"strings"
 )
 
+// listProjectDirs 枚举 repoRoot 的直接子目录；Windows / Unix 实现共用。
+func listProjectDirs(repoRoot string) ([]string, error) {
+	entries, err := os.ReadDir(repoRoot)
+	if err != nil {
+		return nil, err
+	}
+	var dirs []string
+	for _, e := range entries {
+		if e.IsDir() {
+			dirs = append(dirs, filepath.Join(repoRoot, e.Name()))
+		}
+	}
+	return dirs, nil
+}
+
+// globalNodeModulesPath 返回 npm 全局模块路径；Windows / Unix 实现共用。
+func globalNodeModulesPath() (string, error) {
+	out, err := exec.Command("npm", "root", "-g").Output()
+	if err != nil {
+		return "", fmt.Errorf("npm root -g 执行失败: %w", err)
+	}
+	return strings.TrimSpace(string(out)), nil
+}
+
 // Platform 抽象操作系统差异，是 engine 与操作系统之间的唯一边界。
 type Platform interface {
-	// Name 返回平台标识（windows / darwin / linux）。
-	Name() string
 	// DefaultRepoRoot 返回默认仓库根目录（Windows: E:\Github；Unix: ~/Github）。
 	DefaultRepoRoot() string
 	// ListProjectDirs 枚举 repoRoot 的直接子目录（仅目录，不递归）。

@@ -19,8 +19,6 @@ type unixPlatform struct{}
 // New 返回当前平台的 Platform 实现（由 build tag 分发）。
 func New() Platform { return unixPlatform{} }
 
-func (unixPlatform) Name() string { return runtime.GOOS }
-
 func (unixPlatform) DefaultRepoRoot() string {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -30,17 +28,7 @@ func (unixPlatform) DefaultRepoRoot() string {
 }
 
 func (unixPlatform) ListProjectDirs(repoRoot string) ([]string, error) {
-	entries, err := os.ReadDir(repoRoot)
-	if err != nil {
-		return nil, err
-	}
-	var dirs []string
-	for _, e := range entries {
-		if e.IsDir() {
-			dirs = append(dirs, filepath.Join(repoRoot, e.Name()))
-		}
-	}
-	return dirs, nil
+	return listProjectDirs(repoRoot)
 }
 
 func (unixPlatform) RemoveAll(path string) error  { return os.RemoveAll(path) }
@@ -135,9 +123,5 @@ func removeProfileLine(key string) error {
 }
 
 func (unixPlatform) GlobalNodeModulesPath() (string, error) {
-	out, err := exec.Command("npm", "root", "-g").Output()
-	if err != nil {
-		return "", fmt.Errorf("npm root -g 执行失败: %w", err)
-	}
-	return strings.TrimSpace(string(out)), nil
+	return globalNodeModulesPath()
 }

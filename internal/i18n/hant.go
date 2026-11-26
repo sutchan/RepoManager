@@ -21,7 +21,6 @@ func init() {
 		WarningVite:    "警告: 這將刪除 .vite/.turbo/.angular 等建置快取目錄!",
 		Confirm:        "是否繼續?",
 		Ok:             "[完成]",
-		ErrInvalidRoot: "錯誤: 路徑不存在!",
 		About:          "關於",
 		AboutText:      "Repo Manager 透過 7 項功能管理全域依賴與前端專案快取；危險操作執行前會二次確認。版本與建置資訊顯示於視窗頁尾。",
 		OutputTitle:    "執行輸出",
