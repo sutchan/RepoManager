@@ -1,4 +1,4 @@
-# Repo Manager 落地页目录 (landing/) v2.3.10
+# Repo Manager 落地页目录 (landing/) v2.3.11
 
 > **定位**：保存 Web 展示项目的落地页面（landing page）源码与静态资源，是页面内容的唯一落点。
 > 页面已于 v2.3.3 实现（`index.html` + `assets/`）；本文件只保留用途、边界与门禁约定，规范正文一律放 [`docs/`](../docs/README.md)。部署 / 上线方式仍未确定，属规划项。

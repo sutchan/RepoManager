@@ -1,8 +1,35 @@
 # Repo Manager 已完成任务 (docs/tasks-done.md)
 
-> 最后更新：**2026-11-24 15:01**（含第十一节 A1–A10 归档于 11:20）
-> 本文件归档已完成的任务（来源：用户初始 8 项综合审查任务 + 后续 v1.2.3–v1.2.6 演进 + 本轮剩余任务 + v2.0.0 Go 迁移清单 + v2.3.1 文档体系重新规划 + v2.3.2 任务核查 + v2.3.5 审查复核）。
+> 最后更新：**2026-11-26 16:23**（本次迁移 tasks.md 的 v2.3.8 / v2.3.10 已完成批次，新增第十二、十三节）
+> 本文件归档已完成的任务（来源：用户初始 8 项综合审查任务 + 后续 v1.2.3–v1.2.6 演进 + 本轮剩余任务 + v2.0.0 Go 迁移清单 + v2.3.1 文档体系重新规划 + v2.3.2 任务核查 + v2.3.5 审查复核 + v2.3.8 文档标准化 + v2.3.10 冗余清理）。
 > 未完成事项只在 [tasks.md](./tasks.md) 维护。
+
+## 十三、v2.3.10 冗余清理与版本同步归档（2026-11-26）
+
+| ID | 任务 | 优先级 | 状态 | 结果 |
+|----|------|--------|------|------|
+| C1 | 删除未引用静态资源（`public/` 5 个模板 SVG） | 中 | 已完成 | `file` / `globe` / `next` / `vercel` / `window` 全仓 0 引用，`public/` 目录随之移除；来源：本轮冗余清理；证据：`CHANGELOG.MD` [2.3.10] Removed |
+| C2 | 删除未使用 UI 组件与 `CardDescription` 导出 | 中 | 已完成 | 删除 `src/components/ui/table.tsx` / `code-block.tsx`（页面无引用），移除 `card.tsx` 中无引用的 `CardDescription`；来源同上 |
+| C3 | 删除未消费数据模块并修复 barrel 断链 | 中 | 已完成 | 删除 `src/lib/data/features.ts` / `steps.ts` / `project-types.ts`（仅 barrel 导出无消费点），`src/lib/data/index.ts` 仅保留 `repos` 导出；来源同上 |
+| C4 | 删除未消费动画类与 `colorMuted` 令牌 | 低 | 已完成 | 清理 `src/app/globals.css` 与 `docs/tokens.json` 中未消费项；来源同上 |
+| C5 | 合并 GUI 重复根目录校验与 `main.go` 重复 `i18n.Normalize` | 中 | 已完成 | 新增 `internal/ui/root.go` 统一校验，`main.go` 归一化调用收敛为一处；来源同上 |
+| C6 | 清理本地产物与 `.tmp/` 临时内容 | 低 | 已完成 | 一次性脚本 / 报告清理，工具产物保留在 `reports/`；来源同上 |
+| C7 | 清理后全量门禁复跑 | 高 | 已完成 | `gofmt` / `go vet` / `go test` / `go build(nogui+ci)` / `lint` / `type-check` / `check:docs` / `check:root-clean` 全绿；来源同上 |
+| C8 | 版本 bump 至 2.3.10 并同步全部展示位 | 高 | 已完成 | 权威源 `internal/buildinfo/version.go` 与 `package.json` / `package-lock.json` / README 徽章与页脚 / `tokens.json` / 落地页 / 各规范文档标题同步；证据：`CHANGELOG.MD` [2.3.10] |
+
+> 本节由 `docs/tasks.md`「本轮完成概览（v2.3.10）」迁入，保留原始 ID、任务描述、来源与归档上下文；对应表格已从 `tasks.md` 移除，仅保留归档索引。
+
+## 十二、v2.3.8 文档标准化归档（2026-11-26）
+
+| ID | 任务 | 优先级 | 状态 | 结果 |
+|----|------|--------|------|------|
+| D1 | 配置读取失败退出码由 0 改为 1 | 高 | 已完成 | `cmd/repo-manager/main.go` 读配置失败改 `os.Exit(1)`，与 `CLI-REFERENCE.md` §2 退出码契约一致；来源：文档一致性审计；证据：`CHANGELOG.MD` [2.3.8] Fixed |
+| D2 | OpenAPI 3.1 风格 CLI 契约映射 | 中 | 已完成 | `CLI-REFERENCE.md` 附录 A 按六要素映射 CLI 契约并声明无 HTTP 接口，不虚构网络 API；来源：用户文档标准化要求 |
+| D3 | FAQ 快速索引与角色权限矩阵 | 中 | 已完成 | `TROUBLESHOOTING.md` §0 统一 FAQ 索引；`USER-GUIDE.md` §1.1 使用者 / 维护者 / 发布者 / CI 权限矩阵，无应用层账号体系；来源同上 |
+| D4 | 优化建议 S10–S15 与待验证 T1–T5 登记 | 中 | 已完成 | `ARCHITECTURE.md` §7.4 S10–S15 按「背景 / 方案 / 效果 / 优先级」标准化；`tasks.md` 统一登记待办与验证项、明确责任人和日期；来源：代码复核 + 任务治理 |
+| D5 | 版本 bump 至 2.3.8 并同步全部展示位 | 高 | 已完成 | 权威源与 7 处展示位一致，`landing/assets/version.js` 重生成；证据：`CHANGELOG.MD` [2.3.8] Docs |
+
+> 本节由 `docs/tasks.md`「本轮完成概览（v2.3.8）」迁入，保留原始 ID、描述、来源与归档上下文。
 
 ## 十、v2.3.5 审查复核归档（2026-11-24 11:00）
 

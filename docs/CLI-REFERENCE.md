@@ -1,4 +1,4 @@
-# Repo Manager 接口文档（CLI 契约）v2.3.10
+# Repo Manager 接口文档（CLI 契约）v2.3.11
 
 > **关于 OpenAPI**：OpenAPI 规范描述 HTTP API。Repo Manager 是本地桌面 / CLI 工具，**没有 HTTP 接口**（无网络监听、无 RPC，见 [ARCHITECTURE.md §1.3](./ARCHITECTURE.md)），因此**不适用 OpenAPI 规范**，本文以等效的 CLI 接口契约承载「路径 / 方法 / 参数 / 返回 / 错误码 / 调用示例」信息。若未来引入 HTTP API（如本地守护服务），须另立 OpenAPI 文档并登记 [tasks.md](./tasks.md)。
 > 接口事实来源为 `cmd/repo-manager/main.go` 与 `internal/engine/options.go`；本文与代码冲突时以代码为准。
@@ -115,6 +115,30 @@ if ($LASTEXITCODE -ne 0) { "预演失败" }
 ## 附录 A. OpenAPI 3.1 风格 CLI 契约映射（非 HTTP 接口）
 
 > **适用范围声明**：本产品**没有** HTTP 服务、监听端口、RPC 或请求体（见 [ARCHITECTURE.md §1.3](./ARCHITECTURE.md)）。本附录**不是 HTTP API 定义**，也不提供 `servers` 地址；它把 §1–§5 的 CLI 契约映射为 OpenAPI 3.1 的字段结构，便于按行业标准审阅「路径 / 方法 / 参数 / 返回 / 错误码 / 示例」六要素。不得据此发起网络请求。真正的机器可读结构化输出（`-json`）仍是待办 S7。
+
+### A.0 字段结构骨架（仅示意，非可请求文档）
+
+```yaml
+openapi: 3.1.0
+info:
+  title: Repo Manager CLI Contract (non-HTTP)
+  version: X.Y.Z            # 占位；真实版本以 internal/buildinfo/version.go 为准
+  description: 本地 CLI 行为的等效映射，无网络监听。
+servers: []                 # 显式为空：产品不提供服务端点
+paths:
+  /cli/repo-manager:        # 逻辑路径，不是网络地址
+    post:                   # 等价「启动一次本地进程」，非 HTTP POST
+      parameters:           # 详见 A.2
+        - name: lang
+          in: flag
+        - name: function
+          in: positional
+      responses:            # 详见 A.3
+        "0": { description: 成功 }
+        "1": { description: 失败（含局部失败汇总与超时） }
+```
+
+> 该骨架只表达字段层级；实际参数、退出码与示例以 A.1–A.4 为准。
 
 ### A.1 六要素映射表
 

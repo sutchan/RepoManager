@@ -1,6 +1,6 @@
 //go:build windows
 
-// internal/platform/platform_windows.go v2.0.2
+// internal/platform/platform_windows.go v2.3.11
 
 package platform
 
@@ -10,6 +10,8 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
+	"golang.org/x/sys/windows/registry"
 )
 
 // windowsPlatform Windows 实现：attrib 隐藏属性、setx/reg 环境变量持久化。
@@ -39,16 +41,29 @@ func (windowsPlatform) ClearHidden(path string) error {
 
 func (windowsPlatform) TempDir() string { return os.TempDir() }
 
-// SetUserEnv 对应 v1.x `setx`。
+// SetUserEnv 直写 HKCU\Environment（S2），规避 setx 对长值的截断；失败时回退 setx。
 func (windowsPlatform) SetUserEnv(key, value string) error {
+	k, err := registry.OpenKey(registry.CURRENT_USER, `Environment`, registry.SET_VALUE)
+	if err == nil {
+		defer k.Close()
+		if err := k.SetStringValue(key, value); err == nil {
+			return nil
+		}
+	}
 	return run("setx", key, value)
 }
 
-// RemoveUserEnv 对应 v1.x `setx KEY ""` + `reg delete HKCU\Environment /v KEY /f`。
+// RemoveUserEnv 直删 HKCU\Environment 值（S2）；不存在视为成功，失败时回退旧 setx/reg 路径。
 func (windowsPlatform) RemoveUserEnv(key string) error {
+	k, err := registry.OpenKey(registry.CURRENT_USER, `Environment`, registry.SET_VALUE)
+	if err == nil {
+		defer k.Close()
+		if err := k.DeleteValue(key); err == nil || errors.Is(err, registry.ErrNotExist) {
+			return nil
+		}
+	}
 	clearErr := run("setx", key, "")
 	delErr := run("reg", "delete", `HKCU\Environment`, "/v", key, "/f")
-	// 变量不存在时 setx 清空会失败，属预期情形；仅当注册表删除也失败时才报错。
 	if delErr != nil {
 		return errors.Join(clearErr, delErr)
 	}

@@ -1,4 +1,4 @@
-# .github/workflows/ci.yml v2.3.6
+# .github/workflows/ci.yml v2.3.11
 # 仓库级门禁（行为契约见 docs/CONTRIBUTING.md §8.4 / §9.1）：
 # check 跑全套静态 / 测试门禁；windows-smoke 在 Windows runner 验证平台层代码；
 # gui-build 在 Linux 验证默认标签的完整 Fyne GUI 编译。
@@ -48,6 +48,19 @@ jobs:
       - name: go test (nogui)
         run: go test -tags nogui -count=1 ./...
 
+      # S18：未引用符号检测先告警后强制；基线稳定后移除 continue-on-error。
+      - name: staticcheck U1000 (unused symbols, S18)
+        continue-on-error: true
+        run: |
+          go install honnef.co/go/tools/cmd/staticcheck@2025.1.1
+          staticcheck -checks U1000 ./cmd/... ./internal/...
+
+      - name: coverage (nogui, S18)
+        run: |
+          mkdir -p reports
+          go test -tags nogui -coverprofile=reports/coverage.out ./...
+          go tool cover -func=reports/coverage.out | tail -n 1 | tee reports/coverage-summary.txt
+
       # race 检测需要 CGO + gcc；ubuntu runner 具备，本机无 gcc 时留待 CI 验证。
       - name: go test -race (nogui)
         run: go test -tags nogui -race -count=1 ./...
@@ -63,6 +76,9 @@ jobs:
 
       - name: check:docs
         run: npm run check:docs
+
+      - name: check:asset-refs (S18)
+        run: npm run check:asset-refs
 
   # Windows 平台层此前只在发版时首次编译，PR 阶段无法发现问题
   windows-smoke:

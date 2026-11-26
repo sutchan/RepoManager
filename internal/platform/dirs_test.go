@@ -1,4 +1,4 @@
-// internal/platform/dirs_test.go v2.3.3
+// internal/platform/dirs_test.go v2.3.11
 
 package platform
 
@@ -23,6 +23,25 @@ func TestIsSafeCleanDirName(t *testing.T) {
 	for _, name := range invalid {
 		if IsSafeCleanDirName(name) {
 			t.Errorf("不安全目录名被放行: %q", name)
+		}
+	}
+}
+
+// TestIsSafeCleanDirPath 覆盖受限相对子路径与伪装成相对路径的穿越输入（S3）。
+func TestIsSafeCleanDirPath(t *testing.T) {
+	valid := []string{"custom-build", "apps/web/node_modules", `packages\app\.cache`, "a/b/c"}
+	for _, name := range valid {
+		if !IsSafeCleanDirPath(name) {
+			t.Errorf("合法相对子路径被拒绝: %q", name)
+		}
+	}
+	invalid := []string{
+		"", "/etc", `\Windows`, "C:\\Temp", "../escape", "a/../b", "a//b",
+		"a/..", "a/CON/b", "a/:b", "a/ /b", strings.Repeat("a", 256) + "/b",
+	}
+	for _, name := range invalid {
+		if IsSafeCleanDirPath(name) {
+			t.Errorf("不安全相对子路径被放行: %q", name)
 		}
 	}
 }

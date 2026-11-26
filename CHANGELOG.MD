@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.3.11] - 2026-11-26
+
+### Added
+- **失败汇总器** - 新增 `internal/engine/failures.go`，危险操作局部失败统一汇总并返回非零码，三语文案齐备；功能 1/2/3/4/6/7 全覆盖（S10）
+- **安装超时** - `npm install -g` 改用 `exec.CommandContext`，默认 10 min，可用 `REPO_MANAGER_NPM_TIMEOUT`（秒）覆盖，超时显式报错（S11）
+- **冗余预防门禁** - CI 接入 `staticcheck -checks U1000`（告警模式）与 `scripts/check-asset-refs.mjs`（S18），并采集 `go test -coverprofile` 到 `reports/` 作为覆盖率基线
+
+### Fixed
+- **文档事实漂移** - 修正 7 处：不存在的 `recursive.go` 引用、平台接口 11→10 方法、SECURITY 版本与路径、失败可见性表述、S17 过时键名、两条 workflow 头注释、双份清理报告关系
+- **CLI 契约骨架** - `CLI-REFERENCE.md` 补附录 A.0 YAML 字段结构示意，版本号用占位避免后续漂移
+- **部署验证版本** - `INSTALL.md` 版本自检示例由 2.3.8 更正为 2.3.11
+
+### Changed
+- **版本同步** - bump 至 2.3.11，全局展示位（权威源 / 包清单 / README 徽章 / 规范文档标题 / tokens / 落地页 / workflow 头注释）统一
+
+---
+
 ## [2.3.10] - 2026-11-26
 
 ### Removed

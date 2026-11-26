@@ -50,6 +50,7 @@ func (r *functionRunner) run(fn int) {
 		DryRun:         r.dryRunCheck.Checked,
 		Recursive:      r.recursiveCheck.Checked,
 		ExtraCleanDirs: r.cfg.ExtraCleanDirs,
+		ScanDepth:      r.cfg.ScanDepth,
 	}
 	do := func(confirmed bool) {
 		if !confirmed || !r.running.CompareAndSwap(false, true) {

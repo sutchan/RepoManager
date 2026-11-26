@@ -1,4 +1,4 @@
-# Repo Manager 生产就绪规范 (Production Readiness) v2.3.10
+# Repo Manager 生产就绪规范 (Production Readiness) v2.3.11
 
 > **定位**：定义产品达到「可投入生产环境」所需的质量门槛与验收口径，是八类非功能要求的**单一来源**。
 > **权威关系**：本文说「要达到什么程度」；[`CONTRIBUTING.md`](./CONTRIBUTING.md) 说「怎么开发与评审」；[`MAINTAINERS.md`](./MAINTAINERS.md) 说「怎么发布与维护」；[`OPENSPEC.md`](./OPENSPEC.md) 是功能行为契约。
@@ -67,7 +67,7 @@
 - 无权限控制规范：程序安装到只读目录（如 Program Files）时 `config.ini` / 日志写入失败的降级行为只见于历史审计产物，未进规范。
 
 ### 3.3 目标与检查清单
-- ✅ `SECURITY.md` 版本与描述已同步（v2.3.7 核实）：头版本 `v2.3.7`、支持版本表「最新 `2.3.x`」、产品描述未出现双语措辞；原「立即修」项已关闭。
+- ✅ `.github/SECURITY.md` 版本与描述已同步（v2.3.11 核实）：头版本 `v2.3.11`、支持版本表「最新 `2.3.x`」、产品描述未出现双语措辞；原「立即修」项已关闭。
 - `[待实现]` 新增 `.github/dependabot.yml`（gomod / npm / github-actions 三类生态，每周检查）；新增 `govulncheck ./...` 与 `npm audit --omit=dev` 到 CI（高危即阻断）。
 - `[待实现]` 发版时生成 SBOM（如 `syft` / `go version -m` 输出），归档到 `reports/`，不随 Release 上传。
 - **敏感信息分级（立即生效）**：密钥 / Token / 凭据（禁止入库，禁止写日志）；本机路径 / 仓库名（可写本地 `config.ini` 与日志，公开提交前必须脱敏）；功能统计（仅计数，不含项目名称）。
@@ -80,7 +80,7 @@
 
 ### 4.1 已具备
 - CI 已有 `windows-smoke` 与 `gui-build` 平台验证；`-dry-run` 提供无副作用的预演路径。
-- 危险操作有二次确认与结果汇总；失败不静默吞掉（`CONTRIBUTING.md` §4.6 / §11）。
+- 危险操作有二次确认与失败汇总：局部失败由 `failureCollector` 汇总并返回非零码（`internal/engine/failures.go`），`npm install -g` 有 `context.WithTimeout` 超时（默认 10 min，可用 `REPO_MANAGER_NPM_TIMEOUT` 覆盖），失败不再静默吞掉（`CONTRIBUTING.md` §4.6 / §11）。
 
 ### 4.2 现状不足
 - **无可量化指标**：启动耗时、扫描 N 个项目的耗时、GUI 首屏时间、内存峰值、功能成功率、崩溃率均未定义。

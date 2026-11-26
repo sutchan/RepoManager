@@ -1,4 +1,4 @@
-// internal/engine/options.go v2.3.6
+// internal/engine/options.go v2.3.11
 
 package engine
 
@@ -17,16 +17,22 @@ type Options struct {
 	// Recursive 递归扫描 monorepo 深层项目（V1，3 层深度，默认关闭；
 	// 对齐 OPENSPEC §3.0）。
 	Recursive bool
-	// ExtraCleanDirs 自定义清理目录名（V3，仅限项目目录内部匹配，
-	// 并入功能 6 / 7 白名单；对齐 OPENSPEC §3.6 / §3.7）。
+	// ExtraCleanDirs 自定义清理目录名 / 受限相对子路径（V3 / S3），
+	// 并入功能 6 / 7 白名单；对齐 OPENSPEC §3.6 / §3.7。
 	ExtraCleanDirs []string
+	// ScanDepth 递归扫描深度（S6，1–8，0 表示回落到默认 3）。
+	ScanDepth int
 }
 
 // listDirs 按选项选择枚举方式：Recursive 启用 3 层深度递归（覆盖
 // REPO_ROOT/monorepo/packages/app 这类典型 monorepo 结构），否则仅直接子目录。
 func listDirs(p platform.Platform, repoRoot string, opts Options) ([]string, error) {
 	if opts.Recursive {
-		return platform.ListProjectDirsDeep(repoRoot, 3)
+		depth := opts.ScanDepth
+		if depth < 1 || depth > 8 {
+			depth = 3
+		}
+		return platform.ListProjectDirsDeep(repoRoot, depth)
 	}
 	return p.ListProjectDirs(repoRoot)
 }

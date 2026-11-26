@@ -1,4 +1,4 @@
-# Repo Manager 开放规格说明书 (OpenSpec) v2.3.10
+# Repo Manager 开放规格说明书 (OpenSpec) v2.3.11
 
 > **本文定位**：产品功能规格，定义「做什么」——7 项功能的行为契约、交互方式、环境与兼容性。
 > 开发规范（编码 / 提交 / 分支 / 审查）见 [CONTRIBUTING.md](./CONTRIBUTING.md)；UI 设计规范见 [DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md)；变更历史见 [CHANGELOG.MD](../CHANGELOG.MD)；文档导航见 [docs/README.md](./README.md)。
@@ -33,7 +33,7 @@
 | 层 / 包 | 职责 |
 |---------|------|
 | `cmd/repo-manager/` | 程序入口：`main.go`（flag 解析、位置参数、目录解析、GUI/CLI 分流）；`gui.go`（默认标签，启动 Fyne GUI）；`headless.go`（`nogui` 标签下 `runGUI` 的占位提示，**不是 CLI 实现**） |
-| `internal/platform` | **操作系统差异抽象**（关键）：目录扫描、删除、隐藏/系统/只读属性、环境变量持久化、默认 `REPO_ROOT`，按 `build tag` 分 `platform_windows.go` / `platform_unix.go` 实现；`Platform` 接口共 11 个方法 |
+| `internal/platform` | **操作系统差异抽象**（关键）：目录扫描、删除、隐藏/系统/只读属性、环境变量持久化、默认 `REPO_ROOT`，按 `build tag` 分 `platform_windows.go` / `platform_unix.go` 实现；`Platform` 接口共 10 个方法 |
 | `internal/engine` | 功能 1 ～ 功能 7 的**平台无关**业务逻辑（扫描、写 `.npmrc`、清缓存），只调用 `platform` 接口；`Run` 按功能号分派、`IsDangerous` 判定 1 / 6 / 7 |
 | `internal/config` | `config.ini` 读写（去重键、保留未知行）、默认 `REPO_ROOT` / `LANG` / `RECURSIVE` / `EXTRA_CLEAN_DIRS` |
 | `internal/i18n` | `zh` / `zh-Hant` / `en` 三语文案字典（唯一来源）：界面 `T()` + 执行日志 `Logs()`；别名归一化与非法值回落简中 |
@@ -65,7 +65,7 @@
 
 | 接口 / 函数 | 职责摘要 | 调用方向 | 失败语义 |
 |-------------|----------|----------|----------|
-| `platform.Platform` | 11 个方法：目录枚举 / 删除 / 隐藏与只读属性 / 环境变量持久化 / `DefaultRepoRoot()` 等 | `engine` / `ui` → `platform`（唯一 OS 边界） | 路径不存在或非目录 → 报错；删除失败 → 汇入结果，不中断其余项 |
+| `platform.Platform` | 10 个方法：目录枚举 / 删除 / 隐藏属性 / 环境变量持久化 / `DefaultRepoRoot()` 等 | `engine` / `ui` → `platform`（唯一 OS 边界） | 路径不存在或非目录 → 报错；删除失败 → 汇入结果，不中断其余项 |
 | `engine.Run` | 按功能号 1–7 分派到 7 个实现函数 | `cmd` / `ui` → `engine` | 危险功能（1 / 6 / 7）须先二次确认；失败返回三语错误摘要 |
 | `engine.IsDangerous` | 功能 1 / 6 / 7 的危险判定 | `cmd` / `ui` → `engine` | 纯判定，无失败语义 |
 | `config` 读写 | 4 键加载与回写（去重键、保留注释与未知行） | `cmd` / `ui` → `config` | 文件缺失 → 用默认值；解析失败 → 保留默认并警告 |

@@ -1,4 +1,4 @@
-// internal/i18n/log.go v2.3.3
+// internal/i18n/log.go v2.3.11
 
 package i18n
 
@@ -34,6 +34,7 @@ type LogDict struct {
 	GroupNames         [5]string
 	GroupFail          string
 	GroupSummary       string
+	PartialFailSummary string
 	DryRunOn           string
 	RecursiveOn        string
 	DryRunWrite        string
@@ -84,6 +85,7 @@ var logDicts = map[Lang]LogDict{
 		},
 		GroupFail:          "[错误] 第 %d 组安装失败: %v",
 		GroupSummary:       "以下分组安装失败: %s",
+		PartialFailSummary: "部分操作失败（%d 项）：%s",
 		DryRunOn:           "=== 预演模式 (dry-run)：仅显示将要执行的操作，不会修改任何文件 ===",
 		RecursiveOn:        "[递归] 已启用递归扫描（深度 3 层，覆盖 monorepo 深层项目）",
 		DryRunWrite:        "[预演] 将写入: %s",
@@ -137,6 +139,7 @@ var logDicts = map[Lang]LogDict{
 		},
 		GroupFail:          "[ERROR] Group %d installation failed: %v",
 		GroupSummary:       "Failed install groups: %s",
+		PartialFailSummary: "Some operations failed (%d): %s",
 		DryRunOn:           "=== Dry-run mode: showing planned actions only, nothing will be modified ===",
 		RecursiveOn:        "[RECURSIVE] Recursive scan enabled (depth 3, covers monorepo sub-projects)",
 		DryRunWrite:        "[DRY-RUN] Would write: %s",

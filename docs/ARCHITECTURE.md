@@ -1,4 +1,4 @@
-# Repo Manager 项目概述与架构设计 v2.3.10
+# Repo Manager 项目概述与架构设计 v2.3.11
 
 > 本文回答「这是什么、为什么这样设计、如何运转」；功能行为契约见 [OPENSPEC.md](./OPENSPEC.md)，安装部署见 [INSTALL.md](./INSTALL.md)，CLI 接口契约见 [CLI-REFERENCE.md](./CLI-REFERENCE.md)，操作步骤见 [USER-GUIDE.md](./USER-GUIDE.md)。
 > 与代码冲突时以代码为准，并按 [CONTRIBUTING.md §1.1](./CONTRIBUTING.md) 裁决同步本文。
@@ -108,7 +108,7 @@ graph TD
 | 包 | 职责 | 关键文件 |
 |----|------|----------|
 | `cmd/repo-manager` | flag 解析、配置与语言装载、CLI 分发、GUI / Headless 分流、退出码 | `main.go` / `gui.go` / `headless.go` |
-| `internal/engine` | 功能 1-7 的业务实现、危险操作判定（功能 1/6/7）、dry-run 分支 | `engine.go` / `clean.go` / `install.go` / `options.go` / `recursive.go` |
+| `internal/engine` | 功能 1-7 的业务实现、危险操作判定（功能 1/6/7）、dry-run 分支、局部失败汇总与安装超时 | `engine.go` / `clean.go` / `install.go` / `options.go` / `failures.go` |
 | `internal/config` | 4 键 INI 读写、原子保存、`EXTRA_CLEAN_DIRS` 解析与安全过滤 | `config.go` |
 | `internal/platform` | 平台接口 10 方法 + Windows / Unix 实现、路径安全校验、项目目录枚举 | `platform.go` / `platform_windows.go` / `platform_unix.go` / `dirs.go` |
 | `internal/ui` | Fyne 界面：整体重绘布局、执行互斥、暗色主题、GUI 日志缓冲（500 行有界）、`[n/m]` 进度 | `ui.go` / `runner.go` / `theme.go` / `output.go` / `logbuffer.go` |

@@ -1,4 +1,4 @@
-// cmd/repo-manager/main.go v2.3.10
+// cmd/repo-manager/main.go v2.3.11
 
 // 命令 repo-manager 是产品入口：解析参数后分流到命令行模式或 Fyne GUI。
 package main
@@ -22,10 +22,16 @@ import (
 func main() {
 	langFlag := flag.String("lang", "", "界面语言 zh|zh-Hant|en（写入 config.ini）")
 	dryRunFlag := flag.Bool("dry-run", false, "预演模式：仅显示将要执行的操作，不修改任何文件")
-	recursiveFlag := flag.Bool("recursive", false, "递归扫描 monorepo 深层项目（深度 3 层）")
+	recursiveFlag := flag.Bool("recursive", false, "递归扫描 monorepo 深层项目（深度可配，默认 3 层）")
+	scanDepthFlag := flag.Int("scan-depth", 0, "递归扫描深度（1-8；0 使用 config.ini 或默认 3）")
 	showHelp := flag.Bool("h", false, "显示帮助")
 	flag.BoolVar(showHelp, "help", false, "显示帮助")
+	showVersion := flag.Bool("version", false, "显示版本与构建信息")
 	flag.Parse()
+	if *showVersion {
+		fmt.Println(buildinfo.BuildInfo())
+		return
+	}
 
 	cfgPath := config.Path()
 	cfg, err := config.Load(cfgPath)
@@ -49,13 +55,28 @@ func main() {
 		}
 	}
 	// 选项优先级：命令行参数 > config.ini > 默认关闭（对齐 OPENSPEC §4.5 / §5.2）。
+	scanDepth := cfg.ScanDepth
+	if *scanDepthFlag > 0 {
+		scanDepth = *scanDepthFlag
+	}
 	opts := engine.Options{
 		DryRun:         *dryRunFlag,
 		Recursive:      *recursiveFlag || cfg.Recursive,
 		ExtraCleanDirs: cfg.ExtraCleanDirs,
+		ScanDepth:      scanDepth,
 	}
 	p := platform.New()
 	fn, pathArg := parseArgs(flag.Args())
+	// S12：非法功能号与被 GUI 忽略的位置参数必须可见，避免用户输入静默失效。
+	if len(flag.Args()) > 0 {
+		if n, err := strconv.Atoi(flag.Args()[0]); err == nil && (n < 1 || n > 7) {
+			fmt.Fprintf(os.Stderr, "invalid function number %d (valid: 1-7)\n", n)
+			os.Exit(1)
+		}
+		if fn == 0 && pathArg != "" {
+			fmt.Fprintf(os.Stderr, "note: no function number given; positional path %q is ignored in GUI mode\n", pathArg)
+		}
+	}
 	root := resolveRoot(p, cfg, pathArg)
 
 	if fn > 0 {
@@ -139,7 +160,9 @@ func printHelp() {
 	fmt.Println("  -lang zh-Hant  Set language to Traditional Chinese")
 	fmt.Println("  -lang en  Set language to English")
 	fmt.Println("  -dry-run  Preview actions without modifying anything")
-	fmt.Println("  -recursive  Recursive scan (monorepo, depth 3)")
+	fmt.Println("  -recursive  Recursive scan (monorepo, default depth 3)")
+	fmt.Println("  -scan-depth N  Recursive depth 1-8 (0 uses config.ini / default 3)")
+	fmt.Println("  -version  Show version and build info")
 	fmt.Println("  -h        Show this help")
 	fmt.Println()
 	fmt.Println("Examples:")

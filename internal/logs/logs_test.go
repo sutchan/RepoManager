@@ -50,6 +50,36 @@ func TestNewFileLoggerInvalidPath(t *testing.T) {
 	}
 }
 
+// TestLogRotation 验证超过阈值后归档为 .log.1 并继续写入新文件（S1）。
+func TestLogRotation(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "repo-manager.log")
+	old := maxLogSize
+	maxLogSize = 80
+	defer func() { maxLogSize = old }()
+
+	n := 0
+	l := NewFileLogger(path, &countLogger{&n})
+	for i := 0; i < 20; i++ {
+		l.Logf("line-%02d-%s", i, strings.Repeat("x", 30))
+	}
+	l.Close()
+
+	if _, err := os.Stat(path + ".1"); err != nil {
+		t.Fatalf("轮转归档 .log.1 未生成: %v", err)
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(data), "line-00") {
+		t.Fatalf("主日志仍包含轮转前内容: %q", string(data))
+	}
+	if n != 20 {
+		t.Fatalf("下游应收到全部 20 条日志，得到 %d", n)
+	}
+}
+
 type countLogger struct{ n *int }
 
 func (c *countLogger) Logf(format string, args ...any) { *c.n++ }

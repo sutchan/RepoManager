@@ -1,4 +1,4 @@
-// internal/config/keys_test.go v2.3.3
+// internal/config/keys_test.go v2.3.11
 
 package config
 
@@ -73,7 +73,34 @@ func TestParseDirListRejectsUnsafeNames(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(cfg.ExtraCleanDirs) != 2 || cfg.ExtraCleanDirs[0] != "custom-out" || cfg.ExtraCleanDirs[1] != ".cache" {
-		t.Fatalf("应仅保留安全的目录名，得到 %v", cfg.ExtraCleanDirs)
+	if len(cfg.ExtraCleanDirs) != 3 || cfg.ExtraCleanDirs[0] != "custom-out" || cfg.ExtraCleanDirs[1] != ".cache" || cfg.ExtraCleanDirs[2] != "sub/dir" {
+		t.Fatalf("应保留安全目录名与受限相对子路径，得到 %v", cfg.ExtraCleanDirs)
+	}
+}
+
+// TestScanDepthConfig 验证解析、非法值回落与往返保存（S6）。
+func TestScanDepthConfig(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.ini")
+	if err := os.WriteFile(path, []byte("SCAN_DEPTH=5\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := Load(path)
+	if err != nil || cfg.ScanDepth != 5 {
+		t.Fatalf("SCAN_DEPTH=5 应解析为 5，得到 %+v / %v", cfg, err)
+	}
+	if err := os.WriteFile(path, []byte("SCAN_DEPTH=99\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err = Load(path)
+	if err != nil || cfg.ScanDepth != 3 {
+		t.Fatalf("越界值应回落默认 3，得到 %+v / %v", cfg, err)
+	}
+	cfg.ScanDepth = 7
+	if err := Save(path, cfg); err != nil {
+		t.Fatal(err)
+	}
+	got, err := Load(path)
+	if err != nil || got.ScanDepth != 7 {
+		t.Fatalf("往返保存后深度应为 7，得到 %+v / %v", got, err)
 	}
 }

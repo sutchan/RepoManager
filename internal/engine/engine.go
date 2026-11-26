@@ -1,4 +1,4 @@
-// internal/engine/engine.go v2.3.6
+// internal/engine/engine.go v2.3.11
 
 // Package engine 实现功能 1 ～ 7 的平台无关业务逻辑；OS 差异一律经 platform.Platform。
 package engine
@@ -46,8 +46,10 @@ var npmGroups = [][]string{
 
 // EnableGlobalNodeModules 功能 1：启用全局 node_modules（对齐 OPENSPEC §3.1）。
 // DryRun 下仅输出预演日志，不写环境变量 / .npmrc / 删除目录。
+// 局部失败逐项记录并继续，结束时统一返回汇总错误（S10）。
 func EnableGlobalNodeModules(p platform.Platform, repoRoot string, lang i18n.Lang, opts Options, log Logger) error {
 	d := i18n.Logs(lang)
+	var failed failureCollector
 	log.Logf("%s", d.F1Step1)
 	globalPath, err := p.GlobalNodeModulesPath()
 	if err != nil {
@@ -60,6 +62,7 @@ func EnableGlobalNodeModules(p platform.Platform, repoRoot string, lang i18n.Lan
 		log.Logf(d.DryRunEnv, "NODE_PATH="+globalPath)
 	} else if err := p.SetUserEnv("NODE_PATH", globalPath); err != nil {
 		log.Logf(d.EnvSetWarn, err)
+		failed.add("NODE_PATH: %v", err)
 	}
 
 	log.Logf("%s", d.F1Step3)
@@ -77,6 +80,7 @@ func EnableGlobalNodeModules(p platform.Platform, repoRoot string, lang i18n.Lan
 		}
 		if err := writeNpmrc(p, dir, globalPath); err != nil {
 			log.Logf(d.WriteNpmrcErr, dir, err)
+			failed.add("%s: %v", filepath.Join(dir, ".npmrc"), err)
 			continue
 		}
 		log.Logf(d.Configured, filepath.Base(dir))
@@ -93,10 +97,11 @@ func EnableGlobalNodeModules(p platform.Platform, repoRoot string, lang i18n.Lan
 			log.Logf(d.Cleaning, filepath.Base(dir))
 			if err := p.RemoveAll(nm); err != nil {
 				log.Logf(d.DeleteErr, err)
+				failed.add("%s: %v", nm, err)
 			}
 		}
 	}
-	return nil
+	return failed.err(lang)
 }
 
 // writeNpmrc 写入 .npmrc；tmp= 值已加引号（v2.0.0 修复 L1，见 OPENSPEC §7.3）。
@@ -110,11 +115,13 @@ func writeNpmrc(p platform.Platform, projectDir, globalPath string) error {
 // DryRun 下仅输出预演日志，不删除环境变量 / .npmrc。
 func ResetNodeConfig(p platform.Platform, repoRoot string, lang i18n.Lang, opts Options, log Logger) error {
 	d := i18n.Logs(lang)
+	var failed failureCollector
 	log.Logf("%s", d.F2Step1)
 	if opts.DryRun {
 		log.Logf(d.DryRunEnvDel, "NODE_PATH")
 	} else if err := p.RemoveUserEnv("NODE_PATH"); err != nil {
 		log.Logf(d.EnvDelWarn, err)
+		failed.add("NODE_PATH: %v", err)
 	}
 	log.Logf("%s", d.F2Step2)
 	dirs, err := listDirs(p, repoRoot, opts)
@@ -131,7 +138,9 @@ func ResetNodeConfig(p platform.Platform, repoRoot string, lang i18n.Lang, opts 
 		}
 		if err := p.RemoveFile(npmrc); err == nil {
 			log.Logf(d.Removed, filepath.Base(dir))
+		} else if !os.IsNotExist(err) {
+			failed.add("%s: %v", npmrc, err)
 		}
 	}
-	return nil
+	return failed.err(lang)
 }

@@ -1,4 +1,4 @@
-// internal/platform/dirs.go v2.3.3
+// internal/platform/dirs.go v2.3.11
 
 package platform
 
@@ -29,6 +29,29 @@ func IsSafeCleanDirName(name string) bool {
 	// 控制字符会造成跨平台路径解析异常，直接拒绝。
 	for _, r := range name {
 		if r < 0x20 || r == 0x7f {
+			return false
+		}
+	}
+	return true
+}
+
+// IsSafeCleanDirPath 校验受限相对子路径（S3）：斜杠 / 反斜杠分隔的每一段都要满足
+// IsSafeCleanDirName，拒绝绝对路径、盘符与以分隔符开头的输入，杜绝路径穿越。
+// 单级目录名同样合法，兼容 v2.3.10 之前的行为。
+func IsSafeCleanDirPath(name string) bool {
+	if name == "" || strings.HasPrefix(name, "/") || strings.HasPrefix(name, `\`) || strings.Contains(name, ":") {
+		return false
+	}
+	// 连续分隔符会产生空段，明确拒绝以免绕过逐段校验。
+	if strings.Contains(name, "//") || strings.Contains(name, `\\`) {
+		return false
+	}
+	parts := strings.FieldsFunc(name, func(r rune) bool { return r == '/' || r == '\\' })
+	if len(parts) == 0 {
+		return false
+	}
+	for _, part := range parts {
+		if !IsSafeCleanDirName(part) {
 			return false
 		}
 	}
