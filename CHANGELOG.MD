@@ -9,7 +9,12 @@ All notable changes to this project will be documented in this file.
 ### Added
 - **失败汇总器** - 新增 `internal/engine/failures.go`，危险操作局部失败统一汇总并返回非零码，三语文案齐备；功能 1/2/3/4/6/7 全覆盖（S10）
 - **安装超时** - `npm install -g` 改用 `exec.CommandContext`，默认 10 min，可用 `REPO_MANAGER_NPM_TIMEOUT`（秒）覆盖，超时显式报错（S11）
-- **冗余预防门禁** - CI 接入 `staticcheck -checks U1000`（告警模式）与 `scripts/check-asset-refs.mjs`（S18），并采集 `go test -coverprofile` 到 `reports/` 作为覆盖率基线
+- **冗余预防门禁** - CI 接入 `staticcheck -tags nogui -checks U1000`（强制门禁）与 `scripts/check-asset-refs.mjs`（告警模式）（S18），并采集 `go test -coverprofile` 到 `reports/` 作为覆盖率基线
+- **CLI 结构化输出** - `-json` 在 CLI 模式输出 `function` / `root` / `ok` / `messages` / `error`，退出码不变；新增 `-version` 快捷查询与非法功能号可见化（S7 / S12）
+- **配置与扫描增强** - `SCAN_DEPTH`（1–8，默认 3）可配，`EXTRA_CLEAN_DIRS` 支持受限相对子路径，`config.ini` 的 Load / Save 共用解析器（S3 / S6 / S16）
+- **日志轮转与 Windows 注册表** - 日志超 5 MB 归档为 `.log.1`（S1）；`SetUserEnv` / `RemoveUserEnv` 直写 `HKCU\Environment` 并保留 `setx` 降级路径（S2）
+- **i18n 字段级回退** - `Dict` / `LogDict` 空字段由简中逐项补齐，三语完整性与参考界面键集合校验纳入门禁（S13 / S14）
+- **任务治理** - 已完成批次迁移至 `tasks-done.md` 第十二至十四节，优先级重评、受限验证项与未覆盖原因统一登记于 `tasks.md`
 
 ### Fixed
 - **文档事实漂移** - 修正 7 处：不存在的 `recursive.go` 引用、平台接口 11→10 方法、SECURITY 版本与路径、失败可见性表述、S17 过时键名、两条 workflow 头注释、双份清理报告关系

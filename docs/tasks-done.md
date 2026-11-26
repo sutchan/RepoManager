@@ -1,8 +1,29 @@
 # Repo Manager 已完成任务 (docs/tasks-done.md)
 
-> 最后更新：**2026-11-26 16:23**（本次迁移 tasks.md 的 v2.3.8 / v2.3.10 已完成批次，新增第十二、十三节）
+> 最后更新：**2026-11-26 17:02**（新增第十四节：本轮任务推进完成的 S1/S2/S3/S6/S7/S8/S10/S11/S12/S13/S14/S15/S16/S18 归档）
 > 本文件归档已完成的任务（来源：用户初始 8 项综合审查任务 + 后续 v1.2.3–v1.2.6 演进 + 本轮剩余任务 + v2.0.0 Go 迁移清单 + v2.3.1 文档体系重新规划 + v2.3.2 任务核查 + v2.3.5 审查复核 + v2.3.8 文档标准化 + v2.3.10 冗余清理）。
 > 未完成事项只在 [tasks.md](./tasks.md) 维护。
+
+## 十四、v2.3.11 任务推进归档（2026-11-26）
+
+| ID | 任务 | 优先级 | 状态 | 结果 |
+|----|------|--------|------|------|
+| S1 | 日志轮转（5 MB → `.log.1`，仅留 1 份） | P2 | 已完成 | `internal/logs/logs.go` 写入前按 `maxLogSize` 轮转，归档失败回退原文件继续写；`logs_test.go` 覆盖边界与下游转发 |
+| S2 | Windows 环境变量改注册表直写 | P2 | 已完成 | `platform_windows.go` 直写 `HKCU\Environment`（REG_SZ），删除不存在视为成功，失败回退 `setx` / `reg`；`x/sys` 提升为直接依赖 |
+| S3 | `EXTRA_CLEAN_DIRS` 支持受限相对子路径 | P3 | 已完成 | `platform.IsSafeCleanDirPath` 逐段校验；config / engine 双层防线；`dirs_test.go` / `keys_test.go` 覆盖穿越输入 |
+| S6 | `SCAN_DEPTH` 可配置（1–8，默认 3） | P3 | 已完成 | `config.ScanDepth` + `-scan-depth` flag；`listDirs` 边界钳制；`TestScanDepthConfig` 覆盖解析、回落与往返 |
+| S7 | CLI `-json` 结构化输出 | P2 | 已完成 | `json_output.go` 定义 `jsonResult` 与 `teeLogger`；`runCLI` 保持退出码 0/1；确认提示与错误走 stderr；`json_output_test.go` 校验契约 |
+| S8 | 系统级安装包评估 | P3 | 已完成 | [MAINTAINERS.md §6](./MAINTAINERS.md) 落地评估结论：签名/公证成本高于收益，维持仅归档分发并说明触发条件 |
+| S10 | 危险操作局部失败汇总并返回非零码 | P1 | 已完成 | `failures.go` 汇总器 + `engine.go` / `clean.go` 全功能覆盖；`failures_test.go` 断言退出码与失败路径 |
+| S11 | `npm install -g` 超时保护 | P2 | 已完成 | `exec.CommandContext`，默认 10 min，`REPO_MANAGER_NPM_TIMEOUT`（秒）可覆盖；超时显式报错并汇总 |
+| S12 | 非法功能号 / GUI 路径可见化、`-version` | P3 | 已完成 | `main.go` 新增 `-version`、非法功能号退出 1、GUI 位置参数提示；帮助文本同步 |
+| S13 | i18n 字段级回退 + 三语 parity | P1 | 已完成 | `fallback.go` 反射逐字段补齐 `Dict` / `LogDict`；`parity_test.go` 全字段校验；`npm run check:i18n` 纳入门禁 |
+| S14 | 弃用参考界面逻辑测试 | P3 | 已完成 | 技术选型改为零依赖 `node:test`：`scripts/i18n-parity.test.mjs` 校验三语键集合、语言顺序与 `HTML_LANG` |
+| S15 | 统一本地 6 / CI 4 构建矩阵口径 | P3 | 已完成 | `ARCHITECTURE.md` §2 与 `INSTALL.md` §4 标注差异与原因，避免文档与脚本互相矛盾 |
+| S16 | INI 解析器去重 | P3 | 已完成 | `parseKeyValue` 统一跳过注释/空行、归一化 key，Load / Save 共用 |
+| S18 | 冗余预防门禁 | P3 | 已完成 | `ci.yml` 接入 `staticcheck -checks U1000`（告警模式）与 `npm run check:asset-refs` |
+
+> 本轮未覆盖项（S4 / S5 / S17 与受限验证 T1–T3）仍在 [tasks.md](./tasks.md) 跟踪，原因与后续批次安排见该表备注。
 
 ## 十三、v2.3.10 冗余清理与版本同步归档（2026-11-26）
 

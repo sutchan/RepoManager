@@ -48,12 +48,11 @@ jobs:
       - name: go test (nogui)
         run: go test -tags nogui -count=1 ./...
 
-      # S18：未引用符号检测先告警后强制；基线稳定后移除 continue-on-error。
+      # S18：未引用符号检测以 nogui 标签运行，避开 GUI/OpenGL 构建约束。
       - name: staticcheck U1000 (unused symbols, S18)
-        continue-on-error: true
         run: |
           go install honnef.co/go/tools/cmd/staticcheck@2025.1.1
-          staticcheck -checks U1000 ./cmd/... ./internal/...
+          staticcheck -tags nogui -checks U1000 ./cmd/... ./internal/...
 
       - name: coverage (nogui, S18)
         run: |

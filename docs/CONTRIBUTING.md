@@ -77,7 +77,7 @@ npm run check:root-clean                    # 根目录清洁度（CI 首步）
 gofmt -l ./cmd ./internal                   # 输出应为空（CI 用 test -z "$(...)" 判定）
 go vet -tags nogui ./...                    # 静态检查
 go test -tags nogui -count=1 ./...          # 单元 / 临时目录集成测试
-go install honnef.co/go/tools/cmd/staticcheck@2025.1.1 && staticcheck -checks U1000 ./cmd/... ./internal/...  # 未引用符号（S18，CI 先告警）
+go install honnef.co/go/tools/cmd/staticcheck@2025.1.1 && staticcheck -tags nogui -checks U1000 ./cmd/... ./internal/...  # 未引用符号（S18，强制门禁）
 go test -tags nogui -coverprofile=reports/coverage.out ./...  # 覆盖率采集（S18，产物写 reports/）
 go test -tags nogui -race -count=1 ./...    # race 检测（需 CGO + gcc，无 gcc 时留待 CI）
 go build -tags nogui ./...                  # 编译（nogui 排除 GUI 包）
@@ -91,7 +91,7 @@ go run ./cmd/repo-manager -h                # 命令行帮助
 ./scripts/build.sh                          # 6 目标交叉编译（macOS / Linux）
 ```
 
-> `npm run dev` / `type-check` / `lint` / `build` / `landing:version` 服务于参考界面与落地页，**不属于产品核心门禁**；产品质量门禁为上述 11 步（含 S18 的未引用符号与资源引用两项告警式检查），外加 §9.3 的 GUI 手动冒烟。
+> `npm run dev` / `type-check` / `lint` / `build` / `landing:version` 服务于参考界面与落地页，**不属于产品核心门禁**；产品质量门禁为上述 11 步（S18 未引用符号为强制门禁、资源引用为告警式检查），外加 §9.3 的 GUI 手动冒烟。
 
 ### 2.1 技术栈与依赖矩阵
 
