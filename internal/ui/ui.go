@@ -1,6 +1,6 @@
 //go:build !nogui
 
-// internal/ui/ui.go v2.3.10
+// internal/ui/ui.go v2.3.12
 
 // Package ui 实现 Fyne 桌面 GUI（对齐 docs/DESIGN-SYSTEM.md §3.0）。
 // 本包需要 C 工具链编译（Fyne 依赖 OpenGL）；无 C 工具链环境用 `go build -tags nogui` 校验。
@@ -56,6 +56,8 @@ func Run(cfg config.Config) {
 		output.Wrapping = fyne.TextWrapWord
 		output.Disable()
 		progress := newProgressView()
+		cancelBtn := widget.NewButton(dict.Cancel, nil)
+		cancelBtn.Disable()
 		logger := &guiLogger{out: output, mu: &sync.Mutex{}, progress: progress}
 
 		dirEntry := widget.NewEntry()
@@ -80,7 +82,7 @@ func Run(cfg config.Config) {
 		})
 
 		saveBtn := widget.NewButton(dict.Save, func() {
-			root, ok := resolveRoot(w, dirEntry.Text)
+			root, ok := resolveRoot(w, dirEntry.Text, lang)
 			if !ok {
 				return
 			}
@@ -105,16 +107,17 @@ func Run(cfg config.Config) {
 		runner := &functionRunner{
 			w: w, p: p, cfg: &cfg, cfgPath: cfgPath,
 			dirEntry: dirEntry, dryRunCheck: dryRunCheck, recursiveCheck: recursiveCheck,
-			progress: progress, logger: logger, running: &running,
+			progress: progress, logger: logger, cancelBtn: cancelBtn, running: &running,
 			lang: lang, dict: dict, d: i18n.Logs(lang),
 		}
+		cancelBtn.OnTapped = runner.requestCancel
 		fnButtons := runner.newFnButtons()
 
 		top := container.NewVBox(
 			container.NewHBox(widget.NewLabel(dict.TargetDir), dirEntry, browse, saveBtn),
 			container.NewHBox(widget.NewLabel(dict.LangLabel), langSelect, aboutBtn),
 			container.NewHBox(widget.NewLabel(dict.RunHint), dryRunCheck, recursiveCheck),
-			container.NewVBox(progress.label, progress.bar),
+			container.NewVBox(progress.label, progress.bar, cancelBtn),
 		)
 		// 页脚区（Border bottom）：版本号 + build 编号的唯一展示位置，页眉不放版本号。
 		w.SetContent(container.NewBorder(top,

@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.3.12] - 2026-11-26
+
+### Added
+- **GUI 组件测试** - 以 Fyne 软件驱动新增语言下拉框、功能按钮与取消按钮的组件级测试，CI `check` job 增加 `go test -tags ci ./internal/ui`（S4）
+- **GUI 操作取消** - `engine.Options.Context` 贯通功能 1–7 与 npm 安装分组，GUI 新增三语「取消执行」按钮，取消后不再启动后续副作用（S5）
+
+### Fixed
+- **平台错误本地化** - 平台层改为英文哨兵错误，CLI / GUI 边界按当前语言翻译根目录与 npm 路径错误；平台层不引入 i18n 依赖（S17）
+- **任务清单漂移** - 将已完成 S/T 项从活动表迁入完成归档，修正 S7 状态与代码实况不一致（S7）
+
+### Changed
+- **入口拆分** - `cmd/repo-manager/main.go` 拆出 `cli.go`，保持单文件 ≤200 行；版本同步至 2.3.12
+
+---
+
 ## [2.3.11] - 2026-11-26
 
 ### Added

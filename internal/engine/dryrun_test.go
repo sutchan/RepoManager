@@ -1,8 +1,9 @@
-// internal/engine/dryrun_test.go v2.1.0
+// internal/engine/dryrun_test.go v2.3.12
 
 package engine
 
 import (
+	"context"
 	"errors"
 	"path/filepath"
 	"strings"
@@ -67,7 +68,7 @@ func TestDryRunEnableGlobalNodeModules(t *testing.T) {
 func TestDryRunInstallGlobalDeps(t *testing.T) {
 	called := false
 	saved := npmRunner
-	npmRunner = func([]string) (string, error) {
+	npmRunner = func(context.Context, []string) (string, error) {
 		called = true
 		return "", nil
 	}
@@ -89,7 +90,7 @@ func TestDryRunInstallGlobalDeps(t *testing.T) {
 // TestInstallGlobalDepsSummary 校验功能 5 汇总失败组并返回错误（L4 修复）。
 func TestInstallGlobalDepsSummary(t *testing.T) {
 	saved := npmRunner
-	npmRunner = func([]string) (string, error) { return "", errors.New("network down") }
+	npmRunner = func(context.Context, []string) (string, error) { return "", errors.New("network down") }
 	t.Cleanup(func() { npmRunner = saved })
 
 	var log captureLogger
@@ -109,7 +110,7 @@ func TestInstallGlobalDepsSummary(t *testing.T) {
 // TestInstallGlobalDepsAllSuccess 校验全部成功时返回 nil 且无汇总。
 func TestInstallGlobalDepsAllSuccess(t *testing.T) {
 	saved := npmRunner
-	npmRunner = func([]string) (string, error) { return "", nil }
+	npmRunner = func(context.Context, []string) (string, error) { return "", nil }
 	t.Cleanup(func() { npmRunner = saved })
 
 	var log captureLogger

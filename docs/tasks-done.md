@@ -1,8 +1,21 @@
 # Repo Manager 已完成任务 (docs/tasks-done.md)
 
-> 最后更新：**2026-11-26 17:12**（新增第十四节：本轮任务推进完成的 S1/S2/S3/S6/S7/S8/S10/S11/S12/S13/S14/S15/S16/S18 归档；与 [tasks.md](./tasks.md) 同步时间戳）
-> 本文件归档已完成的任务（来源：用户初始 8 项综合审查任务 + 后续 v1.2.3–v1.2.6 演进 + 本轮剩余任务 + v2.0.0 Go 迁移清单 + v2.3.1 文档体系重新规划 + v2.3.2 任务核查 + v2.3.5 审查复核 + v2.3.8 文档标准化 + v2.3.10 冗余清理）。
+> 最后更新：**2026-11-26 23:14**（新增第十五节：S4 / S5 / S17 与 T4 / T5 归档，S7 状态修正；与 [tasks.md](./tasks.md) 同步时间戳）
+> 本文件归档已完成的任务（来源：用户初始 8 项综合审查任务 + 后续 v1.2.3–v1.2.6 演进 + 本轮剩余任务 + v2.0.0 Go 迁移清单 + v2.3.1 文档体系重新规划 + v2.3.2 任务核查 + v2.3.5 审查复核 + v2.3.8 文档标准化 + v2.3.10 冗余清理 + v2.3.12 剩余任务收口）。
 > 未完成事项只在 [tasks.md](./tasks.md) 维护。
+
+## 十五、v2.3.12 剩余任务收口（2026-11-26）
+
+| ID | 任务 | 优先级 | 状态 | 结果 |
+|----|------|--------|------|------|
+| S4 | GUI 组件级自动化测试纳入 CI | P2 | 已完成（v2.3.12） | `internal/ui/components_test.go` 以 `fyne.io/fyne/v2/test` 软件驱动覆盖语言下拉框（三语选项与回调）、功能按钮（数量与文案）与取消按钮（点击后 `context.Canceled` 回传）；`ci.yml` 的 `check` job 新增 `go test -tags ci -count=1 ./internal/ui`，实测通过 |
+| S5 | GUI 执行中可取消（`context.Context` 贯通 runner → engine） | P2 | 已完成（v2.3.12） | `engine.Options.Context` 贯通功能 1–7 与 npm 分组；`functionRunner` 管理 `context.WithCancel`、三语「取消执行」按钮与互斥状态；取消后不再写入环境变量、删除目录或启动后续 npm 分组；`context_test.go` 与组件测试覆盖 |
+| S17 | 平台层错误文案硬编码中文 | P2 | 已完成（v2.3.12） | `internal/platform` 改为英文哨兵错误（`ErrRootFilesystem` / `ErrRootNotExist` / `ErrRootNotDir` / `ErrNpmRoot` / `ErrCommand` / `ErrOpenFile`），不引入 i18n 依赖；`engine.DescribeError` 在 CLI / GUI 边界按 zh / zh-Hant / en 翻译；`platform_test.go` 与 `failures_test.go` 覆盖 |
+| S7 | CLI `-json` 结构化输出（活动表状态修正） | P2 | 已完成（v2.3.11，v2.3.12 修正状态） | 实现已在第十四节完整归档；本轮核实 `json_output.go` / `main.go` / `json_output_test.go` 与代码实况一致，移除 `tasks.md` 活动表中错误的「待办」行，不重复正文 |
+| T4 | `go test -race` 在 CI ubuntu runner 的实际结果 | P2 | 已验证（v2.3.11，v2.3.12 归档） | 远端 `12c5e60` 的 gate job 中 `-race` 步骤通过；同 run 的 `check:docs` 失败已本地修复，v2.3.12 本地 `check:docs` 复验通过 |
+| T5 | 三语键集合全量一致性 | P2 | 已验证（v2.3.11，v2.3.12 归档） | `i18n/parity_test.go` 对 `Dict` / `LogDict` 三语全字段非空校验；`npm run check:i18n` 在 v2.3.12 复验通过，新增 `Cancel` 与平台错误文案三语齐备 |
+
+> 本批验证：`gofmt -l` 为空；`go vet -tags ci` / `-tags nogui`、`go test -tags ci -count=1 ./...`、`go test -tags nogui -count=1 ./...`、`go build -tags ci` / `-tags nogui`、`npm run check:docs` / `check:root-clean` / `check:i18n` / `check:asset-refs` 全部通过。覆盖率本机基线总体 **51.3%**（`engine` 71.9% / `config` 81.5% / `i18n` 96.0% / `internal/ui` 100.0%），距 80% 目标仍为分阶段事项。T1–T3 因需 `workflow_dispatch` 或 tag 授权，仍未验证并保留在 [tasks.md](./tasks.md)。
 
 ## 十四、v2.3.11 任务推进归档（2026-11-26）
 
@@ -23,7 +36,7 @@
 | S16 | INI 解析器去重 | P3 | 已完成 | `parseKeyValue` 统一跳过注释/空行、归一化 key，Load / Save 共用 |
 | S18 | 冗余预防门禁 | P3 | 已完成 | `ci.yml` 接入 `staticcheck -checks U1000`（告警模式）与 `npm run check:asset-refs` |
 
-> 本轮未覆盖项（S4 / S5 / S17 与受限验证 T1–T3）仍在 [tasks.md](./tasks.md) 跟踪，原因与后续批次安排见该表备注。
+> v2.3.11 时点未覆盖项 S4 / S5 / S17 已于 v2.3.12 完成并归档至第十五节；T1–T3 仍为受限验证项，见 [tasks.md](./tasks.md)。
 
 ## 十三、v2.3.10 冗余清理与版本同步归档（2026-11-26）
 

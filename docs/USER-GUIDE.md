@@ -1,4 +1,4 @@
-# Repo Manager 用户操作指南 v2.3.11
+# Repo Manager 用户操作指南 v2.3.12
 
 > 面向日常使用者。功能行为细则见 [OPENSPEC.md](./OPENSPEC.md)；参数速查见 [CLI-REFERENCE.md](./CLI-REFERENCE.md)；FAQ 见根 [README.MD](../README.MD)「常见问题 FAQ」，故障排除见 [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)。
 
@@ -69,11 +69,11 @@ flowchart LR
 1. **启动**：双击 `repo-manager`（无参数即 GUI）。
 2. **根目录**：界面显示当前 `REPO_ROOT`；首次使用时确认它指向存放各项目的父目录（默认 Windows `E:\Github`，Unix `~/Github`）。
 3. **语言**：语言按钮在简中 / 繁中 / 英文间切换，选择会持久化到 `config.ini`；执行日志同步切换。
-4. **执行功能**：点击对应功能按钮；执行期间全部功能按钮禁用（互斥），日志区以 `[n/m]` 显示进度，日志缓冲保留最近 500 行。
+4. **执行功能**：点击对应功能按钮；执行期间全部功能按钮禁用（互斥），可点击「取消执行」中断任务，日志区以 `[n/m]` 显示进度，日志缓冲保留最近 500 行。
 5. **确认弹窗**：功能 1 / 6 / 7 弹出确认框，警告文案按功能不同；取消即返回，不做任何改动。
 6. **版本查看**：版本号只出现在页脚，格式 `vX.Y.Z · build yymmddhhmm`。
 
-> 无自动化 GUI 测试，发版前人工冒烟清单见 [CONTRIBUTING.md §9.3](./CONTRIBUTING.md)。
+> GUI 组件级测试已纳入 CI（v2.3.12 / S4）；端到端交互仍按发版前人工冒烟清单见 [CONTRIBUTING.md §9.3](./CONTRIBUTING.md)。
 
 ## 4. CLI 操作指南
 

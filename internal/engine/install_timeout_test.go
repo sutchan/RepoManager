@@ -1,4 +1,4 @@
-// internal/engine/install_timeout_test.go v2.3.11
+// internal/engine/install_timeout_test.go v2.3.12
 
 package engine
 
@@ -61,7 +61,7 @@ func TestInstallGlobalDepsTimeoutPropagates(t *testing.T) {
 		<-ctx.Done()
 		return nil, ctx.Err()
 	}
-	npmRunner = runNpmInstall
+	npmRunner = runNpmInstallContext
 
 	var log captureLogger
 	err := InstallGlobalDeps(i18n.Zh, Options{}, &log)

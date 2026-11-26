@@ -1,4 +1,4 @@
-# Repo Manager 生产就绪规范 (Production Readiness) v2.3.11
+# Repo Manager 生产就绪规范 (Production Readiness) v2.3.12
 
 > **定位**：定义产品达到「可投入生产环境」所需的质量门槛与验收口径，是八类非功能要求的**单一来源**。
 > **权威关系**：本文说「要达到什么程度」；[`CONTRIBUTING.md`](./CONTRIBUTING.md) 说「怎么开发与评审」；[`MAINTAINERS.md`](./MAINTAINERS.md) 说「怎么发布与维护」；[`OPENSPEC.md`](./OPENSPEC.md) 是功能行为契约。
@@ -31,12 +31,12 @@
 ## 2. 测试策略（单元 / 集成 / 端到端）与覆盖率
 
 ### 2.1 已具备
-- 当前 **18 个 `*_test.go`、55 个 `Test*` 函数**，覆盖 `buildinfo` / `config` / `engine` / `i18n` / `logs` / `platform` / `cmd/repo-manager` / `internal/ui` 八个包（`OPENSPEC.md` §9.3）；CI 以 `-tags nogui` 运行 `go test -count=1`（含 `-race`）。
+- 当前 **21 个 `*_test.go`、64 个 `Test*` 函数**，覆盖 `buildinfo` / `config` / `engine` / `i18n` / `logs` / `platform` / `cmd/repo-manager` / `internal/ui` 八个包（`OPENSPEC.md` §9.3）；CI 以 `-tags nogui` 运行 `go test -count=1`（含 `-race`），并以 `-tags ci` 运行 GUI 组件测试。
 - §4.6 要求业务函数可测：扫描 / 白名单 / 配置 / 文案等纯逻辑须有测试，平台差异用接口隔离。
-- CLI 入口纯逻辑（`parseArgs` / `resolveRoot`）与 GUI 纯逻辑（日志缓冲 / 进度解析）已覆盖测试；完整 GUI 交互与跨平台发版前仍按 `CONTRIBUTING.md` §9.3 做**手动冒烟**（隔离临时目录）。
+- CLI 入口纯逻辑（`parseArgs` / `resolveRoot` / `-json` 契约）与 GUI 关键组件（语言选择 / 功能按钮 / 取消按钮 / 日志缓冲 / 进度解析）已覆盖测试；完整 GUI 事件循环与跨平台发版前仍按 `CONTRIBUTING.md` §9.3 做**手动冒烟**（隔离临时目录）。
 
 ### 2.2 现状不足
-- **覆盖率已采集、门槛待立**：v2.3.11 起 CI 生成 `reports/coverage.out` 并输出摘要；2026-11-26 本机基线总体 **49.9%**（`engine` 74.8% / `config` 81.5% / `i18n` 91.7% / `logs` 78.8% / `platform` 67.8% / `buildinfo` 55.6%），尚未设强制门槛。
+- **覆盖率已采集、门槛待立**：v2.3.11 起 CI 生成 `reports/coverage.out` 并输出摘要；2026-11-26 v2.3.12 本机基线总体 **51.3%**（`engine` 71.9% / `config` 81.5% / `i18n` 96.0% / `logs` 78.8% / `platform` 67.8% / `buildinfo` 55.6% / `internal/ui` 100.0%），尚未设强制门槛。
 - **无分层定义**：单元 / 集成 / 端到端的边界、目录约定、禁用真实仓库根验证等只在零散段落出现。
 - 无 e2e 自动化；GUI 回归完全依赖人工，易漏三语 / 二次确认 / 路径边界。
 - 无 flaky 测试处理规则，无「测试失败时的回归用例补充」要求。

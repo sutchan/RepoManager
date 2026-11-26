@@ -1,4 +1,4 @@
-# .github/workflows/ci.yml v2.3.11
+# .github/workflows/ci.yml v2.3.12
 # 仓库级门禁（行为契约见 docs/CONTRIBUTING.md §8.4 / §9.1）：
 # check 跑全套静态 / 测试门禁；windows-smoke 在 Windows runner 验证平台层代码；
 # gui-build 在 Linux 验证默认标签的完整 Fyne GUI 编译。
@@ -47,6 +47,10 @@ jobs:
 
       - name: go test (nogui)
         run: go test -tags nogui -count=1 ./...
+
+      # S4：Fyne test 软件驱动在 ci 标签下运行 GUI 组件测试，无需 OpenGL。
+      - name: go test (ci tags, GUI components)
+        run: go test -tags ci -count=1 ./internal/ui
 
       # S18：未引用符号检测以 nogui 标签运行，避开 GUI/OpenGL 构建约束。
       - name: staticcheck U1000 (unused symbols, S18)

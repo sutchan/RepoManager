@@ -1,12 +1,15 @@
-// internal/engine/failures.go v2.3.11
+// internal/engine/failures.go v2.3.12
 
 package engine
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"strings"
 
 	"repo-manager/internal/i18n"
+	"repo-manager/internal/platform"
 )
 
 // failureCollector 汇总局部失败项（S10）。
@@ -27,4 +30,29 @@ func (c *failureCollector) err(lang i18n.Lang) error {
 		return nil
 	}
 	return fmt.Errorf(i18n.Logs(lang).PartialFailSummary, len(c.items), strings.Join(c.items, "; "))
+}
+
+// DescribeError 把平台层哨兵错误与 context 错误翻译为当前语言文案（S17）。
+// 平台层保持无 i18n 依赖，所有面向用户的错误在 engine 边界统一格式化。
+func DescribeError(lang i18n.Lang, err error) string {
+	if err == nil {
+		return ""
+	}
+	d := i18n.Logs(lang)
+	switch {
+	case errors.Is(err, platform.ErrRootFilesystem):
+		return fmt.Sprintf(d.RootFilesystemErr, err)
+	case errors.Is(err, platform.ErrRootNotExist):
+		return fmt.Sprintf(d.RootNotExistErr, err)
+	case errors.Is(err, platform.ErrRootNotDir):
+		return fmt.Sprintf(d.RootNotDirErr, err)
+	case errors.Is(err, platform.ErrNpmRoot):
+		return fmt.Sprintf(d.NpmRootErr, err)
+	case errors.Is(err, context.Canceled):
+		return d.CancelledErr
+	case errors.Is(err, context.DeadlineExceeded):
+		return fmt.Sprintf(d.TimeoutErr, err)
+	default:
+		return fmt.Sprintf(d.ErrorPrefix, err)
+	}
 }

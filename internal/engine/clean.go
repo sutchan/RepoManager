@@ -124,7 +124,11 @@ func CleanViteCache(p platform.Platform, repoRoot string, lang i18n.Lang, opts O
 // DryRun 下仅输出预演日志，不删除任何文件。
 func cleanByWhitelist(p platform.Platform, repoRoot string, dirNames, fileNames []string, lang i18n.Lang, opts Options, log Logger) error {
 	d := i18n.Logs(lang)
+	ctx := opts.ctx()
 	var failed failureCollector
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	projects, err := listDirs(p, repoRoot, opts)
 	if err != nil {
 		return err
@@ -141,6 +145,9 @@ func cleanByWhitelist(p platform.Platform, repoRoot string, dirNames, fileNames 
 		}
 	}
 	for _, project := range projects {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		if opts.DryRun {
 			for _, name := range append(dirNames, fileNames...) {
 				target := filepath.Join(project, name)

@@ -1,14 +1,16 @@
-// internal/engine/failures_test.go v2.3.11
+// internal/engine/failures_test.go v2.3.12
 
 package engine
 
 import (
+	"context"
 	"errors"
 	"path/filepath"
 	"strings"
 	"testing"
 
 	"repo-manager/internal/i18n"
+	"repo-manager/internal/platform"
 )
 
 // removeFailPlatform 让删除类操作失败，用于验证 S10 的失败汇总行为。
@@ -84,5 +86,21 @@ func TestEnableGlobalNodeModulesFailureSummary(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "NODE_PATH") {
 		t.Fatalf("错误信息应含 NODE_PATH 上下文，实际: %v", err)
+	}
+}
+
+// TestDescribeErrorLocalizesSentinels 校验平台哨兵错误按语言翻译（S17）。
+func TestDescribeErrorLocalizesSentinels(t *testing.T) {
+	rootErr := platform.ValidateRoot(filepath.Join(t.TempDir(), "missing"))
+	zh := DescribeError(i18n.Zh, rootErr)
+	if !strings.Contains(zh, "仓库根目录不存在") {
+		t.Fatalf("简中应翻译路径不存在，实际: %s", zh)
+	}
+	en := DescribeError(i18n.En, rootErr)
+	if !strings.Contains(en, "Repository root does not exist") {
+		t.Fatalf("英文应翻译路径不存在，实际: %s", en)
+	}
+	if got := DescribeError(i18n.Zh, context.Canceled); !strings.Contains(got, "操作已取消") {
+		t.Fatalf("取消错误应本地化，实际: %s", got)
 	}
 }
