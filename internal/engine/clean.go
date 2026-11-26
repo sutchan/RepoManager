@@ -1,4 +1,4 @@
-// internal/engine/clean.go v2.3.11
+// internal/engine/clean.go v2.3.12
 
 package engine
 
@@ -14,7 +14,11 @@ import (
 // DryRun 下仅输出预演日志，不删除 / 不写入任何文件。
 func CleanNextCache(p platform.Platform, repoRoot string, lang i18n.Lang, opts Options, log Logger) error {
 	d := i18n.Logs(lang)
+	ctx := opts.ctx()
 	var failed failureCollector
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	log.Logf("%s", d.F3Start)
 	dirs, err := listDirs(p, repoRoot, opts)
 	if err != nil {
@@ -23,6 +27,9 @@ func CleanNextCache(p platform.Platform, repoRoot string, lang i18n.Lang, opts O
 	for _, dir := range dirs {
 		if !platform.IsNextProject(dir) {
 			continue
+		}
+		if err := ctx.Err(); err != nil {
+			return err
 		}
 		next := nextCachePath(dir)
 		if opts.DryRun {
@@ -64,7 +71,11 @@ func CleanNextCache(p platform.Platform, repoRoot string, lang i18n.Lang, opts O
 // DryRun 下仅输出预演日志，不删除任何文件。
 func RestoreNextCache(p platform.Platform, repoRoot string, lang i18n.Lang, opts Options, log Logger) error {
 	d := i18n.Logs(lang)
+	ctx := opts.ctx()
 	var failed failureCollector
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	log.Logf("%s", d.F4Start)
 	dirs, err := listDirs(p, repoRoot, opts)
 	if err != nil {
@@ -73,6 +84,9 @@ func RestoreNextCache(p platform.Platform, repoRoot string, lang i18n.Lang, opts
 	for _, dir := range dirs {
 		if !platform.IsNextProject(dir) {
 			continue
+		}
+		if err := ctx.Err(); err != nil {
+			return err
 		}
 		next := nextCachePath(dir)
 		info, err := os.Stat(next)

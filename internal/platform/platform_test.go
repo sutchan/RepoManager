@@ -1,8 +1,9 @@
-// internal/platform/platform_test.go v2.3.6
+// internal/platform/platform_test.go v2.3.12
 
 package platform
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -80,6 +81,23 @@ func TestValidateRoot(t *testing.T) {
 	}
 	if err := ValidateRoot(filepath.Join(dir, "missing")); err == nil {
 		t.Fatal("不存在的路径不应通过校验")
+	}
+}
+
+func TestValidateRootSentinels(t *testing.T) {
+	dir := t.TempDir()
+	file := filepath.Join(dir, "f.txt")
+	if err := os.WriteFile(file, nil, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := ValidateRoot(string(filepath.Separator)); !errors.Is(err, ErrRootFilesystem) {
+		t.Fatalf("文件系统根应返回 ErrRootFilesystem，实际: %v", err)
+	}
+	if err := ValidateRoot(filepath.Join(dir, "missing")); !errors.Is(err, ErrRootNotExist) {
+		t.Fatalf("不存在路径应返回 ErrRootNotExist，实际: %v", err)
+	}
+	if err := ValidateRoot(file); !errors.Is(err, ErrRootNotDir) {
+		t.Fatalf("文件应返回 ErrRootNotDir，实际: %v", err)
 	}
 }
 

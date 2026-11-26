@@ -1,4 +1,4 @@
-// internal/i18n/i18n.go v2.3.11
+// internal/i18n/i18n.go v2.3.12
 
 // Package i18n 是唯一的 UI 文案来源（zh / zh-Hant / en），禁止在 ui / engine 层硬编码文案。
 package i18n
@@ -38,6 +38,7 @@ type Dict struct {
 	RunHint        string
 	DryRunLabel    string
 	RecursiveLabel string
+	Cancel         string
 	WarningF1      string
 	WarningAll     string
 	WarningVite    string
@@ -60,6 +61,7 @@ var dicts = map[Lang]Dict{
 		RunHint:        "点击功能按钮执行；危险操作会先确认",
 		DryRunLabel:    "预演模式 (dry-run)",
 		RecursiveLabel: "递归扫描 (monorepo)",
+		Cancel:         "取消执行",
 		WarningF1:      "警告: 这将删除所有项目的本地 node_modules!",
 		WarningAll:     "警告: 这将永久删除所有缓存文件!",
 		WarningVite:    "警告: 这将删除 .vite/.turbo/.angular 等构建缓存目录!",
@@ -80,6 +82,7 @@ var dicts = map[Lang]Dict{
 		RunHint:        "Click a function button; dangerous ones ask for confirmation",
 		DryRunLabel:    "Dry-run mode",
 		RecursiveLabel: "Recursive scan (monorepo)",
+		Cancel:         "Cancel",
 		WarningF1:      "WARNING: This will delete all local node_modules!",
 		WarningAll:     "WARNING: This will permanently delete all cache files!",
 		WarningVite:    "WARNING: This will delete .vite/.turbo/.angular and other build cache directories!",

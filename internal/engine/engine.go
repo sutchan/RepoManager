@@ -1,4 +1,4 @@
-// internal/engine/engine.go v2.3.11
+// internal/engine/engine.go v2.3.12
 
 // Package engine 实现功能 1 ～ 7 的平台无关业务逻辑；OS 差异一律经 platform.Platform。
 package engine
@@ -49,7 +49,12 @@ var npmGroups = [][]string{
 // 局部失败逐项记录并继续，结束时统一返回汇总错误（S10）。
 func EnableGlobalNodeModules(p platform.Platform, repoRoot string, lang i18n.Lang, opts Options, log Logger) error {
 	d := i18n.Logs(lang)
+	ctx := opts.ctx()
 	var failed failureCollector
+	// S5：每个外部副作用前检查取消，避免用户取消后继续删除或写入。
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	log.Logf("%s", d.F1Step1)
 	globalPath, err := p.GlobalNodeModulesPath()
 	if err != nil {
@@ -58,6 +63,9 @@ func EnableGlobalNodeModules(p platform.Platform, repoRoot string, lang i18n.Lan
 	log.Logf(d.F1Path, globalPath)
 
 	log.Logf("%s", d.F1Step2)
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	if opts.DryRun {
 		log.Logf(d.DryRunEnv, "NODE_PATH="+globalPath)
 	} else if err := p.SetUserEnv("NODE_PATH", globalPath); err != nil {
@@ -74,6 +82,9 @@ func EnableGlobalNodeModules(p platform.Platform, repoRoot string, lang i18n.Lan
 		if !platform.IsNodeProject(dir) {
 			continue
 		}
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		if opts.DryRun {
 			log.Logf(d.DryRunWrite, filepath.Join(dir, ".npmrc"))
 			continue
@@ -88,6 +99,9 @@ func EnableGlobalNodeModules(p platform.Platform, repoRoot string, lang i18n.Lan
 
 	log.Logf("%s", d.F1Step4)
 	for _, dir := range dirs {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		nm := filepath.Join(dir, "node_modules")
 		if info, err := os.Stat(nm); err == nil && info.IsDir() {
 			if opts.DryRun {
@@ -115,7 +129,11 @@ func writeNpmrc(p platform.Platform, projectDir, globalPath string) error {
 // DryRun 下仅输出预演日志，不删除环境变量 / .npmrc。
 func ResetNodeConfig(p platform.Platform, repoRoot string, lang i18n.Lang, opts Options, log Logger) error {
 	d := i18n.Logs(lang)
+	ctx := opts.ctx()
 	var failed failureCollector
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	log.Logf("%s", d.F2Step1)
 	if opts.DryRun {
 		log.Logf(d.DryRunEnvDel, "NODE_PATH")
@@ -124,11 +142,17 @@ func ResetNodeConfig(p platform.Platform, repoRoot string, lang i18n.Lang, opts 
 		failed.add("NODE_PATH: %v", err)
 	}
 	log.Logf("%s", d.F2Step2)
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	dirs, err := listDirs(p, repoRoot, opts)
 	if err != nil {
 		return err
 	}
 	for _, dir := range dirs {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		npmrc := filepath.Join(dir, ".npmrc")
 		if opts.DryRun {
 			if _, err := os.Stat(npmrc); err == nil {

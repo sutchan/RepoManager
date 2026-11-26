@@ -1,4 +1,4 @@
-// internal/i18n/log.go v2.3.11
+// internal/i18n/log.go v2.3.12
 
 package i18n
 
@@ -45,6 +45,12 @@ type LogDict struct {
 	ErrorPrefix        string
 	ConfirmCLI         string
 	Cancelled          string
+	RootFilesystemErr  string
+	RootNotExistErr    string
+	RootNotDirErr      string
+	NpmRootErr         string
+	CancelledErr       string
+	TimeoutErr         string
 	LoadCfgErr         string
 	SaveCfgErr         string
 	NoGUI              [2]string
@@ -98,6 +104,12 @@ var logDicts = map[Lang]LogDict{
 		ConfirmUnavailable: "无法读取确认输入（非交互环境），危险操作已终止；请在交互式终端运行或使用 -dry-run。",
 		ConfirmCLI:         "是否继续? [Y/N]: ",
 		Cancelled:          "已取消",
+		RootFilesystemErr:  "仓库根目录不能是文件系统根目录: %v",
+		RootNotExistErr:    "仓库根目录不存在: %v",
+		RootNotDirErr:      "仓库根目录不是目录: %v",
+		NpmRootErr:         "获取全局 node_modules 路径失败: %v",
+		CancelledErr:       "操作已取消",
+		TimeoutErr:         "操作超时: %v",
 		LoadCfgErr:         "读取配置失败: %v\n",
 		SaveCfgErr:         "保存配置失败: %v\n",
 		NoGUI: [2]string{
@@ -152,6 +164,12 @@ var logDicts = map[Lang]LogDict{
 		ConfirmUnavailable: "Cannot read confirmation (non-interactive), dangerous operation aborted. Use an interactive terminal or -dry-run.",
 		ConfirmCLI:         "Continue? [Y/N]: ",
 		Cancelled:          "Cancelled",
+		RootFilesystemErr:  "Repository root cannot be a filesystem root: %v",
+		RootNotExistErr:    "Repository root does not exist: %v",
+		RootNotDirErr:      "Repository root is not a directory: %v",
+		NpmRootErr:         "Failed to resolve global node_modules path: %v",
+		CancelledErr:       "Operation cancelled",
+		TimeoutErr:         "Operation timed out: %v",
 		LoadCfgErr:         "Failed to read config: %v\n",
 		SaveCfgErr:         "Failed to save config: %v\n",
 		NoGUI: [2]string{

@@ -1,6 +1,6 @@
 //go:build !windows
 
-// internal/platform/platform_unix.go v2.0.2
+// internal/platform/platform_unix.go v2.3.12
 
 package platform
 
@@ -62,7 +62,7 @@ func applyChflags(path, flag string) error {
 	}
 	out, err := exec.Command(bin, flag, path).CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("chflags %s 执行失败: %w: %s", flag, err, strings.TrimSpace(string(out)))
+		return fmt.Errorf("%w: chflags %s: %v: %s", ErrCommand, flag, err, strings.TrimSpace(string(out)))
 	}
 	return nil
 }
@@ -89,7 +89,7 @@ func (unixPlatform) SetUserEnv(key, value string) error {
 	}
 	f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
-		return fmt.Errorf("打开 %s 失败: %w", path, err)
+		return fmt.Errorf("%w: %s: %v", ErrOpenFile, path, err)
 	}
 	defer f.Close()
 	_, err = f.WriteString(fmt.Sprintf("export %s=%q\n", key, value))

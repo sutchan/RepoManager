@@ -1,8 +1,9 @@
-// internal/engine/options.go v2.3.11
+// internal/engine/options.go v2.3.12
 
 package engine
 
 import (
+	"context"
 	"fmt"
 
 	"repo-manager/internal/i18n"
@@ -22,6 +23,16 @@ type Options struct {
 	ExtraCleanDirs []string
 	// ScanDepth 递归扫描深度（S6，1–8，0 表示回落到默认 3）。
 	ScanDepth int
+	// Context 由 CLI / GUI 注入的取消上下文（S5）；nil 时等价于 context.Background。
+	Context context.Context
+}
+
+// ctx 返回可用的上下文，避免调用方显式判空。
+func (o Options) ctx() context.Context {
+	if o.Context != nil {
+		return o.Context
+	}
+	return context.Background()
 }
 
 // listDirs 按选项选择枚举方式：Recursive 启用 3 层深度递归（覆盖
@@ -40,6 +51,9 @@ func listDirs(p platform.Platform, repoRoot string, opts Options) ([]string, err
 // Run 按功能编号（1-7）执行对应功能，lang 决定执行日志语言。
 // 前置条件：调用方须先用 platform.NormalizeRoot + platform.ValidateRoot 校验 repoRoot。
 func Run(p platform.Platform, fn int, repoRoot string, lang i18n.Lang, opts Options, log Logger) error {
+	if err := opts.ctx().Err(); err != nil {
+		return err
+	}
 	d := i18n.Logs(lang)
 	if opts.DryRun {
 		log.Logf("%s", d.DryRunOn)

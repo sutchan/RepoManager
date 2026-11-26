@@ -1,16 +1,27 @@
-// internal/platform/platform.go v2.3.6
+// internal/platform/platform.go v2.3.12
 
 // Package platform 收口全部操作系统差异（目录扫描、删除、隐藏属性、环境变量持久化）。
 // engine 只依赖本接口，禁止直接调用 OS 专属命令；新增平台仅需增加对应 build tag 实现。
 package platform
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"sort"
 	"strings"
+)
+
+// 平台层只返回英文哨兵错误，文案由上层按语言翻译；本包禁止依赖 i18n（S17）。
+var (
+	ErrRootFilesystem = errors.New("filesystem root rejected")
+	ErrRootNotExist   = errors.New("path does not exist")
+	ErrRootNotDir     = errors.New("path is not a directory")
+	ErrNpmRoot        = errors.New("npm root -g failed")
+	ErrCommand        = errors.New("command failed")
+	ErrOpenFile       = errors.New("open file failed")
 )
 
 // listProjectDirs 枚举 repoRoot 的直接子目录；Windows / Unix 实现共用。
@@ -32,7 +43,7 @@ func listProjectDirs(repoRoot string) ([]string, error) {
 func globalNodeModulesPath() (string, error) {
 	out, err := exec.Command("npm", "root", "-g").Output()
 	if err != nil {
-		return "", fmt.Errorf("npm root -g 执行失败: %w", err)
+		return "", fmt.Errorf("%w: %v", ErrNpmRoot, err)
 	}
 	return strings.TrimSpace(string(out)), nil
 }
@@ -137,14 +148,14 @@ func NormalizeRoot(root string) string {
 // ValidateRoot 校验仓库根目录存在、为目录且不是文件系统根（危险操作的最小范围约束）。
 func ValidateRoot(root string) error {
 	if IsFilesystemRoot(root) {
-		return fmt.Errorf("禁止将文件系统根目录作为仓库根目录（范围过大）: %s", root)
+		return fmt.Errorf("%w: %s", ErrRootFilesystem, root)
 	}
 	info, err := os.Stat(root)
 	if err != nil {
-		return fmt.Errorf("路径不存在: %s", root)
+		return fmt.Errorf("%w: %s", ErrRootNotExist, root)
 	}
 	if !info.IsDir() {
-		return fmt.Errorf("不是目录: %s", root)
+		return fmt.Errorf("%w: %s", ErrRootNotDir, root)
 	}
 	return nil
 }

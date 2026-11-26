@@ -1,6 +1,6 @@
 //go:build windows
 
-// internal/platform/platform_windows.go v2.3.11
+// internal/platform/platform_windows.go v2.3.12
 
 package platform
 
@@ -78,8 +78,8 @@ func (windowsPlatform) GlobalNodeModulesPath() (string, error) {
 func run(name string, args ...string) error {
 	cmd := exec.Command(name, args...)
 	if out, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("%s %s: %w: %s",
-			name, strings.Join(args, " "), err, strings.TrimSpace(string(out)))
+		return fmt.Errorf("%w: %s %s: %v: %s",
+			ErrCommand, name, strings.Join(args, " "), err, strings.TrimSpace(string(out)))
 	}
 	return nil
 }

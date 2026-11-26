@@ -1,4 +1,4 @@
-// internal/i18n/hant.go v2.3.11
+// internal/i18n/hant.go v2.3.12
 
 package i18n
 
@@ -16,6 +16,7 @@ func init() {
 		RunHint:        "點擊功能按鈕執行；危險操作會先確認",
 		DryRunLabel:    "預演模式 (dry-run)",
 		RecursiveLabel: "遞迴掃描 (monorepo)",
+		Cancel:         "取消執行",
 		WarningF1:      "警告: 這將刪除所有專案的本機 node_modules!",
 		WarningAll:     "警告: 這將永久刪除所有快取檔案!",
 		WarningVite:    "警告: 這將刪除 .vite/.turbo/.angular 等建置快取目錄!",
@@ -73,6 +74,12 @@ func init() {
 		ErrorPrefix:        "[錯誤] %v",
 		ConfirmCLI:         "是否繼續? [Y/N]: ",
 		Cancelled:          "已取消",
+		RootFilesystemErr:  "存放庫根目錄不能是檔案系統根目錄: %v",
+		RootNotExistErr:    "存放庫根目錄不存在: %v",
+		RootNotDirErr:      "存放庫根目錄不是目錄: %v",
+		NpmRootErr:         "取得全域 node_modules 路徑失敗: %v",
+		CancelledErr:       "作業已取消",
+		TimeoutErr:         "作業逾時: %v",
 		LoadCfgErr:         "讀取設定失敗: %v\n",
 		SaveCfgErr:         "儲存設定失敗: %v\n",
 		NoGUI: [2]string{
