@@ -1,4 +1,4 @@
-// cmd/repo-manager/main.go v2.3.14
+// cmd/repo-manager/main.go v2.3.16
 
 // 命令 repo-manager 是产品入口：解析参数后分流到命令行模式或 Fyne GUI。
 package main
@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	langFlag := flag.String("lang", "", "界面语言 zh|zh-Hant|en（写入 config.ini）")
+	langFlag := flag.String("lang", "", "界面语言 zh|zh-Hant|en（非预演时写入 config.ini）")
 	dryRunFlag := flag.Bool("dry-run", false, "预演模式：仅显示将要执行的操作，不修改任何文件")
 	recursiveFlag := flag.Bool("recursive", false, "递归扫描 monorepo 深层项目（深度可配，默认 3 层）")
 	scanDepthFlag := flag.Int("scan-depth", 0, "递归扫描深度（1-8；0 使用 config.ini 或默认 3）")
@@ -45,13 +45,7 @@ func main() {
 		// 配置损坏属于真实失败，必须以非零码退出，避免脚本把失败误判为成功。
 		os.Exit(1)
 	}
-	if *langFlag != "" {
-		lang = i18n.Normalize(*langFlag)
-		cfg.Lang = string(lang)
-		if saveErr := config.Save(cfgPath, cfg); saveErr != nil {
-			fmt.Fprintf(os.Stderr, i18n.Logs(lang).SaveCfgErr, saveErr)
-		}
-	}
+	lang = applyLanguageOption(cfgPath, cfg, *langFlag, *dryRunFlag)
 	// 选项优先级：命令行参数 > config.ini > 默认关闭（对齐 OPENSPEC §4.5 / §5.2）。
 	scanDepth := cfg.ScanDepth
 	if *scanDepthFlag > 0 {
@@ -82,6 +76,23 @@ func main() {
 		return
 	}
 	runGUI(cfg)
+}
+
+// applyLanguageOption 应用 -lang 并按需持久化；预演模式只影响本次运行，不回写配置（对齐 OPENSPEC §4.7）。
+func applyLanguageOption(cfgPath string, cfg *config.Config, requested string, dryRun bool) i18n.Lang {
+	lang := i18n.Normalize(cfg.Lang)
+	if requested == "" {
+		return lang
+	}
+	lang = i18n.Normalize(requested)
+	cfg.Lang = string(lang)
+	if dryRun {
+		return lang
+	}
+	if saveErr := config.Save(cfgPath, cfg); saveErr != nil {
+		fmt.Fprintf(os.Stderr, i18n.Logs(lang).SaveCfgErr, saveErr)
+	}
+	return lang
 }
 
 // parseArgs 解析位置参数：[功能号 1-7] [路径]。

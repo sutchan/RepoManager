@@ -1,4 +1,4 @@
-// cmd/repo-manager/cli.go v2.3.14
+// cmd/repo-manager/cli.go v2.3.16
 
 package main
 
@@ -20,15 +20,18 @@ import (
 // runCLI 命令行模式：危险操作保留二次确认，预演模式跳过（对齐 OPENSPEC §4.5 / §4.7）。
 func runCLI(p platform.Platform, cfgPath string, cfg *config.Config, fn int, root string, lang i18n.Lang, opts engine.Options, useJSON bool) {
 	d := i18n.Logs(lang)
-	if err := platform.ValidateRoot(root); err != nil {
-		// S17：平台层只给哨兵错误，CLI 按当前语言本地化后再输出。
-		localized := errors.New(engine.DescribeError(lang, err))
-		if useJSON {
-			emitJSONResult(fn, root, nil, localized)
-		} else {
-			fmt.Fprintln(os.Stderr, localized)
+	// 功能 5 只安装全局依赖，不访问 REPO_ROOT；目录不存在不应阻断（对齐 OPENSPEC §3.5）。
+	if fn != 5 {
+		if err := platform.ValidateRoot(root); err != nil {
+			// S17：平台层只给哨兵错误，CLI 按当前语言本地化后再输出。
+			localized := errors.New(engine.DescribeError(lang, err))
+			if useJSON {
+				emitJSONResult(fn, root, nil, localized)
+			} else {
+				fmt.Fprintln(os.Stderr, localized)
+			}
+			os.Exit(1)
 		}
-		os.Exit(1)
 	}
 	if engine.IsDangerous(fn) && !opts.DryRun {
 		if useJSON {
@@ -42,6 +45,10 @@ func runCLI(p platform.Platform, cfgPath string, cfg *config.Config, fn int, roo
 			// 非交互环境（stdin 关闭 / EOF）不能静默当作「用户取消」，否则脚本会误判成功。
 			if readErr != nil {
 				fmt.Fprintln(os.Stderr, d.ConfirmUnavailable)
+				// -json 的 stdout 契约要求失败也为单个 JSON 对象，错误文本仍只走 stderr。
+				if useJSON {
+					emitJSONResult(fn, root, nil, errors.New(d.ConfirmUnavailable))
+				}
 				os.Exit(1)
 			}
 			if useJSON {

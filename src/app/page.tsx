@@ -1,4 +1,4 @@
-// src/app/page.tsx v2.3.14
+// src/app/page.tsx v2.3.16
 "use client";
 import { useEffect, useState } from "react";
 
@@ -177,10 +177,10 @@ export default function Home() {
                 <Card key={tw.id} id={`tweak-card-${tw.id}`}>
                   <CardContent className="py-4">
                     <div id={`tweak-head-${tw.id}`} className="mb-1 flex items-center gap-2">
-                      <Badge tone="primary">{tw.category}</Badge>
-                      <span className="font-semibold">{tw.title}</span>
+                      <Badge tone="primary">{tw.category[lang]}</Badge>
+                      <span className="font-semibold">{tw.title[lang]}</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">{tw.desc}</p>
+                    <p className="text-sm text-muted-foreground">{tw.desc[lang]}</p>
                   </CardContent>
                 </Card>
               ))}

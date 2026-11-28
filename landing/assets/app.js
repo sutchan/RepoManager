@@ -1,4 +1,4 @@
-// landing/assets/app.js v2.3.14
+// landing/assets/app.js v2.3.16
 // 语言切换：偏好持久化并做枚举校验；文案来自 dict.js，版本来自构建期生成的 version.js。
 const SUPPORTED = ["zh", "zh-Hant", "en"];
 const HTML_LANG = { zh: "zh", "zh-Hant": "zh-Hant", en: "en" };
@@ -18,6 +18,10 @@ function applyLang(lang) {
   const chosen = SUPPORTED.includes(lang) ? lang : "zh";
   const dict = DICT[chosen] || DICT.zh;
   document.documentElement.lang = HTML_LANG[chosen];
+  // 浏览器标签与分享摘要随语言切换；title/meta 带语义化 id 便于测试定位。
+  if (dict.pageTitle) document.title = dict.pageTitle;
+  const pageDesc = document.getElementById("landing-page-description");
+  if (pageDesc && dict.pageDesc) pageDesc.setAttribute("content", dict.pageDesc);
   document.querySelectorAll("[data-i18n]").forEach((el) => {
     const value = dict[el.dataset.i18n];
     if (value) el.textContent = value;

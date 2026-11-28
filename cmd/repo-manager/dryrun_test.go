@@ -1,4 +1,4 @@
-// cmd/repo-manager/dryrun_test.go v2.3.14
+// cmd/repo-manager/dryrun_test.go v2.3.16
 
 package main
 
@@ -75,5 +75,39 @@ func TestRunCLIJSONStdoutIsPureJSON(t *testing.T) {
 	}
 	if !result.OK || result.Function != 6 || len(result.Messages) == 0 {
 		t.Fatalf("JSON 结果不完整: %+v", result)
+	}
+}
+
+// TestRunCLIFunction5SkipsRootValidation 功能 5 不访问 REPO_ROOT，目录不存在也应正常预演（对齐 OPENSPEC §3.5）。
+func TestRunCLIFunction5SkipsRootValidation(t *testing.T) {
+	dir := t.TempDir()
+	cfgPath := filepath.Join(dir, "config.ini")
+	cfg, err := config.Load(cfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	missingRoot := filepath.Join(dir, "does-not-exist")
+	reader, writer, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	original := os.Stdout
+	os.Stdout = writer
+	defer func() { os.Stdout = original }()
+	// 若仍校验根目录，runCLI 会 os.Exit(1) 并直接终止测试进程。
+	runCLI(platform.New(), cfgPath, &cfg, 5, missingRoot, i18n.Zh, engine.Options{DryRun: true}, true)
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+	out, err := io.ReadAll(reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var result jsonResult
+	if err := json.Unmarshal(out, &result); err != nil {
+		t.Fatalf("stdout 应为单个 JSON 文档，得到 %q: %v", out, err)
+	}
+	if !result.OK || result.Function != 5 || result.Root != missingRoot {
+		t.Fatalf("功能 5 预演结果异常: %+v", result)
 	}
 }

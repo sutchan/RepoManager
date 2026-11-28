@@ -1,10 +1,12 @@
-// scripts/check-asset-refs.mjs v2.3.11
+// scripts/check-asset-refs.mjs v2.3.16
 // S18 冗余预防：扫描 landing/assets/ 静态资源是否被 landing/ 内源码引用。
 // 告警模式：输出未引用清单但退出码恒为 0；基线建立后再转强制门禁。
 import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const ROOT = process.cwd();
+// 以脚本位置定位仓库根，避免从其他工作目录调用时误判（与其他门禁脚本一致）。
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const ASSET_DIR = join(ROOT, "landing", "assets");
 const SCAN_DIR = join(ROOT, "landing");
 

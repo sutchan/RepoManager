@@ -1,4 +1,4 @@
-// src/components/ui/tabs.tsx v2.3.14
+// src/components/ui/tabs.tsx v2.3.16
 "use client";
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -79,9 +79,10 @@ export function TabsTrigger({ id, value, children }: { id?: string; value: strin
 
 export function TabsContent({ id, value, children, className }: { id?: string; value: string; children: React.ReactNode; className?: string }) {
   const ctx = React.useContext(Ctx)!;
-  if (ctx.value !== value) return null;
+  const active = ctx.value === value;
+  // 非激活面板保留在 DOM 并用 hidden 隐藏：aria-controls 始终指向真实存在的 tabpanel（WCAG 4.1.2）。
   return (
-    <div id={id ?? `tab-content-${value}`} role="tabpanel" aria-labelledby={`tab-${value}`} className={cn("mt-4", className)}>
+    <div id={id ?? `tab-content-${value}`} role="tabpanel" aria-labelledby={`tab-${value}`} hidden={!active} className={cn("mt-4", className)}>
       {children}
     </div>
   );

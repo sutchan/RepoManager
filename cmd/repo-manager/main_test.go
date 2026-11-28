@@ -1,11 +1,15 @@
-// cmd/repo-manager/main_test.go v2.3.6
+// cmd/repo-manager/main_test.go v2.3.16
 
 package main
 
 import (
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"repo-manager/internal/config"
+	"repo-manager/internal/i18n"
 	"repo-manager/internal/platform"
 )
 
@@ -51,5 +55,55 @@ func TestResolveRootPriority(t *testing.T) {
 	}
 	if got := resolveRoot(p, config.Config{}, ""); got != p.DefaultRepoRoot() {
 		t.Fatalf("无参数应取平台默认，得到 %q", got)
+	}
+}
+
+// TestApplyLanguageOptionDryRunDoesNotSave 确认 -dry-run -lang 不回写 config.ini（对齐 OPENSPEC §4.7）。
+func TestApplyLanguageOptionDryRunDoesNotSave(t *testing.T) {
+	dir := t.TempDir()
+	cfgPath := filepath.Join(dir, "config.ini")
+	original := "LANG=zh\n"
+	if err := os.WriteFile(cfgPath, []byte(original), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := config.Load(cfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := applyLanguageOption(cfgPath, &cfg, "en", true); got != i18n.En {
+		t.Fatalf("预演语言应为 en，得到 %q", got)
+	}
+	if cfg.Lang != "en" {
+		t.Fatalf("本次运行的配置语言应为 en，得到 %q", cfg.Lang)
+	}
+	data, err := os.ReadFile(cfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(data) != original {
+		t.Fatalf("预演不应修改 config.ini，得到 %q", data)
+	}
+}
+
+// TestApplyLanguageOptionPersists 确认非预演的 -lang 正常持久化。
+func TestApplyLanguageOptionPersists(t *testing.T) {
+	dir := t.TempDir()
+	cfgPath := filepath.Join(dir, "config.ini")
+	if err := os.WriteFile(cfgPath, []byte("LANG=zh\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := config.Load(cfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := applyLanguageOption(cfgPath, &cfg, "zh-Hant", false); got != i18n.Hant {
+		t.Fatalf("语言应为 zh-Hant，得到 %q", got)
+	}
+	data, err := os.ReadFile(cfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(data), "LANG=zh-Hant") {
+		t.Fatalf("非预演应持久化语言，得到 %q", data)
 	}
 }

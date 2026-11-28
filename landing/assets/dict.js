@@ -1,7 +1,9 @@
-// landing/assets/dict.js v2.3.14
+// landing/assets/dict.js v2.3.16
 // 三语文案（简中 → 繁中 → 英文）与产品文案同源：功能事实见 docs/OPENSPEC.md，技术栈见 docs/CONTRIBUTING.md §2.1。
 window.LANDING_DICT = {
   zh: {
+    pageTitle: "Repo Manager · 前端项目清理工具",
+    pageDesc: "Repo Manager — 面向前端与全栈开发者的跨平台清理工具：7 项功能统一管理全局 node_modules 与项目缓存，支持 GUI / CLI 与预演模式。",
     navFeatures: "功能", navDemo: "演示", navWorkflow: "使用步骤", navStack: "技术栈",
     navUpdates: "更新记录", navContact: "联系方式", navFaq: "常见问题",
     skipLink: "跳到主要内容", navAriaLabel: "主导航", langSwitchAriaLabel: "语言切换",
@@ -63,6 +65,8 @@ window.LANDING_DICT = {
     versionMissing: "版本信息待构建生成",
   },
   "zh-Hant": {
+    pageTitle: "Repo Manager · 前端專案清理工具",
+    pageDesc: "Repo Manager — 面向前端與全端開發者的跨平台清理工具：7 項功能統一管理全域 node_modules 與專案快取，支援 GUI / CLI 與預演模式。",
     navFeatures: "功能", navDemo: "演示", navWorkflow: "使用步驟", navStack: "技術棧",
     navUpdates: "更新紀錄", navContact: "聯絡方式", navFaq: "常見問題",
     skipLink: "跳至主要內容", navAriaLabel: "主導覽", langSwitchAriaLabel: "語言切換",
@@ -124,6 +128,8 @@ window.LANDING_DICT = {
     versionMissing: "版本資訊待建置產生",
   },
   en: {
+    pageTitle: "Repo Manager · Front-end project cleaner",
+    pageDesc: "Repo Manager — a cross-platform cleaner for front-end and full-stack developers: seven functions for global node_modules and project caches, with GUI / CLI and dry-run mode.",
     navFeatures: "Features", navDemo: "Demo", navWorkflow: "How it works", navStack: "Tech stack",
     navUpdates: "Changelog", navContact: "Contact", navFaq: "FAQ",
     skipLink: "Skip to main content", navAriaLabel: "Main navigation", langSwitchAriaLabel: "Language switcher",
