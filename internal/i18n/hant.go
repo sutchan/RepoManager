@@ -65,7 +65,7 @@ func init() {
 		GroupSummary:       "以下分組安裝失敗: %s",
 		PartialFailSummary: "部分操作失敗（%d 項）：%s",
 		DryRunOn:           "=== 預演模式 (dry-run)：僅顯示將執行的操作，不會修改任何檔案 ===",
-		RecursiveOn:        "[遞迴] 已啟用遞迴掃描（深度 3 層，覆蓋 monorepo 深層專案）",
+		RecursiveOn:        "[遞迴] 已啟用遞迴掃描（深度 %d 層，覆蓋 monorepo 深層專案）",
 		DryRunWrite:        "[預演] 將寫入: %s",
 		DryRunDelete:       "[預演] 將刪除: %s",
 		DryRunEnv:          "[預演] 將設定環境變數: %s",

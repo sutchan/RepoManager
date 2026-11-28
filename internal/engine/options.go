@@ -35,15 +35,19 @@ func (o Options) ctx() context.Context {
 	return context.Background()
 }
 
-// listDirs 按选项选择枚举方式：Recursive 启用 3 层深度递归（覆盖
+// scanDepth 返回有效扫描深度（1-8，非法值回落默认 3），枚举与日志共用同一口径。
+func scanDepth(opts Options) int {
+	if opts.ScanDepth < 1 || opts.ScanDepth > 8 {
+		return 3
+	}
+	return opts.ScanDepth
+}
+
+// listDirs 按选项选择枚举方式：Recursive 启用指定深度的递归（默认 3 层，覆盖
 // REPO_ROOT/monorepo/packages/app 这类典型 monorepo 结构），否则仅直接子目录。
 func listDirs(p platform.Platform, repoRoot string, opts Options) ([]string, error) {
 	if opts.Recursive {
-		depth := opts.ScanDepth
-		if depth < 1 || depth > 8 {
-			depth = 3
-		}
-		return platform.ListProjectDirsDeep(repoRoot, depth)
+		return platform.ListProjectDirsDeep(repoRoot, scanDepth(opts))
 	}
 	return p.ListProjectDirs(repoRoot)
 }
@@ -59,7 +63,7 @@ func Run(p platform.Platform, fn int, repoRoot string, lang i18n.Lang, opts Opti
 		log.Logf("%s", d.DryRunOn)
 	}
 	if opts.Recursive {
-		log.Logf("%s", d.RecursiveOn)
+		log.Logf(d.RecursiveOn, scanDepth(opts))
 	}
 	switch fn {
 	case 1:

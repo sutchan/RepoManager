@@ -107,7 +107,7 @@ func Run(cfg config.Config) {
 		runner := &functionRunner{
 			w: w, p: p, cfg: &cfg, cfgPath: cfgPath,
 			dirEntry: dirEntry, dryRunCheck: dryRunCheck, recursiveCheck: recursiveCheck,
-			progress: progress, logger: logger, cancelBtn: cancelBtn, running: &running,
+			progress: progress, logger: logger, cancelBtn: cancelBtn, langSelect: langSelect, running: &running,
 			lang: lang, dict: dict, d: i18n.Logs(lang),
 		}
 		cancelBtn.OnTapped = runner.requestCancel

@@ -27,6 +27,22 @@ func TestLoadNewKeys(t *testing.T) {
 	}
 }
 
+func TestLoadRecursiveCaseInsensitive(t *testing.T) {
+	for _, value := range []string{"TRUE", "True", "YES", "yes", "1", "true"} {
+		path := filepath.Join(t.TempDir(), "config.ini")
+		if err := os.WriteFile(path, []byte("RECURSIVE="+value+"\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		cfg, err := Load(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !cfg.Recursive {
+			t.Errorf("RECURSIVE=%q 应识别为开启", value)
+		}
+	}
+}
+
 func TestLoadDefaultRecursive(t *testing.T) {
 	cfg, err := Load(filepath.Join(t.TempDir(), "missing.ini"))
 	if err != nil {

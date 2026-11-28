@@ -68,17 +68,27 @@ func (r *functionRunner) run(fn int) {
 		r.setCancel(cancel)
 		r.setButtonsEnabled(false)
 		r.setCancelEnabled(true)
+		// 执行期间禁用语言下拉：重绘会重建 runner，导致取消函数与日志目标丢失。
+		r.setLangSelectEnabled(false)
 		r.progress.Reset()
 		go func() {
-			defer r.clearCancel()
-			defer r.running.Store(false)
-			defer r.setButtonsEnabled(true)
-			defer r.progress.Finish()
+			var runErr error
+			defer func() {
+				// 仅在成功完成时置满进度，取消 / 失败不应显示「已完成」。
+				if runErr == nil && ctx.Err() == nil {
+					r.progress.Finish()
+				}
+				r.clearCancel()
+				r.running.Store(false)
+				r.setButtonsEnabled(true)
+				r.setLangSelectEnabled(true)
+			}()
 			// V4：执行日志同时追加写入 repo-manager.log。
 			fileLog := logs.NewFileLogger(logs.DefaultPath(), r.logger)
 			defer fileLog.Close()
-			if err := r.execute(ctx, fn, root, opts, fileLog); err != nil {
-				fileLog.Logf(r.d.ErrorPrefix, err)
+			runErr = r.execute(ctx, fn, root, opts, fileLog)
+			if runErr != nil {
+				fileLog.Logf(r.d.ErrorPrefix, runErr)
 			}
 		}()
 	}
@@ -139,6 +149,21 @@ func (r *functionRunner) setCancelEnabled(enabled bool) {
 			r.cancelBtn.Enable()
 		} else {
 			r.cancelBtn.Disable()
+		}
+	})
+}
+
+// setLangSelectEnabled 在 UI 线程切换语言下拉框状态；
+// 执行中禁止重绘，确保取消按钮、日志缓冲与进度条仍指向当前 runner。
+func (r *functionRunner) setLangSelectEnabled(enabled bool) {
+	if r.langSelect == nil {
+		return
+	}
+	fyne.Do(func() {
+		if enabled {
+			r.langSelect.Enable()
+		} else {
+			r.langSelect.Disable()
 		}
 	})
 }
