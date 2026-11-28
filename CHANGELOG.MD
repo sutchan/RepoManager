@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.3.16] - 2026-11-28
+
+### Fixed
+- **功能 5 独立运行** - CLI 不再对仅需安装全局依赖的功能 5 校验 `REPO_ROOT`，默认目录不存在时也能正常预演 / 执行（对齐 OPENSPEC §3.5）
+- **`-json` 失败路径** - stdin EOF 无法完成危险操作确认时，stdout 仍输出单个 JSON 对象（`ok: false` + `error`），避免脚本拿到空文件；提示与错误文本仍只走 stderr
+- **预演零副作用** - `-dry-run -lang <语言>` 仅对本次运行生效，不再回写 `config.ini`（对齐 OPENSPEC §4.7）
+- **标签页无障碍** - 非激活 `TabsContent` 改为渲染后 `hidden`，`aria-controls` 始终指向真实存在的 `tabpanel`（WCAG 4.1.2）
+- **参考界面三语一致性** - 优化建议的类别 / 标题 / 描述改为简中 → 繁中 → 英文三语字典，随语言切换
+- **落地页 title / meta** - 浏览器标题与 meta description 随三语切换，元素带语义化 id `landing-page-title` / `landing-page-description`
+- **门禁脚本可移植性** - `check:asset-refs` 改用脚本位置定位仓库根，从任意工作目录调用均有效
+
+### Changed
+- **i18n 门禁扩围** - `check:i18n` 新增 `landing/assets/dict.js` 三语键集合与页面标题 / 描述词条校验（5 个测试）
+
+### Docs
+- **契约同步** - `CLI-REFERENCE.md` 明确 `-json` 退出码 1 的 stdout 单对象契约；`OPENSPEC.md` 补功能 5 目录无关与预演语言不落盘说明；任务清单与本变更记录同步至 v2.3.16
+
 ## [2.3.15] - 2026-11-28
 
 ### Docs

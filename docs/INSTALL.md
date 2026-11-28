@@ -1,4 +1,4 @@
-# Repo Manager 安装部署指南 v2.3.15
+# Repo Manager 安装部署指南 v2.3.16
 
 > 适用对象：从零把 Repo Manager 跑起来的使用者与 CI 维护者。产品行为契约见 [OPENSPEC.md](./OPENSPEC.md)；接口参数见 [CLI-REFERENCE.md](./CLI-REFERENCE.md)；操作步骤见 [USER-GUIDE.md](./USER-GUIDE.md)。
 
@@ -129,7 +129,7 @@ build 编号（10 位 `yymmddhhmm`）与版本号由脚本经 `-ldflags -X repo-
 
 安装 / 构建完成后按顺序验证（**严禁在真实项目根目录做删除类验证**，先建含 1-2 个假项目 `package.json` 的临时目录）：
 
-1. **版本自检**：`repo-manager -h`，应输出帮助与页脚 `v2.3.15 · build <10 位数字>`；
+1. **版本自检**：`repo-manager -h`，应输出帮助与页脚 `v2.3.16 · build <10 位数字>`；
 2. **语言持久化**：`repo-manager -lang en`，`config.ini` 出现 `LANG=en` 且无重复行；
 3. **零副作用预演**：`repo-manager -dry-run 1 <临时目录>`，输出全部为 `[预演]` 且无任何文件改动；
 4. **GUI 冒烟**：双击运行，按 [CONTRIBUTING.md §9.3](./CONTRIBUTING.md) 的 8 项清单逐项核对（语言切换、关于弹窗、功能 3 → 4 隐藏文件闭环等）；

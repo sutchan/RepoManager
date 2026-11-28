@@ -1,4 +1,4 @@
-# Repo Manager 接口文档（CLI 契约）v2.3.15
+# Repo Manager 接口文档（CLI 契约）v2.3.16
 
 > **关于 OpenAPI**：OpenAPI 规范描述 HTTP API。Repo Manager 是本地桌面 / CLI 工具，**没有 HTTP 接口**（无网络监听、无 RPC，见 [ARCHITECTURE.md §1.3](./ARCHITECTURE.md)），因此**不适用 OpenAPI 规范**，本文以等效的 CLI 接口契约承载「路径 / 方法 / 参数 / 返回 / 错误码 / 调用示例」信息。若未来引入 HTTP API（如本地守护服务），须另立 OpenAPI 文档并登记 [tasks.md](./tasks.md)。
 > 接口事实来源为 `cmd/repo-manager/main.go` 与 `internal/engine/options.go`；本文与代码冲突时以代码为准。
@@ -180,7 +180,7 @@ paths:
 | 等价状态码 | 触发条件 | 输出 / 副作用 |
 |:----------:|----------|---------------|
 | `0` | 执行成功；或用户在确认提示回答非 `Y` | 默认 stdout：`[n/m]` 进度与结果日志；`-json` 下 stdout 固定单个 JSON 对象，日志进 `messages` 并追加写 `repo-manager.log`，确认提示与错误走 stderr |
-| `1` | 配置读取失败 / 根目录无效 / stdin EOF / `engine.Run` 出错 / 非法功能号 | stderr：`[错误] ...`（`-json` 下亦走 stderr）；配置失败时不回写配置；无结构化错误 body |
+| `1` | 配置读取失败 / 根目录无效 / stdin EOF / `engine.Run` 出错 / 非法功能号 | stderr：`[错误] ...`（`-json` 下亦走 stderr）；配置失败时不回写配置；`-json` 下 stdout 仍为单个 JSON 对象（`ok: false` + `error`） |
 | `2` | `flag` 解析错误（未知参数 / 缺值 / 非法整数） | stderr：标准 `flag` 包错误；不经应用错误处理 |
 
 日志行格式为 `YYYY-MM-DD HH:MM:SS <消息>`（`logs.go`）；`Content-Type` 不适用，因为响应是进程输出而非 HTTP 消息体。

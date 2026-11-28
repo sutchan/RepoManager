@@ -45,7 +45,7 @@ func main() {
 		// 配置损坏属于真实失败，必须以非零码退出，避免脚本把失败误判为成功。
 		os.Exit(1)
 	}
-	lang = applyLanguageOption(cfgPath, cfg, *langFlag, *dryRunFlag)
+	lang = applyLanguageOption(cfgPath, &cfg, *langFlag, *dryRunFlag)
 	// 选项优先级：命令行参数 > config.ini > 默认关闭（对齐 OPENSPEC §4.5 / §5.2）。
 	scanDepth := cfg.ScanDepth
 	if *scanDepthFlag > 0 {
@@ -89,7 +89,7 @@ func applyLanguageOption(cfgPath string, cfg *config.Config, requested string, d
 	if dryRun {
 		return lang
 	}
-	if saveErr := config.Save(cfgPath, cfg); saveErr != nil {
+	if saveErr := config.Save(cfgPath, *cfg); saveErr != nil {
 		fmt.Fprintf(os.Stderr, i18n.Logs(lang).SaveCfgErr, saveErr)
 	}
 	return lang

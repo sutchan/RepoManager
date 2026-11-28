@@ -1,9 +1,25 @@
 # Repo Manager 已完成任务 (docs/tasks-done.md)
 
-> 最后更新：**2026-11-26 23:14**（新增第十五节：S4 / S5 / S17 与 T4 / T5 归档，S7 状态修正；与 [tasks.md](./tasks.md) 同步时间戳）
-> 本文件归档已完成的任务（来源：用户初始 8 项综合审查任务 + 后续 v1.2.3–v1.2.6 演进 + 本轮剩余任务 + v2.0.0 Go 迁移清单 + v2.3.1 文档体系重新规划 + v2.3.2 任务核查 + v2.3.5 审查复核 + v2.3.8 文档标准化 + v2.3.10 冗余清理 + v2.3.12 剩余任务收口）。
+> 最后更新：**2026-11-28**（新增第十六节：v2.3.16 代码审查修复归档；与 [tasks.md](./tasks.md) 同步时间戳）
+> 本文件归档已完成的任务（来源：用户初始 8 项综合审查任务 + 后续 v1.2.3–v1.2.6 演进 + 本轮剩余任务 + v2.0.0 Go 迁移清单 + v2.3.1 文档体系重新规划 + v2.3.2 任务核查 + v2.3.5 审查复核 + v2.3.8 文档标准化 + v2.3.10 冗余清理 + v2.3.12 剩余任务收口 + v2.3.16 代码审查修复）。
 > 未完成事项只在 [tasks.md](./tasks.md) 维护。
-> 结构说明：最新批次（十五→十）按倒序置顶，随后为一～九历史批次；编号沿用归档批次，不按出现顺序排列。
+> 结构说明：最新批次（十六→十）按倒序置顶，随后为一～九历史批次；编号沿用归档批次，不按出现顺序排列。
+
+## 十六、v2.3.16 代码审查修复归档（2026-11-28）
+
+| ID | 任务 | 优先级 | 状态 | 结果 |
+|----|------|--------|------|------|
+| C1 | 功能 5 误依赖仓库根目录 | 中 | 已完成 | `cmd/repo-manager/cli.go` 仅对非功能 5 校验 `REPO_ROOT`；默认目录不存在也能安装全局依赖；`dryrun_test.go` 新增回归测试（不存在目录的预演返回 `ok: true`） |
+| C2 | `-json` 失败路径 stdout 空文件 | 中 | 已完成 | stdin EOF 时先输出单个 JSON（`ok: false` + `error`）再退出 1，错误文本仍只在 stderr；`CLI-REFERENCE.md` 退出码表同步 |
+| C3 | `-dry-run -lang` 回写配置 | 中 | 已完成 | `main.go` 抽出 `applyLanguageOption`，预演仅改本次运行语言；`main_test.go` 新增预演与非预演两条断言 |
+| C4 | 参考界面标签页悬空 `aria-controls` | 中 | 已完成 | `TabsContent` 非激活时渲染并 `hidden`，不再 `return null`；`aria-controls` 始终指向真实 tabpanel |
+| C5 | 参考界面优化建议不随语言切换 | 中 | 已完成 | `repos.ts` 的 `category` / `title` / `desc` 改为三语字典，`page.tsx` 按 `lang` 取值（繁中采用台湾用语） |
+| C6 | 落地页 title / meta 固定中文 | 中 | 已完成 | `dict.js` 三语新增 `pageTitle` / `pageDesc`，`app.js` 的 `applyLang` 同步 `document.title` 与 meta；`index.html` 加 `landing-page-title` / `landing-page-description` 语义化 id |
+| C7 | i18n 门禁未覆盖 landing 字典 | 中 | 已完成 | `scripts/i18n-parity.test.mjs` 以 `vm` 沙箱加载 `dict.js`，校验三语键集合与标题 / 描述词条；`check:i18n` 现 5 个测试全绿 |
+| C8 | `check:asset-refs` 依赖调用工作目录 | 低 | 已完成 | 改用 `fileURLToPath(import.meta.url)` 定位仓库根，与其余门禁脚本一致 |
+| R9 | 版本与文档同步 | 中 | 已完成 | bump 至 v2.3.16 并同步 §8.2 全部展示位；`CHANGELOG.MD` 新增 `[2.3.16]`，OPENSPEC §3.5 / §4.7、CLI 契约与任务清单同步 |
+
+> 本节按 2026-11-28 代码与门禁实况归档；未完成任务只在 [tasks.md](./tasks.md) 维护。
 
 ## 十五、v2.3.12 剩余任务收口（2026-11-26）
 

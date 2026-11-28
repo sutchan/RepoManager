@@ -1,4 +1,4 @@
-# Repo Manager 开放规格说明书 (OpenSpec) v2.3.15
+# Repo Manager 开放规格说明书 (OpenSpec) v2.3.16
 
 > **本文定位**：产品功能规格，定义「做什么」——7 项功能的行为契约、交互方式、环境与兼容性。
 > 开发规范（编码 / 提交 / 分支 / 审查）见 [CONTRIBUTING.md](./CONTRIBUTING.md)；UI 设计规范见 [DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md)；变更历史见 [CHANGELOG.MD](../CHANGELOG.MD)；文档导航见 [docs/README.md](./README.md)。
@@ -147,6 +147,8 @@
 
 ### 3.5 功能 5：安装常用全局依赖
 
+本功能只安装全局依赖，不访问 `REPO_ROOT`；CLI 即使默认目录不存在也可执行（v2.3.16 修正）。
+
 按 5 组依次执行 `npm install -g`：
 
 | 组 | 包 |
@@ -261,7 +263,7 @@ GUI 提供 3 种目录来源：使用当前目录、手动输入完整路径（�
 ### 4.7 预演模式 (dry-run)
 
 - **入口**：CLI `-dry-run` 参数；GUI「预演模式 (dry-run)」复选框（会话级选择，不写入 `config.ini`）。
-- **行为**：`engine.Options.DryRun` 贯穿功能 1–7，仅输出「将写入 / 将删除 / 将设置环境变量 / 将安装」预演日志（`[预演]` / `[DRY-RUN]` 前缀），不修改任何业务文件与环境变量，不执行 `npm install`，且 CLI 不回写 `config.ini`、位置参数不持久化（路径仅本次生效）。日志文件 `repo-manager.log` 仍照常追加（可观测性所需，非业务副作用）。
+- **行为**：`engine.Options.DryRun` 贯穿功能 1–7，仅输出「将写入 / 将删除 / 将设置环境变量 / 将安装」预演日志（`[预演]` / `[DRY-RUN]` 前缀），不修改任何业务文件与环境变量，不执行 `npm install`，且 CLI 不回写 `config.ini`、位置参数不持久化（路径仅本次生效）。`-dry-run -lang <语言>` 的语言也只对本次运行生效（v2.3.16 修正）。日志文件 `repo-manager.log` 仍照常追加（可观测性所需，非业务副作用）。
 - **确认**：预演下危险操作（1 / 6 / 7）跳过二次确认。
 - **实现**：预演开关统一在 `internal/engine` 层短路；`internal/platform` 的删除 / 写入 / 环境变量持久化方法在预演下不会被调用。
 
