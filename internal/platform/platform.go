@@ -150,6 +150,10 @@ func ValidateRoot(root string) error {
 	if IsFilesystemRoot(root) {
 		return fmt.Errorf("%w: %s", ErrRootFilesystem, root)
 	}
+	// 符号链接可能指向文件系统根；词法判定会被绕过，解析后再校验一次。
+	if resolved, err := filepath.EvalSymlinks(root); err == nil && IsFilesystemRoot(resolved) {
+		return fmt.Errorf("%w: %s", ErrRootFilesystem, root)
+	}
 	info, err := os.Stat(root)
 	if err != nil {
 		return fmt.Errorf("%w: %s", ErrRootNotExist, root)

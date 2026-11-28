@@ -102,6 +102,11 @@ func EnableGlobalNodeModules(p platform.Platform, repoRoot string, lang i18n.Lan
 		if err := ctx.Err(); err != nil {
 			return err
 		}
+		// 与 .npmrc 写入保持一致：只删除 Node 项目的本地依赖，
+		// 避免误删 REPO_ROOT 下非前端目录中的同名目录（对齐 OPENSPEC §3.1）。
+		if !platform.IsNodeProject(dir) {
+			continue
+		}
 		nm := filepath.Join(dir, "node_modules")
 		if info, err := os.Stat(nm); err == nil && info.IsDir() {
 			if opts.DryRun {
@@ -122,7 +127,14 @@ func EnableGlobalNodeModules(p platform.Platform, repoRoot string, lang i18n.Lan
 func writeNpmrc(p platform.Platform, projectDir, globalPath string) error {
 	content := fmt.Sprintf("prefix=%s\ncache=%s\ntmp=%q\nglobal=true\nprefer-global=true\n",
 		globalPath, filepath.Join(globalPath, ".npm-cache"), p.TempDir())
-	return os.WriteFile(filepath.Join(projectDir, ".npmrc"), []byte(content), 0o644)
+	path := filepath.Join(projectDir, ".npmrc")
+	// 符号链接会跟随写到项目外文件；先删除链接再写普通文件。
+	if info, err := os.Lstat(path); err == nil && info.Mode()&os.ModeSymlink != 0 {
+		if err := p.RemoveFile(path); err != nil {
+			return err
+		}
+	}
+	return os.WriteFile(path, []byte(content), 0o644)
 }
 
 // ResetNodeConfig 功能 2：重置 Node 配置（对齐 OPENSPEC §3.2）。

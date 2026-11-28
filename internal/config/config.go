@@ -64,7 +64,7 @@ func Load(path string) (Config, error) {
 			cfg.Lang = strings.TrimSpace(value)
 		case "RECURSIVE":
 			v := strings.TrimSpace(value)
-			cfg.Recursive = v == "true" || v == "1" || strings.EqualFold(v, "yes")
+			cfg.Recursive = strings.EqualFold(v, "true") || v == "1" || strings.EqualFold(v, "yes")
 		case "EXTRA_CLEAN_DIRS":
 			cfg.ExtraCleanDirs = parseDirList(value)
 		case "SCAN_DEPTH":
@@ -183,9 +183,24 @@ func Save(path string, cfg Config) error {
 		lines = append(lines, depthLine)
 	}
 	content := strings.Join(lines, "\n")
-	tmp := path + ".tmp"
-	if err := os.WriteFile(tmp, []byte(content), 0o644); err != nil {
+	// 唯一临时文件名 + Sync：多实例并发保存时不再争用固定的 config.ini.tmp，
+	// 崩溃时也不会留下半截配置；失败时清理残留。
+	tmp, err := os.CreateTemp(filepath.Dir(path), ".config-*.tmp")
+	if err != nil {
+		return fmt.Errorf("创建临时文件失败: %w", err)
+	}
+	tmpName := tmp.Name()
+	defer os.Remove(tmpName)
+	if _, err := tmp.WriteString(content); err != nil {
+		tmp.Close()
 		return fmt.Errorf("写入临时文件失败: %w", err)
 	}
-	return os.Rename(tmp, path)
+	if err := tmp.Sync(); err != nil {
+		tmp.Close()
+		return fmt.Errorf("同步临时文件失败: %w", err)
+	}
+	if err := tmp.Close(); err != nil {
+		return fmt.Errorf("关闭临时文件失败: %w", err)
+	}
+	return os.Rename(tmpName, path)
 }

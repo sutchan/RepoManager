@@ -36,6 +36,7 @@ type functionRunner struct {
 	logger         *guiLogger
 	buttons        []*widget.Button
 	cancelBtn      *widget.Button
+	langSelect     *widget.Select
 	cancelFn       context.CancelFunc
 	cancelMu       sync.Mutex
 	running        *atomic.Bool

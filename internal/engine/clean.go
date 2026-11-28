@@ -40,8 +40,16 @@ func CleanNextCache(p platform.Platform, repoRoot string, lang i18n.Lang, opts O
 			continue
 		}
 		log.Logf(d.Processing, filepath.Base(dir))
-		if info, err := os.Stat(next); err == nil {
-			if info.IsDir() {
+		// Lstat 不跟随符号链接：.next 若被替换为链接，只删除链接本身，
+		// 避免下面的写入与属性修改破坏链接指向的项目外文件。
+		if info, err := os.Lstat(next); err == nil {
+			if info.Mode()&os.ModeSymlink != 0 {
+				if err := p.RemoveFile(next); err != nil {
+					log.Logf(d.RemoveErr, err)
+					failed.add("%s: %v", next, err)
+					continue
+				}
+			} else if info.IsDir() {
 				if err := p.RemoveAll(next); err != nil {
 					log.Logf(d.RemoveDirErr, err)
 					failed.add("%s: %v", next, err)
@@ -89,7 +97,8 @@ func RestoreNextCache(p platform.Platform, repoRoot string, lang i18n.Lang, opts
 			return err
 		}
 		next := nextCachePath(dir)
-		info, err := os.Stat(next)
+		// Lstat 不跟随符号链接，避免把链接指向的外部文件当作占位文件处理。
+		info, err := os.Lstat(next)
 		if err != nil || info.IsDir() {
 			continue // 不存在或是正常缓存目录，无需处理
 		}
@@ -98,6 +107,14 @@ func RestoreNextCache(p platform.Platform, repoRoot string, lang i18n.Lang, opts
 			continue
 		}
 		log.Logf(d.Restoring, filepath.Base(dir))
+		if info.Mode()&os.ModeSymlink != 0 {
+			// 功能 3 写入的占位若为链接，只删除链接本身。
+			if err := p.RemoveFile(next); err != nil && !os.IsNotExist(err) {
+				log.Logf(d.RemoveErr, err)
+				failed.add("%s: %v", next, err)
+			}
+			continue
+		}
 		if err := p.ClearHidden(next); err != nil {
 			log.Logf(d.ClearAttrWarn, err)
 			failed.add("%s ClearHidden: %v", next, err)
@@ -148,8 +165,27 @@ func cleanByWhitelist(p platform.Platform, repoRoot string, dirNames, fileNames 
 		if err := ctx.Err(); err != nil {
 			return err
 		}
+		// 删除前逐段拒绝符号链接并确认目标仍位于项目内，避免越界删除。
+		type targetEntry struct {
+			name string
+			path string
+		}
+		targets := make([]targetEntry, 0, len(dirNames))
+		for _, name := range dirNames {
+			target, ok := platform.ResolveCleanTarget(project, name)
+			if !ok {
+				log.Logf(d.UnsafeCleanDir, name)
+				continue
+			}
+			targets = append(targets, targetEntry{name: name, path: target})
+		}
 		if opts.DryRun {
-			for _, name := range append(dirNames, fileNames...) {
+			for _, t := range targets {
+				if _, err := os.Stat(t.path); err == nil {
+					log.Logf(d.DryRunDelete, t.path)
+				}
+			}
+			for _, name := range fileNames {
 				target := filepath.Join(project, name)
 				if _, err := os.Stat(target); err == nil {
 					log.Logf(d.DryRunDelete, target)
@@ -158,12 +194,11 @@ func cleanByWhitelist(p platform.Platform, repoRoot string, dirNames, fileNames 
 			continue
 		}
 		log.Logf(d.Cleaning, filepath.Base(project))
-		for _, name := range dirNames {
-			target := filepath.Join(project, name)
-			if _, err := os.Stat(target); err == nil {
-				if err := p.RemoveAll(target); err != nil {
-					log.Logf(d.RemoveNameErr, name, err)
-					failed.add("%s: %v", target, err)
+		for _, t := range targets {
+			if _, err := os.Stat(t.path); err == nil {
+				if err := p.RemoveAll(t.path); err != nil {
+					log.Logf(d.RemoveNameErr, t.name, err)
+					failed.add("%s: %v", t.path, err)
 				}
 			}
 		}

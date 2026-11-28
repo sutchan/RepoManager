@@ -3,6 +3,7 @@
 package platform
 
 import (
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -56,6 +57,34 @@ func IsSafeCleanDirPath(name string) bool {
 		}
 	}
 	return true
+}
+
+// ResolveCleanTarget 把受控相对路径解析为项目内的绝对清理目标。
+// 逐段拒绝符号链接，防止中间链接把 RemoveAll 导向项目外的任意目录；
+// 解析后的最终路径也必须仍位于项目目录内。
+// 返回 false 表示该目标不安全，调用方必须跳过。
+func ResolveCleanTarget(project, name string) (string, bool) {
+	if !IsSafeCleanDirPath(name) {
+		return "", false
+	}
+	base, err := filepath.EvalSymlinks(project)
+	if err != nil {
+		return "", false
+	}
+	target := base
+	for _, part := range strings.FieldsFunc(name, func(r rune) bool { return r == '/' || r == '\\' }) {
+		target = filepath.Join(target, part)
+		if info, err := os.Lstat(target); err == nil && info.Mode()&os.ModeSymlink != 0 {
+			return "", false
+		}
+	}
+	if resolved, err := filepath.EvalSymlinks(target); err == nil {
+		rel, err := filepath.Rel(base, resolved)
+		if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+			return "", false
+		}
+	}
+	return target, true
 }
 
 // isReservedDeviceName 判断 Windows 设备保留名（不区分大小写，忽略扩展名）。

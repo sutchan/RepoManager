@@ -75,7 +75,10 @@ func runCLI(p platform.Platform, cfgPath string, cfg *config.Config, fn int, roo
 		}
 		os.Exit(1)
 	}
-	// 命令行模式记住本次使用的目录
+	// 命令行模式记住本次使用的目录；预演不写盘（对齐 OPENSPEC §4.7「不修改任何文件」）。
+	if opts.DryRun {
+		return
+	}
 	cfg.RepoRoot = root
 	if err := config.Save(cfgPath, *cfg); err != nil {
 		fmt.Fprintf(os.Stderr, d.SaveCfgErr, err)
