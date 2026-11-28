@@ -1,4 +1,4 @@
-# Repo Manager 开放规格说明书 (OpenSpec) v2.3.13
+# Repo Manager 开放规格说明书 (OpenSpec) v2.3.14
 
 > **本文定位**：产品功能规格，定义「做什么」——7 项功能的行为契约、交互方式、环境与兼容性。
 > 开发规范（编码 / 提交 / 分支 / 审查）见 [CONTRIBUTING.md](./CONTRIBUTING.md)；UI 设计规范见 [DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md)；变更历史见 [CHANGELOG.MD](../CHANGELOG.MD)；文档导航见 [docs/README.md](./README.md)。
@@ -204,12 +204,15 @@ GUI 提供 3 种目录来源：使用当前目录、手动输入完整路径（�
 | `-lang zh\|zh-Hant\|en` | 设置语言并写入 `config.ini`（`tw` / `zh-TW` 归繁中，其余非法值回落简中） | `repo-manager -lang zh-Hant` |
 | `-dry-run` | 预演模式：仅显示将要执行的操作，不修改任何文件（见 §4.7） | `repo-manager -dry-run 6` |
 | `-recursive` | 递归扫描 monorepo 深层项目（深度默认 3 层（1–8 可配），见 §3.0；优先级高于 `config.ini`） | `repo-manager -recursive 6` |
+| `-scan-depth N` | 递归深度 1–8，`0` 回落配置值或默认 3（S6） | `repo-manager -recursive -scan-depth 7 6` |
+| `-json` | 仅 CLI 模式：stdout 输出结构化 JSON，退出码不变（S7） | `repo-manager -json 6` |
+| `-version` | 输出版本与构建信息后退出 0（S12） | `repo-manager -version` |
 | `-h` / `-help` / `--help` | 显示帮助信息（固定英文，含版本与 build 信息） | `repo-manager -h` |
 | `1`-`7` | 直接运行对应功能（命令行模式，跳过 GUI） | `repo-manager 1` |
 | 路径 | 指定仓库根目录（支持含空格路径，需引号包裹）；**仅在给出功能号时生效** | `repo-manager 6 "D:\My Projects"` |
 | 数字 + 路径 | 为指定目录直接运行功能 | `repo-manager 5 E:\Projects` |
 
-> 不带功能号时启动 GUI 并忽略位置路径；`repo-manager` 未注册 `-root` / `-version` 标志，也没有交互式文本菜单。
+> 不带功能号时启动 GUI 并忽略位置路径；`repo-manager` 未注册 `-root` 标志，也没有交互式文本菜单。数字但不在 1–7 的首参报错退出 1，非数字按路径解析（GUI 模式下忽略并提示）。
 > CLI 与 GUI 的执行日志同步追加写入可执行文件同目录的 `repo-manager.log`（v2.3.0，见 §6.2）。
 
 ### 4.4 主菜单
@@ -258,7 +261,7 @@ GUI 提供 3 种目录来源：使用当前目录、手动输入完整路径（�
 ### 4.7 预演模式 (dry-run)
 
 - **入口**：CLI `-dry-run` 参数；GUI「预演模式 (dry-run)」复选框（会话级选择，不写入 `config.ini`）。
-- **行为**：`engine.Options.DryRun` 贯穿功能 1–7，仅输出「将写入 / 将删除 / 将设置环境变量 / 将安装」预演日志（`[预演]` / `[DRY-RUN]` 前缀），不修改任何文件与环境变量，不执行 `npm install`。
+- **行为**：`engine.Options.DryRun` 贯穿功能 1–7，仅输出「将写入 / 将删除 / 将设置环境变量 / 将安装」预演日志（`[预演]` / `[DRY-RUN]` 前缀），不修改任何业务文件与环境变量，不执行 `npm install`，且 CLI 不回写 `config.ini`。日志文件 `repo-manager.log` 仍照常追加（可观测性所需，非业务副作用）。
 - **确认**：预演下危险操作（1 / 6 / 7）跳过二次确认。
 - **实现**：预演开关统一在 `internal/engine` 层短路；`internal/platform` 的删除 / 写入 / 环境变量持久化方法在预演下不会被调用。
 
@@ -310,12 +313,14 @@ REPO_ROOT=E:\Github
 LANG=zh
 RECURSIVE=false
 EXTRA_CLEAN_DIRS=
+SCAN_DEPTH=3
 ```
 
 **新增键（v2.3.0）**：
-- `RECURSIVE`：`true|1|yes` 启用递归扫描 monorepo 深层项目（深度默认 3 层（1–8 可配），见 §3.0 / §7.3 L3），默认 `false`；CLI `-recursive` 优先级更高。
-- `EXTRA_CLEAN_DIRS`：逗号分隔的自定义清理目录名，并入功能 6 / 7 白名单，**仅限项目目录内部匹配**；留空表示无自定义项。
-- **安全约束（v2.3.2 起）**：只接受目录名，禁止路径分隔符、`..`、绝对路径、盘符（如 `C:`）与 Windows 保留设备名；非法项由 `IsSafeCleanDirPath` 拒绝（三语警告后跳过，不影响其余项）。仅匹配项目目录内部的一级子目录，不会删除 `REPO_ROOT` 顶层项，也不覆盖功能 6 / 7 既有白名单。
+- `RECURSIVE`：`true|1|yes`（大小写不敏感）启用递归扫描 monorepo 深层项目（深度默认 3 层（1–8 可配），见 §3.0 / §7.3 L3），默认 `false`；CLI `-recursive` 优先级更高。
+- `SCAN_DEPTH`（S6）：递归深度 1–8，非法值回落 3；CLI `-scan-depth` 优先级更高。
+- `EXTRA_CLEAN_DIRS`：逗号分隔的自定义清理目录，并入功能 6 / 7 白名单，**仅限项目目录内部匹配**；留空表示无自定义项。
+- **安全约束（v2.3.2 起，v2.3.14 加固）**：支持单级目录名与受限相对子路径（S3），逐段拒绝 `..`、绝对路径、盘符与 Windows 保留设备名；非法项由 `IsSafeCleanDirPath` 拒绝（三语警告后跳过）。删除前 `ResolveCleanTarget` 逐段拒绝符号链接并确认解析结果仍位于项目目录内，防止中间链接把 `RemoveAll` 导向项目外；不会删除 `REPO_ROOT` 顶层项，也不覆盖功能 6 / 7 既有白名单。
 
 **`lang.ini`**：首部 `LANG=` 记录当前语言选择；`[en]` / `[zh]` 两节保存中英文文案参考。Go 程序**不从该节读取文案**（文案在 `internal/i18n` 中定义），此文件为 v1.x 历史保留。`-lang` 参数不得覆盖本文件。
 
@@ -434,7 +439,8 @@ npm run check:docs                          # 校验所有 Markdown 相对链接
 
 ### 9.3 覆盖范围说明
 
-- 当前共 **21 个 `*_test.go`**（其中 1 个为测试辅助文件 `internal/engine/testkit_test.go`）、**64 个 `Test*` 函数**，覆盖 8 个包：`internal/buildinfo`（页脚格式）、`internal/config`（配置读写与新键）、`internal/engine`（功能 1～7、预演、递归、失败汇总与取消上下文）、`internal/i18n`（字典完整性）、`internal/logs`（日志落盘）、`internal/platform`（目录枚举、路径校验与哨兵错误）、`cmd/repo-manager`（参数优先级与 `-json` 契约）、`internal/ui`（有界日志缓冲、进度解析、语言选择、功能按钮与取消按钮）。CI 以 `-tags nogui` 运行全部测试，并以 `-tags ci` 运行 GUI 组件测试。
+- 当前共 **24 个 `*_test.go`**（其中 1 个为测试辅助文件 `internal/engine/testkit_test.go`）、**72 个 `Test*` 函数**，覆盖 8 个包：`internal/buildinfo`（页脚格式）、`internal/config`（配置读写与新键）、`internal/engine`（功能 1～7、预演、递归、失败汇总与取消上下文）、`internal/i18n`（字典完整性）、`internal/logs`（日志落盘）、`internal/platform`（目录枚举、路径校验与哨兵错误）、`cmd/repo-manager`（参数优先级与 `-json` 契约）、`internal/ui`（有界日志缓冲、进度解析、语言选择、功能按钮与取消按钮）。CI 以 `-tags nogui` 运行全部测试，并以 `-tags ci` 运行 GUI 组件测试。
+- v2.3.14 回归补强：符号链接越界防护（根目录 / 自定义清理目录 / `.next` 占位）、功能 1 只删除 Node 项目依赖、预演不回写配置、递归深度日志、三语原始字典完整性与 `RECURSIVE` 大小写；数据按当前仓库实算，新增测试后须同步本段。
 - `cmd/repo-manager` 与 `internal/ui` 的**入口纯逻辑与关键组件已覆盖**（见上），但完整 GUI 事件循环与对话框流程仍依赖 [§9.2](./CONTRIBUTING.md) 的手动冒烟清单；数据按当前仓库实算，新增测试后须同步本段。
 - 历史版本文档中的「功能 1～7 ✅ 通过」是当时的手工验证结论，不作为当前自动化覆盖证据。
 

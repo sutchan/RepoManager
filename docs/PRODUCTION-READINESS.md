@@ -1,4 +1,4 @@
-# Repo Manager 生产就绪规范 (Production Readiness) v2.3.13
+# Repo Manager 生产就绪规范 (Production Readiness) v2.3.14
 
 > **定位**：定义产品达到「可投入生产环境」所需的质量门槛与验收口径，是八类非功能要求的**单一来源**。
 > **权威关系**：本文说「要达到什么程度」；[`CONTRIBUTING.md`](./CONTRIBUTING.md) 说「怎么开发与评审」；[`MAINTAINERS.md`](./MAINTAINERS.md) 说「怎么发布与维护」；[`OPENSPEC.md`](./OPENSPEC.md) 是功能行为契约。
@@ -31,7 +31,7 @@
 ## 2. 测试策略（单元 / 集成 / 端到端）与覆盖率
 
 ### 2.1 已具备
-- 当前 **21 个 `*_test.go`、64 个 `Test*` 函数**，覆盖 `buildinfo` / `config` / `engine` / `i18n` / `logs` / `platform` / `cmd/repo-manager` / `internal/ui` 八个包（`OPENSPEC.md` §9.3）；CI 以 `-tags nogui` 运行 `go test -count=1`（含 `-race`），并以 `-tags ci` 运行 GUI 组件测试。
+- 当前 **24 个 `*_test.go`、72 个 `Test*` 函数**，覆盖 `buildinfo` / `config` / `engine` / `i18n` / `logs` / `platform` / `cmd/repo-manager` / `internal/ui` 八个包（`OPENSPEC.md` §9.3）；CI 以 `-tags nogui` 运行 `go test -count=1`（含 `-race`），并以 `-tags ci` 运行 GUI 组件测试。
 - §4.6 要求业务函数可测：扫描 / 白名单 / 配置 / 文案等纯逻辑须有测试，平台差异用接口隔离。
 - CLI 入口纯逻辑（`parseArgs` / `resolveRoot` / `-json` 契约）与 GUI 关键组件（语言选择 / 功能按钮 / 取消按钮 / 日志缓冲 / 进度解析）已覆盖测试；完整 GUI 事件循环与跨平台发版前仍按 `CONTRIBUTING.md` §9.3 做**手动冒烟**（隔离临时目录）。
 

@@ -1,4 +1,4 @@
-# Repo Manager 接口文档（CLI 契约）v2.3.13
+# Repo Manager 接口文档（CLI 契约）v2.3.14
 
 > **关于 OpenAPI**：OpenAPI 规范描述 HTTP API。Repo Manager 是本地桌面 / CLI 工具，**没有 HTTP 接口**（无网络监听、无 RPC，见 [ARCHITECTURE.md §1.3](./ARCHITECTURE.md)），因此**不适用 OpenAPI 规范**，本文以等效的 CLI 接口契约承载「路径 / 方法 / 参数 / 返回 / 错误码 / 调用示例」信息。若未来引入 HTTP API（如本地守护服务），须另立 OpenAPI 文档并登记 [tasks.md](./tasks.md)。
 > 接口事实来源为 `cmd/repo-manager/main.go` 与 `internal/engine/options.go`；本文与代码冲突时以代码为准。
@@ -43,19 +43,20 @@ repo-manager [flags] [功能号 1-7] [路径]
 
 | 位置 | 取值 | 说明 |
 |------|------|------|
-| 1 | `1`-`7` | 功能编号；不是 1-7 数字的首参不作为功能号（进 GUI） |
-| 2 | 目录路径 | 本次执行的 `REPO_ROOT`，执行成功后写回 `config.ini` |
+| 1 | `1`-`7` | 功能编号；数字但不在 1–7 → 报错退出 1；非数字 → 按路径解析（GUI 模式下被忽略并提示） |
+| 2 | 目录路径 | 本次执行的 `REPO_ROOT`；仅 CLI 模式且非预演时执行成功后写回 `config.ini` |
 
 ---
 
 ## 2. 退出码定义
 
-仅 3 个退出码（`main.go`），`-json` 不改变该契约：
+共 3 种退出码（`main.go`），`-json` 不改变该契约：
 
 | 退出码 | 场景 |
 |:------:|------|
 | `0` | 成功结束；含用户在确认提示回答非 `Y`（正常文本模式打印「已取消」；`-json` 模式在 stdout 输出 `ok: true` 且 `messages` 含取消文案） |
-| `1` | 五类失败：① `config.ini` 读取失败（禁止回写并以非零码终止；`-h` 仍返回 0）；② 根目录校验失败（不存在 / 非目录 / 文件系统根）；③ 非交互环境读确认输入失败（stdin EOF / 关闭，**不算用户取消**）；④ `engine.Run` 执行出错；⑤ 非法功能号（数字但不在 1–7，S12） |
+| `1` | 五类失败：① `config.ini` 读取失败（禁止回写并以非零码终止；`-h` 仍返回 0）；② 根目录校验失败（不存在 / 非目录 / 文件系统根，含指向根的符号链接）；③ 非交互环境读确认输入失败（stdin EOF / 关闭，**不算用户取消**）；④ `engine.Run` 执行出错；⑤ 非法功能号（数字但不在 1–7） |
+| `2` | 标准 `flag` 包解析错误（未知参数、缺少取值、整数参数非法）；由 Go `flag.CommandLine` 直接退出，不经应用自身错误处理 |
 
 脚本侧应把非 0 一律视为失败；「取消」与「成功」同为 0，可用 `-json` 的 `messages` 字段区分（S7 已落地）。
 
@@ -65,10 +66,10 @@ repo-manager [flags] [功能号 1-7] [路径]
 
 | 内容 | 流 | 证据 |
 |------|----|------|
-| 错误信息（`[错误] ...`） | stderr | `log.go:94` |
-| 危险操作确认提示（`是否继续? [Y/N]: `） | stdout | `log.go:97` |
-| 正常执行日志（含 `[预演]` / `[n/m]` 进度 / `[警告]`） | stdout | `engine.go:23-27` |
-| 全部执行日志（带 `2006-01-02 15:04:05` 时间戳） | 同时追加写 exe 同目录 `repo-manager.log` | `main.go:114-116`、`logs.go` |
+| 错误信息（`[错误] ...`） | stderr | `internal/i18n.LogDict.ErrorPrefix` |
+| 危险操作确认提示（`是否继续? [Y/N]: `） | stdout | `internal/i18n.LogDict.ConfirmCLI` |
+| 正常执行日志（含 `[预演]` / `[n/m]` 进度 / `[警告]`） | stdout | `cmd/repo-manager/cli.go` 的 `runCLI` |
+| 全部执行日志（带 `2006-01-02 15:04:05` 时间戳） | 同时追加写 exe 同目录 `repo-manager.log` | `logs.NewFileLogger`（CLI / GUI 入口各调用一次） |
 
 确认交互规则：`TrimSpace` 后必须 `EqualFold "Y"` 才执行；stdin 读取失败 → stderr 提示并退出 1（不静默当作取消）。
 
@@ -78,8 +79,8 @@ repo-manager [flags] [功能号 1-7] [路径]
 
 - 路径：可执行文件同目录 `config.ini`（便携式）；格式 INI，`键=值`，`#` 注释保留。
 - 键共 5 个：`REPO_ROOT` / `LANG` / `RECURSIVE` / `EXTRA_CLEAN_DIRS` / `SCAN_DEPTH`，语义见 [INSTALL.md §3](./INSTALL.md)。
-- 写入为原子替换（临时文件 + `os.Rename`）；读取失败（非「文件不存在」）时 CLI 禁止回写并报错退出，防止损坏配置被覆盖。
-- `RECURSIVE` 接受 `true` / `1` / `yes`；`EXTRA_CLEAN_DIRS` 支持安全单级目录名与受限相对子路径（逐段校验，拒绝 `..` / 绝对路径 / 保留设备名），不合格直接丢弃并告警（S3）；`SCAN_DEPTH` 取 1–8，非法值回落 3（S6）。
+- 写入为原子替换（唯一临时文件 + `Sync` + `os.Rename`）；读取失败（非「文件不存在」）时 CLI 禁止回写并报错退出，防止损坏配置被覆盖。预演模式不回写配置。
+- `RECURSIVE` 接受 `true` / `1` / `yes`（均大小写不敏感）；`EXTRA_CLEAN_DIRS` 支持安全单级目录名与受限相对子路径（逐段校验，拒绝 `..` / 绝对路径 / 保留设备名；删除前逐段拒绝符号链接并确认目标仍在项目内），不合格直接丢弃并告警（S3）；`SCAN_DEPTH` 取 1–8，非法值回落 3（S6）。
 
 ---
 
@@ -164,8 +165,9 @@ paths:
 | `recursive` | flag | 否 | boolean | 递归扫描；深度由 `scanDepth` 控制（默认 3） |
 | `scanDepth` | flag | 否 | integer 1–8 | 递归深度；`0` 使用 `config.ini:SCAN_DEPTH` 或默认 3（S6） |
 | `json` | flag | 否 | boolean | 仅 CLI：stdout 输出 `jsonResult`，退出码不变（S7） |
-| `h` / `help` | flag | 否 | boolean | 输出帮助 + 版本页脚后退出 0；在读取配置之前处理 |
-| `function` | positional | 否 | integer `1`–`7` | 缺省启动 GUI；非 1–7 的首参按路径解析（已知行为，改进列 S12） |
+| `h` / `help` | flag | 否 | boolean | 输出帮助 + 版本页脚后退出 0；在读取配置之后、错误检查之前处理（仅 `-version` 在读取配置前） |
+| `version` | flag | 否 | boolean | 直接输出 `buildinfo.BuildInfo()` 后退出 0；在读取配置之前处理 |
+| `function` | positional | 否 | integer `1`–`7` | 缺省启动 GUI；数字但不在 1–7 → 报错退出 1；非数字按路径解析（GUI 模式下忽略并提示） |
 | `repoRoot` | positional | 否 | string (path) | 优先级：命令行 > `config.ini:REPO_ROOT` > 平台默认 |
 
 ### A.3 返回定义（OpenAPI response 风格）
@@ -173,7 +175,8 @@ paths:
 | 等价状态码 | 触发条件 | 输出 / 副作用 |
 |:----------:|----------|---------------|
 | `0` | 执行成功；或用户在确认提示回答非 `Y` | stdout：`[n/m]` 进度与结果日志；同时追加写 `repo-manager.log` |
-| `1` | 配置读取失败 / 根目录无效 / stdin EOF / `engine.Run` 出错 | stderr：`[错误] ...`；配置失败时不回写配置；无结构化错误 body |
+| `1` | 配置读取失败 / 根目录无效 / stdin EOF / `engine.Run` 出错 / 非法功能号 | stderr：`[错误] ...`；配置失败时不回写配置；无结构化错误 body |
+| `2` | `flag` 解析错误（未知参数 / 缺值 / 非法整数） | stderr：标准 `flag` 包错误；不经应用错误处理 |
 
 日志行格式为 `YYYY-MM-DD HH:MM:SS <消息>`（`logs.go`）；`Content-Type` 不适用，因为响应是进程输出而非 HTTP 消息体。
 

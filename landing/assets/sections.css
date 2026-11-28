@@ -1,4 +1,4 @@
-/* landing/assets/sections.css v2.3.13 */
+/* landing/assets/sections.css v2.3.14 */
 /* 新增板块样式：演示 / 更新记录 / 联系方式；令牌沿用 styles.css，不引入第二套配色 */
 
 /* 演示：双栏示例与等宽命令块，窄屏单列；代码块可横向滚动不撑破容器 */
@@ -19,7 +19,7 @@
 }
 .demo-note { margin: var(--sp-4) 0 0; font-size: 13px; color: var(--muted-foreground); }
 
-/* 更新记录：版本徽标 + 时间 + 摘要，窄屏纵向堆叠 */
+/* 更新记录：日期 + 摘要，版本只在页脚展示；窄屏纵向堆叠 */
 .updates-list, .contact-list { list-style: none; margin: 0 0 var(--sp-4); padding: 0; }
 .updates-list li, .contact-list li {
   display: flex;
@@ -31,7 +31,6 @@
   font-size: 13px;
 }
 .updates-list time { color: var(--muted-foreground); font-variant-numeric: tabular-nums; }
-.update-ver { font-weight: 700; color: var(--primary); font-variant-numeric: tabular-nums; }
 .updates-list li span:last-child { flex: 1 1 240px; color: var(--muted-foreground); }
 
 /* 联系方式：标题 + 说明 + 外链三段式 */

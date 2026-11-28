@@ -1,4 +1,4 @@
-// landing/assets/app.js v2.3.13
+// landing/assets/app.js v2.3.14
 // 语言切换：偏好持久化并做枚举校验；文案来自 dict.js，版本来自构建期生成的 version.js。
 const SUPPORTED = ["zh", "zh-Hant", "en"];
 const HTML_LANG = { zh: "zh", "zh-Hant": "zh-Hant", en: "en" };

@@ -1,4 +1,4 @@
-// internal/i18n/log.go v2.3.12
+// internal/i18n/log.go v2.3.14
 
 package i18n
 

@@ -4,6 +4,33 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.3.14] - 2026-11-28
+
+### Security
+- **符号链接越界防护** - 新增 `platform.ResolveCleanTarget`，自定义清理目录逐段拒绝符号链接并确认解析结果仍在项目内，杜绝中间链接把 `RemoveAll` 导向项目外；`ValidateRoot` 对符号链接解析后再判文件系统根
+- **`.next` / `.npmrc` 占位写入** - 功能 3/4 改用 `Lstat` 识别符号链接并只删除链接本身，避免覆盖链接指向的项目外文件；功能 1 写 `.npmrc` 前先移除符号链接
+
+### Fixed
+- **功能 1 删除范围** - 本地 `node_modules` 删除循环补齐 Node 项目过滤，不再误删 `REPO_ROOT` 下非前端目录中的同名目录
+- **预演零副作用** - CLI 预演不再回写 `config.ini`（日志仍照常落盘），对齐 OPENSPEC §4.7
+- **配置保存原子性** - 改用唯一临时文件 + `Sync` + `Rename`，避免多实例争用固定 `.config.tmp`；`RECURSIVE` 解析改为大小写不敏感
+- **GUI 执行期交互** - 执行期间禁用语言下拉，防止重绘丢失取消函数与日志目标；取消 / 失败不再把进度条置满
+- **递归深度日志** - `RecursiveOn` 改为格式串并传实际深度，`-scan-depth 7` 不再误报「深度 3」
+- **三语校验与测试构造** - 新增原始字典全字段断言（字段级回退不再掩盖漏配）；修正 npm 超时测试重复传入 `install -g` 的参数错误
+
+### Added
+- **回归测试** - 新增符号链接越界、功能 1 边界、`.next` 链接保护、预演无副作用、递归深度等用例；全仓 24 个测试文件 / 72 个 `Test*` 函数 / 8 个包
+- **语义化 ID 与无障碍** - 参考界面补 `app-version`、统计值与语言标签 id、语言组 `aria-pressed`，Tabs 补 `tablist` / `aria-controls` / `aria-labelledby` 与方向键导航；落地页补重复项语义 id、三语无障碍标签与 FAQ 导航
+- **日志权限** - `repo-manager.log` 由 0644 收紧为 0600，避免多用户机器读取本机路径信息
+
+### Changed
+- **落地页令牌对齐** - 浅色 `--primary` / `--muted-foreground`、标题字阶与字体栈统一到 `docs/tokens.json`；移除功能更新区的非页脚硬编码版本号
+- **源码拆分** - `internal/engine/clean.go` 拆出 `whitelist.go`、`internal/config/config.go` 拆出 `save.go`，全仓源码仍 ≤ 200 行
+- **文档同步** - CLI 契约补退出码 2、`-version` / `-json` / `-scan-depth` 与参数边界；OPENSPEC 同步预演边界、清理目录安全约束与测试计数；DESIGN-SYSTEM 去除 Fyne 章节的 DOM 描述
+- **版本同步** - bump 至 2.3.14，权威源与全部展示位同步，落地页版本文件重新生成
+
+---
+
 ## [2.3.13] - 2026-11-28
 
 ### Added

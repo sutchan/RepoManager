@@ -1,4 +1,4 @@
-// landing/assets/dict.js v2.3.13
+// landing/assets/dict.js v2.3.14
 // 三语文案（简中 → 繁中 → 英文）与产品文案同源：功能事实见 docs/OPENSPEC.md，技术栈见 docs/CONTRIBUTING.md §2.1。
 window.LANDING_DICT = {
   zh: {
