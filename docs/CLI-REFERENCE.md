@@ -67,11 +67,13 @@ repo-manager [flags] [功能号 1-7] [路径]
 | 内容 | 流 | 证据 |
 |------|----|------|
 | 错误信息（`[错误] ...`） | stderr | `internal/i18n.LogDict.ErrorPrefix` |
-| 危险操作确认提示（`是否继续? [Y/N]: `） | stdout | `internal/i18n.LogDict.ConfirmCLI` |
-| 正常执行日志（含 `[预演]` / `[n/m]` 进度 / `[警告]`） | stdout | `cmd/repo-manager/cli.go` 的 `runCLI` |
+| 危险操作确认提示（`是否继续? [Y/N]: `） | 默认 stdout；`-json` 下走 stderr | `internal/i18n.LogDict.ConfirmCLI` |
+| 正常执行日志（含 `[预演]` / `[n/m]` 进度 / `[警告]`） | 默认 stdout；`-json` 下不直接输出（进 `messages` 与日志文件） | `cmd/repo-manager/cli.go` 的 `runCLI` |
 | 全部执行日志（带 `2006-01-02 15:04:05` 时间戳） | 同时追加写 exe 同目录 `repo-manager.log` | `logs.NewFileLogger`（CLI / GUI 入口各调用一次） |
 
 确认交互规则：`TrimSpace` 后必须 `EqualFold "Y"` 才执行；stdin 读取失败 → stderr 提示并退出 1（不静默当作取消）。
+
+`-json` 模式 stdout 固定为单个 JSON 对象；执行日志只进 `messages` 与 `repo-manager.log`，确认提示与错误走 stderr，不直接输出到 stdout。
 
 ---
 
@@ -104,6 +106,9 @@ repo-manager -lang en -recursive 7 ~/Github
 
 # 语言偏好持久化（写回 config.ini）
 repo-manager -lang zh-Hant
+
+# `-json` 脚本集成：stdout 固定单个 JSON 对象（日志进 messages，错误进 stderr）
+repo-manager -json 3 ~/Github > result.json 2>err.log; echo "exit=$?"; jq -r '.ok, (.messages[]?)' result.json
 ```
 
 ```powershell
@@ -174,8 +179,8 @@ paths:
 
 | 等价状态码 | 触发条件 | 输出 / 副作用 |
 |:----------:|----------|---------------|
-| `0` | 执行成功；或用户在确认提示回答非 `Y` | stdout：`[n/m]` 进度与结果日志；同时追加写 `repo-manager.log` |
-| `1` | 配置读取失败 / 根目录无效 / stdin EOF / `engine.Run` 出错 / 非法功能号 | stderr：`[错误] ...`；配置失败时不回写配置；无结构化错误 body |
+| `0` | 执行成功；或用户在确认提示回答非 `Y` | 默认 stdout：`[n/m]` 进度与结果日志；`-json` 下 stdout 固定单个 JSON 对象，日志进 `messages` 并追加写 `repo-manager.log`，确认提示与错误走 stderr |
+| `1` | 配置读取失败 / 根目录无效 / stdin EOF / `engine.Run` 出错 / 非法功能号 | stderr：`[错误] ...`（`-json` 下亦走 stderr）；配置失败时不回写配置；无结构化错误 body |
 | `2` | `flag` 解析错误（未知参数 / 缺值 / 非法整数） | stderr：标准 `flag` 包错误；不经应用错误处理 |
 
 日志行格式为 `YYYY-MM-DD HH:MM:SS <消息>`（`logs.go`）；`Content-Type` 不适用，因为响应是进程输出而非 HTTP 消息体。

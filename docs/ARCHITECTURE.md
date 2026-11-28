@@ -54,7 +54,7 @@ Repo Manager 是一个**本地单文件桌面 / CLI 工具**，围绕 `REPO_ROOT
 | GUI 渲染依赖 | go-gl/gl + go-gl/glfw v3.4（间接依赖） | Fyne 默认标签经 OpenGL 渲染；Linux 下需 X11 + Wayland 开发库（见 [INSTALL.md §2](./INSTALL.md)） |
 | 构建注入 | `-ldflags -X`（`scripts/build.ps1:47` / `build.sh:45-47`） | 版本号与 build 编号构建期注入，运行期稳定（[CONTRIBUTING.md §8.2](./CONTRIBUTING.md)） |
 | 国际化 | 内置 `internal/i18n`（无第三方库） | 仅 3 种语言 `zh` / `zh-Hant` / `en`，词条量小，避免依赖膨胀 |
-| 配置 | INI（`internal/config` 自实现） | 4 个键、保留注释与未知行、原子替换，无需解析库 |
+| 配置 | INI（`internal/config` 自实现） | 5 个键、保留注释与未知行、原子替换，无需解析库 |
 
 **弃用说明**：仓库根 `src/`（Next.js 参考界面）自 v2.0.0 起弃用，仅作 UI 参考保留，不参与产品构建；`RepoCleaner.bat` / `lang.ini` 为 v1.x 遗留参考。
 
@@ -87,7 +87,7 @@ graph TD
     LOGS --> ENG
 ```
 
-**关键约束**：`engine` 只依赖 `platform.Platform` 接口（`internal/platform/platform.go:16-39`，10 个方法），**禁止直接调用 OS 命令或平台 API**；所有平台差异（隐藏属性、环境变量、默认根目录）收敛到 `platform_windows.go` / `platform_unix.go` 两个实现文件。
+**关键约束**：`engine` 只依赖 `platform.Platform` 接口（`internal/platform/platform.go` 的 `Platform`，10 个方法），**禁止直接调用 OS 命令或平台 API**；所有平台差异（隐藏属性、环境变量、默认根目录）收敛到 `platform_windows.go` / `platform_unix.go` 两个实现文件。
 
 ### 3.2 三种构建形态
 
@@ -99,7 +99,7 @@ graph TD
 
 ### 3.3 配置与持久化
 
-`config.ini` 位于**可执行文件同目录**（便携式，`internal/config/config.go:29-35`），共 5 个键：`REPO_ROOT` / `LANG` / `RECURSIVE` / `EXTRA_CLEAN_DIRS` / `SCAN_DEPTH`。保存采用「读旧 → 过滤 → 补写 → 写临时文件 → `os.Rename` 原子替换」（`config.go:89-157`），读旧失败即取消保存，防止损坏文件被覆盖。运行日志 `repo-manager.log` 同样落在 exe 同目录（`internal/logs/logs.go:18-24`）。
+`config.ini` 位于**可执行文件同目录**（便携式，见 `internal/config/config.go` 的 `Path`），共 5 个键：`REPO_ROOT` / `LANG` / `RECURSIVE` / `EXTRA_CLEAN_DIRS` / `SCAN_DEPTH`。保存采用「读旧 → 过滤 → 补写 → 临时文件 `Sync` → `os.Rename` 原子替换」（见 `config.go` 的 `Save`），读旧失败即取消保存，防止损坏文件被覆盖；预演模式不回写配置。运行日志 `repo-manager.log` 同样落在 exe 同目录（见 `internal/logs/logs.go` 的 `DefaultPath`），以 `0600` 权限创建，超过 5 MB 轮转为 `repo-manager.log.1`。
 
 ---
 
@@ -177,9 +177,10 @@ flowchart LR
 
 所有清理目标只来自**枚举**，不接受任意路径：
 
-1. `EXTRA_CLEAN_DIRS` 解析时逐项过 `platform.IsSafeCleanDirPath`（`internal/platform/dirs.go:13-36`）：拒绝空值 / 首尾空白 / `.` / `..` / 长度超过 255 / 含 `/\:` / 绝对路径 / Windows 保留设备名（CON、PRN、AUX、NUL、COM1-9、LPT1-9）/ 控制字符，不合格项**直接丢弃**；
-2. 功能 6 / 7 执行时**二次校验**，仍不合格的输出 `[警告] 已忽略不安全的自定义清理目录名`（`clean.go:109-119`）；
-3. `ValidateRoot`（`platform.go:114-137`）拒绝文件系统根、不存在路径与非目录。
+1. `EXTRA_CLEAN_DIRS` 解析时逐项过 `platform.IsSafeCleanDirPath`（`internal/platform/dirs.go`）：接受单级目录名或以 `/`、`\` 分隔的受限相对子路径；逐段拒绝空段 / 首尾空白 / `.` / `..` / 长度超过 255 / 盘符 / 绝对路径 / Windows 保留设备名（CON、PRN、AUX、NUL、COM1-9、LPT1-9）/ 控制字符，不合格项**直接丢弃**；
+2. 功能 6 / 7 执行时**二次校验**，仍不合格的输出 `[警告] 已忽略不安全的自定义清理目录名`；删除前 `ResolveCleanTarget` 逐段拒绝符号链接并确认解析结果仍在项目目录内，防止链接把删除导向项目外；
+3. `ValidateRoot`（`internal/platform/platform.go`）拒绝文件系统根、不存在路径、非目录及指向根的符号链接；
+4. 功能 1 的 `.npmrc` 写入与 `node_modules` 删除都只作用于 `platform.IsNodeProject` 识别的项目目录，避免误删 `REPO_ROOT` 下非 Node 目录的同名目录。
 
 ### 6.2 Next.js 缓存的「隐藏文件」机制（功能 3 → 4）
 
@@ -187,11 +188,11 @@ flowchart LR
 
 ### 6.3 项目目录枚举
 
-`ListProjectDirs` 只枚举 `REPO_ROOT` 直接子目录；`ListProjectDirsDeep` 深度上限参数化（CLI / GUI 用 3 层），跳过 13 个依赖与产物目录（含 `.git`，`platform.go:42-46`），避免把依赖树误当项目。
+`ListProjectDirs` 只枚举 `REPO_ROOT` 直接子目录；`ListProjectDirsDeep` 深度上限参数化（默认 3 层，CLI `-scan-depth` / `SCAN_DEPTH` 可配 1–8），跳过 13 个依赖与产物目录（含 `.git`，见 `platform.go` 的 `deepSkipDirs`），避免把依赖树误当项目。递归日志使用实际深度，不会出现「配置 7 层却打印 3 层」。
 
 ### 6.4 dry-run 覆盖
 
-`-dry-run` 对功能 1-7 全部生效：所有写环境变量 / 写文件 / 删除动作改输出 `[预演] 将...`（`install.go:25-28`、`log.go:89-93`），且跳过危险操作二次确认——预演模式是**零副作用**的。
+`-dry-run` 对功能 1-7 全部生效：所有写环境变量 / 写文件 / 删除动作改输出 `[预演] 将...`（见 `internal/i18n/log.go` 的 `DryRun*` 文案），且跳过危险操作二次确认。预演不回写 `config.ini`（即位置参数不会持久化），不执行 `npm install`——预演模式是**零副作用**的。
 
 ### 6.5 版本与 build 编号
 

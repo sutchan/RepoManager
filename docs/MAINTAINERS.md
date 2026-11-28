@@ -102,7 +102,7 @@ grep 'const Version' internal/buildinfo/version.go
 | 改 UI / 令牌 | [DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md) + [tokens.json](./tokens.json) |
 | 改流程 / 命令 / CI | [CONTRIBUTING.md](./CONTRIBUTING.md) + [docs/README.md](./README.md) §4 |
 | 新增 / 删除文档 | [docs/README.md](./README.md) §1 文档地图与 §3 目录树、[CONTRIBUTING.md §3.1](./CONTRIBUTING.md)、本文 §4（根 `README.MD` 不再维护文档索引） |
-| 改落地页 / 新增根目录子目录 | [`landing/README.md`](../landing/README.md) + 四处文档登记 + `scripts/check-root-clean.mjs` 白名单（见 §5） |
+| 改落地页 / 新增根目录子目录 | [`landing/README.md`](../landing/README.md) + 三处文档登记 + CHANGELOG Docs 记录 + `scripts/check-root-clean.mjs` 白名单（见 §5） |
 | 改质量 / 安全 / 性能 / 日志 / 部署门槛 | [PRODUCTION-READINESS.md](./PRODUCTION-READINESS.md)（八类非功能要求单一来源）+ 发布检查清单 |
 | 新增 / 完成任务 | [tasks.md](./tasks.md)（唯一未完成来源）/ [tasks-done.md](./tasks-done.md)（归档） |
 | 维护者信息 / 仓库设置 | 本文 |
@@ -120,7 +120,7 @@ grep 'const Version' internal/buildinfo/version.go
 
 ## 5. 门禁与目录卫生
 
-- 自动门禁命令以 [ci.yml](../.github/workflows/ci.yml) 为准（含 `check:root-clean`、`gofmt`、`go vet` / `go test` / `go build` 的 `nogui` 标签、`go build -tags ci ./...` 的 GUI 代码编译、`npm ci`、`check:docs`；`windows-smoke` 另在 Windows runner 冒烟），完整说明见 [CONTRIBUTING.md §6.3](./CONTRIBUTING.md) 与 [OPENSPEC.md §9.1](./OPENSPEC.md)。发布侧另有 `scripts/package-release.sh`（归档）与 `npm run landing:version`（落地页版本注入，每次 bump 版本须重跑并同步 `landing/assets/version.js`）。
+- 自动门禁命令以 [ci.yml](../.github/workflows/ci.yml) 为准（含 `check:root-clean`、`gofmt`、`go vet` / `go test` / `go build` 的 `nogui` 标签、`go build -tags ci ./...` 的 GUI 代码编译、`npm ci`、`check:docs`；`windows-smoke` 另在 Windows runner 冒烟），完整说明见 [CONTRIBUTING.md §2](./CONTRIBUTING.md)（完整门禁命令在 §2）与 [OPENSPEC.md §9.1](./OPENSPEC.md)。发布侧另有 `scripts/package-release.sh`（归档）与 `npm run landing:version`（落地页版本注入，每次 bump 版本须重跑并同步 `landing/assets/version.js`）。
 - 一次性脚本、探针、日志、中间产物写 `.tmp/`；工具正式产物写 `reports/` / `coverage/` / `test-results/`；`*.code-workspace` 按后缀放行。
 - 新增根目录工程文件 / 子目录必须同时登记 `scripts/check-root-clean.mjs` 的 `ALLOWED_DIRS` 白名单，并核对 `.gitignore` 的忽略规则，二者不可脱节；`landing/` 已按此登记。落地页构建产物写 `landing/dist/` 或 `landing/out/`（由 `.gitignore` 忽略）。
 - 产品运行时生成的 `config.ini` / `repo-manager.log` 位于可执行文件同目录，不属仓库根目录卫生约束。
@@ -129,7 +129,7 @@ grep 'const Version' internal/buildinfo/version.go
 
 ## 6. 已知差距与决策记录
 
-以下为 **v2.3.3 核查后的现状**（含已修复项，不是新的待办）；未完成任务统一见 [tasks.md](./tasks.md)：
+以下为 **v2.3.14 核查后的现状（含历史修复项）**，不是新的待办；未完成任务统一见 [tasks.md](./tasks.md)：
 
 | 编号 | 现状 | 目标 / 决策 |
 |------|------|-------------|
@@ -137,7 +137,7 @@ grep 'const Version' internal/buildinfo/version.go
 | M2 | ~~已修复~~ v2.3.3：`gate` 含 `check:root-clean`，`release` job 校验同 SHA 的其它工作流全绿 | 跨工作流阻断见 §3 |
 | M3 | ~~已修复~~ v2.3.3：帮助、日志、代码与测试注释统一为 3 层，帮助固定英文 | 见 [OPENSPEC.md §7.3](./OPENSPEC.md) L6 |
 | M4 | ~~已修复~~ v2.3.3：i18n 三语齐全（zh / zh-Hant / en），切换 UI 与持久化覆盖全部语言 | 繁中别名与回退见 `internal/i18n` |
-| M5 | ~~已接受~~ **v2.3.6 部分修复**：`cmd/` 已补 `parseArgs` / `resolveRoot` 参数与优先级测试，`internal/ui` 新增有界日志缓冲测试，核心逻辑自动化覆盖到位；完整 GUI 交互（对话框 / 按钮点击）仍按 §9.3 冒烟，理由是无头环境无法驱动 Fyne 事件循环 | `cmd/repo-manager/main_test.go`、`internal/ui/logbuffer_test.go`；发版前按 [CONTRIBUTING.md §9.3](./CONTRIBUTING.md) 手动冒烟（清单口径已归档 D5） |
+| M5 | ~~已接受~~ **v2.3.12 S4/S5 已完成归档、v2.3.14 补执行期交互修复**：`cmd/` 与 `internal/ui` 核心逻辑自动化测试覆盖到位；完整 GUI 交互（对话框 / 按钮点击）仍按 §9.3 冒烟，理由是无头环境无法驱动完整事件循环 | `cmd/repo-manager/main_test.go`、`internal/ui/logbuffer_test.go`、`internal/ui/components_test.go`；发版前按 [CONTRIBUTING.md §9.3](./CONTRIBUTING.md) 手动冒烟（清单口径已归档 D5） |
 | M6 | ~~已修复~~ v2.3.3：产品名与技术标识、远程、应用内文案全量统一 | 同步清单见 §1 |
 
 > 修复任一项时同步更新本表、[tasks.md](./tasks.md) 与 [CHANGELOG.MD](../CHANGELOG.MD)；本表只记录决策，不替代任务跟踪。

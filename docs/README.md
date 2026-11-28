@@ -88,7 +88,7 @@ RepoManager/
 ├── internal/                                   # Go 实现：buildinfo / config / engine / i18n / logs / platform / ui
 ├── go.mod / go.sum                             # Go 模块定义与依赖锁定
 ├── RepoCleaner.bat / lang.ini                  # v1.x 旧版 Windows 脚本与文案参考（已弃用，保留兼容）
-├── config.ini                                  # 运行配置（4 键，本机生成不入库；示例见 docs/config.example.ini）
+├── config.ini                                  # 运行配置（5 键，本机生成不入库；示例见 docs/config.example.ini）
 ├── .nvmdrc / RepoManager.code-workspace       # 本机 Node 版本标记 / VS Code 工作区配置（禁止删除）
 ├── docs/                                       # 本目录：所有规范与规格
 │   ├── README.md          # 文档中心（本文）
@@ -155,6 +155,7 @@ Go 产品本体（产品当前形态）的门禁与构建：
 gofmt -l ./cmd ./internal          # 格式检查（应无输出）
 go vet -tags nogui ./...           # 静态检查（无 C 工具链时）
 go test -tags nogui -count=1 ./... # 单元测试
+go test -tags ci -count=1 ./internal/ui  # GUI 组件测试（软件驱动，无需 C 工具链）
 go build -tags nogui ./...         # 编译（GUI 完整构建需 C 工具链）
 go build -tags ci ./...            # 编译 GUI 代码（ci software driver，无需 C 工具链）
 ./scripts/build.ps1                # Windows 交叉编译 6 目标到 bin/
@@ -175,8 +176,8 @@ CI 实际执行的门禁命令以 [`.github/workflows/ci.yml`](../.github/workfl
 7. 禁止创建 `.github/readme.md`（与根 README 重复）；`*.code-workspace` 是工作区配置，禁止删除（当前文件名为 `RepoManager.code-workspace`）。
 8. GitHub 平台入口（行为准则、安全、支持、Issue/PR 模板、CODEOWNERS）放 `.github/`，规范正文放 `docs/`；改动社区健康文件时同步本页 §1.1 与 [CONTRIBUTING.md §3.1](./CONTRIBUTING.md) 的文件清单。禁止在 `.github/` 复制 `docs/CONTRIBUTING.md` 正文。
 9. `.github/*.yml`（FUNDING / Issue Forms / config）改动后须验证 YAML 可解析，且不得填写未经核实的账号、邮箱或承诺响应时间。
-10. **新增 / 删除 / 重命名文档**须同时更新：本页 §1 文档地图、§3 目录树、[CONTRIBUTING.md §3.1](./CONTRIBUTING.md)、[MAINTAINERS.md §4](./MAINTAINERS.md) 变更对照表；根 `README.MD` 面向使用者，不再维护文档索引与目录树。新增文档标题带当前版本号，并在 `CHANGELOG.MD` 对应版本的 `Docs` 分组记录。
-11. **任务单一来源**：未完成 / 进行中任务只写 [tasks.md](./tasks.md)，完成后归档到 [tasks-done.md](./tasks-done.md)；禁止在其他文档维护待办清单或把「规划」写成既成事实。
+10. **新增 / 删除 / 重命名文档**须同步三处文档登记 + CHANGELOG Docs 记录：本页 §1 文档地图与 §3 目录树、[CONTRIBUTING.md §3.1](./CONTRIBUTING.md)、[MAINTAINERS.md §4](./MAINTAINERS.md) 变更对照表；根 `README.MD` 面向使用者，不再维护文档索引与目录树。新增文档标题带当前版本号。
+11. **任务单一来源**：未完成 / 进行中任务只写 [tasks.md](./tasks.md)，完成后归档到 [tasks-done.md](./tasks-done.md)；禁止在其他文档维护待办清单或把「规划」写成既成事实。`PRODUCTION-READINESS.md` 中的 `[待实现]` 质量缺口要么登记到 [tasks.md](./tasks.md)，要么明确标注为「非任务型质量目标」，避免形成第二份待办清单。
 12. **数据真实性**：文档中的数量、行数、命令数、容量、耗时等数据须实算或有可核实来源，禁止估算、虚构；发现代码与文档冲突时以代码为准，并同步修文档或登记到 [tasks.md](./tasks.md)。
 13. **目录卫生**：新增根目录工程文件须同时核对 `.gitignore` 与 `scripts/check-root-clean.mjs` 白名单；每次改动文档后跑 `npm run check:docs` 与 `npm run check:root-clean`。
 

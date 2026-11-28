@@ -77,6 +77,7 @@ npm run check:root-clean                    # 根目录清洁度（CI 首步）
 gofmt -l ./cmd ./internal                   # 输出应为空（CI 用 test -z "$(...)" 判定）
 go vet -tags nogui ./...                    # 静态检查
 go test -tags nogui -count=1 ./...          # 单元 / 临时目录集成测试
+go test -tags ci -count=1 ./internal/ui          # GUI 组件测试（软件驱动，无需 C 工具链）
 go install honnef.co/go/tools/cmd/staticcheck@2025.1.1 && staticcheck -tags nogui -checks U1000 ./cmd/... ./internal/...  # 未引用符号（S18，强制门禁）
 go test -tags nogui -coverprofile=reports/coverage.out ./...  # 覆盖率采集（S18，产物写 reports/）
 go test -tags nogui -race -count=1 ./...    # race 检测（需 CGO + gcc，无 gcc 时留待 CI）
@@ -91,7 +92,7 @@ go run ./cmd/repo-manager -h                # 命令行帮助
 ./scripts/build.sh                          # 6 目标交叉编译（macOS / Linux）
 ```
 
-> `npm run dev` / `type-check` / `lint` / `build` / `landing:version` 服务于参考界面与落地页，**不属于产品核心门禁**；产品质量门禁为上述 11 步（S18 未引用符号为强制门禁、资源引用为告警式检查），外加 §9.3 的 GUI 手动冒烟。
+> `npm run dev` / `type-check` / `lint` / `build` / `landing:version` 服务于参考界面与落地页，**不属于产品核心门禁**；产品质量门禁为上述 13 步（S18 未引用符号为强制门禁、资源引用为告警式检查），外加 §9.3 的 GUI 手动冒烟。
 
 ### 2.1 技术栈与依赖矩阵
 
@@ -146,7 +147,7 @@ RepoManager/
 │   ├── MAINTAINERS.md           # 维护者手册（命名 / 仓库设置 / 发布 / 文档治理）
 │   ├── PRODUCTION-READINESS.md  # 八类非功能要求与发布前检查
 │   ├── tokens.json              # 设计令牌
-│   ├── config.example.ini       # 运行配置示例模板（4 键）
+│   ├── config.example.ini       # 运行配置示例模板（5 键）
 │   └── tasks.md / tasks-done.md # 任务单一来源与完成归档
 ├── landing/                     # Web 展示项目落地页（index.html + assets/；README.md 为目录说明）
 │   ├── README.md
@@ -175,7 +176,7 @@ RepoManager/
 ├── prototype/                   # 原型目录，仅保留 README.md 说明，无代码、无规范正文
 │   └── README.md
 ├── RepoCleaner.bat              # v1.x 旧版 Windows 脚本（已弃用，保留兼容）
-├── config.ini                   # 运行配置：4 键（本机生成，v2.2.0 起不入库，示例见 docs/config.example.ini）
+├── config.ini                   # 运行配置：5 键（本机生成，v2.2.0 起不入库，示例见 docs/config.example.ini）
 ├── lang.ini                     # 语言文案参考节 [en] / [zh]（v1.x 历史保留，Go 不读取）
 ├── README.MD / CHANGELOG.MD / LICENSE     # 入口、变更历史、许可证
 ├── RepoManager.code-workspace   # VS Code 工作区配置，禁止删除（命名现状见 MAINTAINERS.md §1）
@@ -195,7 +196,7 @@ RepoManager/
    - **文档文件（`.md/.markdown/.mdx/.rst`）不拆分**，即使超过 200 行也保持单文件完整连贯。
    - `.bat` 为批处理脚本，不纳入源码 200 行规则，但仍须按标签分节、保持可读。
 6. **临时文件统一落固定子目录**：一次性脚本、探针、调试日志、中间产物一律写入 `.tmp/`；工具正式产物（审计报告、覆盖率、`*-result.json` 等）写入 `reports/` / `coverage/` / `test-results/`。写入前先 `mkdir -p`，本轮产生的 `.tmp/` 内容在任务结束前清理；需长期留存的证据改写进 `docs/` 或测试断言。目录忽略规则以 `.gitignore` 实况为准，并在 ESLint / `tsconfig.json` / `check-doc-links.mjs` 中排除，避免临时脚本让门禁假红。**禁止**在仓库根或顶层散落 `.tmp-*.mjs`、`tmp-*.js`、`*.log`、`audit-*.json` 等；根目录白名单由 `scripts/check-root-clean.mjs` 强制校验（CI 首步），新增根目录工程文件须同时核对 `.gitignore` 与白名单。产品运行时的 `config.ini` / `repo-manager.log` 属 exe 同目录便携配置，不在此约束内。
-7. **新增 / 删除 / 重命名文档**须同步三处：[`docs/README.md`](./README.md) §1 文档地图与 §3 目录树、本文 §3.1、[`MAINTAINERS.md`](./MAINTAINERS.md) §4 变更对照表；根 `README.MD` 面向使用者与构建者，只保留少量入口链接，**不再维护文档索引与目录树**。新增文档标题带当前版本号，并在 `CHANGELOG.MD` 对应版本的 `Docs` 分组记录。**新增根目录子目录**（如 `landing/`）还须登记 `scripts/check-root-clean.mjs` 的 `ALLOWED_DIRS` 白名单并核对 `.gitignore`。同一事实只在一处维护，其余用链接引用。
+7. **新增 / 删除 / 重命名文档**须同步三处文档登记 + CHANGELOG Docs 记录：[`docs/README.md`](./README.md) §1 文档地图与 §3 目录树、本文 §3.1、[`MAINTAINERS.md`](./MAINTAINERS.md) §4 变更对照表；根 `README.MD` 面向使用者与构建者，只保留少量入口链接，**不再维护文档索引与目录树**。新增文档标题带当前版本号，并在 `CHANGELOG.MD` 对应版本的 `Docs` 分组记录。**新增根目录子目录**（如 `landing/`）还须登记 `scripts/check-root-clean.mjs` 的 `ALLOWED_DIRS` 白名单并核对 `.gitignore`。同一事实只在一处维护，其余用链接引用。
 8. **命名层次**：产品名 `Repo Manager`、Go 模块与二进制 `repo-manager`、平台仓库名 `sutchan/RepoManager`；本地 Git 远程以 `git remote -v` 为准（当前 `sutchan/RepoCleaner.git`，见 [MAINTAINERS.md §1](./MAINTAINERS.md) 与本文 §7.2）。本机目录名 `RepoManager` 与工作区文件 `RepoManager.code-workspace` 与产品名对应，v2.3.3 已完成技术标识同步。未完成事项见 [`tasks.md`](./tasks.md)。
 
 ---
@@ -344,7 +345,7 @@ v1.2.5
 
 ### 6.3 提交前检查
 
-按 §2 的 8 步门禁命令逐项执行（**唯一命令清单**，与 `ci.yml` 对齐，勿在此维护第二套），并额外确认：
+按 §2 的 13 步门禁命令逐项执行（**唯一命令清单**，与 `ci.yml` 对齐，勿在此维护第二套），并额外确认：
 
 ```bash
 git status --porcelain             # 无 node_modules / .next / *.log / *.tsbuildinfo / bin/ / .tmp/ 被跟踪
@@ -405,7 +406,7 @@ git diff --check                   # 无空白错误
 - `README.MD`（根） → 版本徽章 `Version-X.Y.Z` 与页脚版本号
 - `CHANGELOG.MD`（根） → 新增对应版本小节（置于最上方）
 - `docs/tokens.json` → `version`
-- `docs/DESIGN-SYSTEM.md`、`docs/README.md`、`docs/OPENSPEC.md`、`docs/CONTRIBUTING.md`、`docs/TROUBLESHOOTING.md`、`docs/MAINTAINERS.md`、`prototype/README.md` → 标题版本
+- `docs/DESIGN-SYSTEM.md`、`docs/README.md`、`docs/OPENSPEC.md`、`docs/CONTRIBUTING.md`、`docs/TROUBLESHOOTING.md`、`docs/MAINTAINERS.md`、`docs/INSTALL.md`、`docs/CLI-REFERENCE.md`、`docs/USER-GUIDE.md`、`docs/PRODUCTION-READINESS.md`、`prototype/README.md` → 标题版本
 - `docs/tasks.md` → 头部「当前版本」说明
 - `.github/SECURITY.md` → 标题版本 + 支持版本表「最新 2.3.x」的历史多次遗漏，bump 时须显式核对
 - `.github/` 下其他 Community Health 文件 → 标题或首行注释版本
@@ -468,7 +469,7 @@ git diff --check                   # 无空白错误
 - [ ] 新增/修改的 UI 对齐 `docs/DESIGN-SYSTEM.md` 与 `docs/tokens.json`，无硬编码颜色
 - [ ] 主要容器与关键元素已加语义化 `id`（§4.4）
 - [ ] 无 `fmt.Println` 调试输出、无吞错（`_ = err`）、无未使用的 import / 变量；Go 代码已 `gofmt` 且导出符号有 doc 注释
-- [ ] §2 的 8 步门禁全部通过：`gofmt -l ./cmd ./internal` 无输出；`go vet/test/build` 用 `-tags nogui`、`go build -tags ci` 验证 GUI 层；`npm ci`、`check:docs`、`check:root-clean` 通过
+- [ ] §2 的 13 步门禁全部通过：`gofmt -l ./cmd ./internal` 无输出；`go vet/test/build` 用 `-tags nogui`、`go build -tags ci` 验证 GUI 层；`npm ci`、`check:docs`、`check:root-clean` 通过
 - [ ] 单文件 ≤ 200 行（代码文件）；超出已按职责拆分且不破坏导出契约
 - [ ] 平台层改动：路径经 `path/filepath` 处理、删除目标仅来自枚举、危险操作有二次确认
 - [ ] 提交信息格式合规，且含新版本号
@@ -489,7 +490,8 @@ git diff --check                   # 无空白错误
 |--------|------|
 | `repo-manager -h` | 输出帮助信息后退出 |
 | `repo-manager -lang en` | `config.ini` 写入 `LANG=en` 且不产生重复行 |
-| GUI 语言按钮 | 简中 / 繁中 / 英文三语切换生效，执行日志同步切换，语言偏好持久化 |
+| GUI 语言下拉框 | 展开为简中 / 繁中 / 英文三语选项；切换生效，执行日志同步切换，语言偏好持久化 |
+| 执行期间的语言下拉框与取消按钮 | 语言下拉框禁用（避免重绘导致取消函数与日志目标丢失），取消按钮保持可用，功能按钮禁用；执行结束恢复 |
 | GUI 关于按钮 | 弹窗展示功能说明，不出现版本号 |
 | 功能 1（确认） | 生成 `.npmrc`、清理本地 `node_modules`；取消则返回且不删除 |
 | 功能 3 → 功能 4 | 生成带隐藏属性的 `.next` 文件；功能 4 能成功删除该文件（无残留、无报错） |
@@ -510,7 +512,7 @@ git diff --check                   # 无空白错误
 6. 禁止创建 `.github/readme.md`；`*.code-workspace` 是工作区配置，禁止删除（当前文件名 `RepoManager.code-workspace`）。
 7. 改动文档后必须执行 `npm run check:docs`（相对链接含大小写）与 `npm run check:root-clean`（根目录无散落条目），校验方法见 [`docs/README.md` §5](./README.md)。
 8. **任务单一来源**：未完成 / 进行中事项只写 `docs/tasks.md`，完成后归档到 `docs/tasks-done.md`；其他文档不得另建待办清单。
-9. **新增 / 删除 / 重命名文档**按 §3.2 规则 7 同步三处登记，并在 `CHANGELOG.MD` 对应版本的 `Docs` 分组记录。
+9. **新增 / 删除 / 重命名文档**按 §3.2 规则 7 同步三处文档登记 + CHANGELOG Docs 记录。
 10. 版本同步清单按 §8.2 执行，含 `docs/TROUBLESHOOTING.md` / `docs/MAINTAINERS.md` / `landing/README.md` 标题与 `docs/tasks.md` 头部版本说明。
 11. **本地记忆文档**：`.codebuddy/memory/`（已被 `.gitignore` 忽略，不入库）记录 AI 协作的背景、核心决策与时间线，是**参考信息而非规范来源**，不得覆盖本文 / `OPENSPEC.md` / `DESIGN-SYSTEM.md`。记忆文档须按主题归类、标注时效性与可信度，并引用本文 §1 作为规范入口；本文只在 §1.1 表中提及它，**不建立指向未入库文件的可点击链接**（GitHub 上会 404）。
 

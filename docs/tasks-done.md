@@ -3,6 +3,7 @@
 > 最后更新：**2026-11-26 23:14**（新增第十五节：S4 / S5 / S17 与 T4 / T5 归档，S7 状态修正；与 [tasks.md](./tasks.md) 同步时间戳）
 > 本文件归档已完成的任务（来源：用户初始 8 项综合审查任务 + 后续 v1.2.3–v1.2.6 演进 + 本轮剩余任务 + v2.0.0 Go 迁移清单 + v2.3.1 文档体系重新规划 + v2.3.2 任务核查 + v2.3.5 审查复核 + v2.3.8 文档标准化 + v2.3.10 冗余清理 + v2.3.12 剩余任务收口）。
 > 未完成事项只在 [tasks.md](./tasks.md) 维护。
+> 结构说明：最新批次（十五→十）按倒序置顶，随后为一～九历史批次；编号沿用归档批次，不按出现顺序排列。
 
 ## 十五、v2.3.12 剩余任务收口（2026-11-26）
 
@@ -205,15 +206,3 @@
 | R8 | v2.3.3 收口复核 | 中 | 已完成 | 修复 README 版本徽章（2.3.2 → 2.3.3）、Release 资产下载说明与目录树、docs/README 目录树；OPENSPEC §9.1 补 `go build -tags ci ./...` 并改写发布门禁边界；MAINTAINERS §3 / §5、CONTRIBUTING §6.3、TROUBLESHOOTING §6 同步 `version / build / package / release` 与 `gh api` 跨工作流阻断实况；`CHANGELOG.MD` `[2.3.3]` Docs 段补记 |
 
 > 本节按 2026-11-14 18:21 的代码与 workflow 实况归档；`docs/tasks.md` 已更新为无待办状态。已知限制（`windows/arm64` 无交叉工具链、`linux/arm64` 缺 arm64 架构开发库）登记于 [MAINTAINERS.md §6](./MAINTAINERS.md) 与 [CONTRIBUTING.md §8.4](./CONTRIBUTING.md)，不属待办。
-
-## 十、v2.3.10 冗余清理（2026-11-26 完成）
-
-| ID | 任务 | 优先级 | 状态 | 结果 |
-|----|------|--------|------|------|
-| C1 | 删除未引用的静态资源 | 中 | 已完成 | `public/` 下 5 个 Next.js 模板默认 SVG（`file` / `globe` / `next` / `vercel` / `window`）全仓 0 引用，`public/` 目录随之移除 |
-| C2 | 删除未使用的 UI 组件与导出 | 中 | 已完成 | `src/components/ui/table.tsx`、`code-block.tsx` 删除（页面无引用）；`card.tsx` 移除无引用的 `CardDescription` |
-| C3 | 删除未消费的数据模块 | 中 | 已完成 | `src/lib/data/features.ts`、`steps.ts`、`project-types.ts` 删除；`src/lib/data/index.ts` 仅保留 `repos` 导出，修复 barrel 断链 |
-| C4 | 删除未消费的样式与令牌 | 低 | 已完成 | `src/app/globals.css` 的 `.animate-fade-in-up` / `.animate-spin-slow` 及其关键帧删除；`internal/ui/theme.go` 的 `colorMuted` 令牌删除 |
-| C5 | 合并功能重叠的代码 | 中 | 已完成 | 新增 `internal/ui/root.go` 的 `resolveRoot`，统一「保存配置」与「执行功能」两处重复的根目录归一化 + 校验；`cmd/repo-manager/main.go` 消除同一语言值的重复 `i18n.Normalize` 调用 |
-| C6 | 清理本地产物与临时文件 | 低 | 已完成 | `prototype/tsconfig.tsbuildinfo`、根 `tsconfig.tsbuildinfo` 与 `.tmp/` 临时目录内容清除（均被 `.gitignore` 覆盖） |
-| C7 | 清理后全量门禁复跑 | 高 | 已完成 | `gofmt -l`、`go vet -tags nogui`、`go test -tags nogui`（8 包通过）、`go build -tags ci`、`npm run lint`、`npm run type-check`、`check:docs`、`check:root-clean` 全绿，功能未破坏 |

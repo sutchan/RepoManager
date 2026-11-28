@@ -68,7 +68,7 @@
 | `platform.Platform` | 10 个方法：目录枚举 / 删除 / 隐藏属性 / 环境变量持久化 / `DefaultRepoRoot()` 等 | `engine` / `ui` → `platform`（唯一 OS 边界） | 路径不存在或非目录 → 报错；删除失败 → 汇入结果，不中断其余项 |
 | `engine.Run` | 按功能号 1–7 分派到 7 个实现函数 | `cmd` / `ui` → `engine` | 危险功能（1 / 6 / 7）须先二次确认；失败返回三语错误摘要 |
 | `engine.IsDangerous` | 功能 1 / 6 / 7 的危险判定 | `cmd` / `ui` → `engine` | 纯判定，无失败语义 |
-| `config` 读写 | 4 键加载与回写（去重键、保留注释与未知行） | `cmd` / `ui` → `config` | 文件缺失 → 用默认值；解析失败 → 保留默认并警告 |
+| `config` 读写 | 5 键加载与回写（去重键、保留注释与未知行） | `cmd` / `ui` → `config` | 文件缺失 → 用默认值；解析失败 → 保留默认并警告 |
 | `i18n.T()` / `Logs()` | 按归一化语言码取界面 / 日志文案 | 各层 → `i18n` | 缺失键或非法语言码 → 回落简中 `zh` |
 | `logs.FileLogger` | 追加写 `repo-manager.log`（带时间戳） | `engine` / `ui` → `logs` | 打开失败 → 降级为仅下游输出，不阻断功能 |
 | `buildinfo.Footer()` / `BuildInfo()` | 页脚与 `-h` 版本文本 | `ui` / `cmd` → `buildinfo` | `BuildID` 缺失 → 回退仅版本号 |
@@ -205,7 +205,7 @@ GUI 提供 3 种目录来源：使用当前目录、手动输入完整路径（�
 | `-dry-run` | 预演模式：仅显示将要执行的操作，不修改任何文件（见 §4.7） | `repo-manager -dry-run 6` |
 | `-recursive` | 递归扫描 monorepo 深层项目（深度默认 3 层（1–8 可配），见 §3.0；优先级高于 `config.ini`） | `repo-manager -recursive 6` |
 | `-scan-depth N` | 递归深度 1–8，`0` 回落配置值或默认 3（S6） | `repo-manager -recursive -scan-depth 7 6` |
-| `-json` | 仅 CLI 模式：stdout 输出结构化 JSON，退出码不变（S7） | `repo-manager -json 6` |
+| `-json` | 仅 CLI 模式：stdout 固定为单个 JSON 对象，执行日志进 `messages` 与 `repo-manager.log`，确认提示与错误走 stderr，退出码不变（S7） | `repo-manager -json 6` |
 | `-version` | 输出版本与构建信息后退出 0（S12） | `repo-manager -version` |
 | `-h` / `-help` / `--help` | 显示帮助信息（固定英文，含版本与 build 信息） | `repo-manager -h` |
 | `1`-`7` | 直接运行对应功能（命令行模式，跳过 GUI） | `repo-manager 1` |
@@ -261,7 +261,7 @@ GUI 提供 3 种目录来源：使用当前目录、手动输入完整路径（�
 ### 4.7 预演模式 (dry-run)
 
 - **入口**：CLI `-dry-run` 参数；GUI「预演模式 (dry-run)」复选框（会话级选择，不写入 `config.ini`）。
-- **行为**：`engine.Options.DryRun` 贯穿功能 1–7，仅输出「将写入 / 将删除 / 将设置环境变量 / 将安装」预演日志（`[预演]` / `[DRY-RUN]` 前缀），不修改任何业务文件与环境变量，不执行 `npm install`，且 CLI 不回写 `config.ini`。日志文件 `repo-manager.log` 仍照常追加（可观测性所需，非业务副作用）。
+- **行为**：`engine.Options.DryRun` 贯穿功能 1–7，仅输出「将写入 / 将删除 / 将设置环境变量 / 将安装」预演日志（`[预演]` / `[DRY-RUN]` 前缀），不修改任何业务文件与环境变量，不执行 `npm install`，且 CLI 不回写 `config.ini`、位置参数不持久化（路径仅本次生效）。日志文件 `repo-manager.log` 仍照常追加（可观测性所需，非业务副作用）。
 - **确认**：预演下危险操作（1 / 6 / 7）跳过二次确认。
 - **实现**：预演开关统一在 `internal/engine` 层短路；`internal/platform` 的删除 / 写入 / 环境变量持久化方法在预演下不会被调用。
 
@@ -288,7 +288,7 @@ RepoManager/
 ├── cmd/repo-manager/          # main.go（入口）+ gui.go（默认标签）/ headless.go（nogui 占位）
 ├── internal/
 │   ├── buildinfo/             # 版本权威源、Footer() / BuildInfo()
-│   ├── config/                # config.ini 读写（4 键，去重并保留未知行）
+│   ├── config/                # config.ini 读写（5 键，去重并保留未知行）
 │   ├── engine/                # 功能 1～7 平台无关业务、Run 分派、IsDangerous
 │   ├── i18n/                  # zh / zh-Hant / en 界面与执行日志字典（hant.go）
 │   ├── logs/                  # 执行日志落盘（v2.3.0）
@@ -296,7 +296,7 @@ RepoManager/
 │   └── ui/                    # Fyne GUI（nogui 标签下排除）
 ├── go.mod / go.sum            # Go 模块定义与依赖锁定（Fyne v2）
 ├── scripts/                   # build.ps1 / build.sh + check-doc-links.mjs / check-root-clean.mjs
-├── docs/config.example.ini    # config.ini 示例模板（4 键）
+├── docs/config.example.ini    # config.ini 示例模板（5 键）
 ├── config.ini                 # 运行时生成于 exe 同目录，本机配置不入库
 ├── repo-manager.log           # 运行时生成于 exe 同目录，追加写执行日志，不入库
 ├── RepoCleaner.bat / lang.ini # v1.x 旧版批处理与文案（已弃用，Go 不读取 lang.ini）
@@ -315,6 +315,8 @@ RECURSIVE=false
 EXTRA_CLEAN_DIRS=
 SCAN_DEPTH=3
 ```
+
+> `SCAN_DEPTH` 为 v2.3.11 起支持的键（S6）；示例 ini 已含该项，取值 1–8，非法值回落 3。
 
 **新增键（v2.3.0）**：
 - `RECURSIVE`：`true|1|yes`（大小写不敏感）启用递归扫描 monorepo 深层项目（深度默认 3 层（1–8 可配），见 §3.0 / §7.3 L3），默认 `false`；CLI `-recursive` 优先级更高。
@@ -359,7 +361,7 @@ SCAN_DEPTH=3
 | `.npmrc` | 各项目根目录 | 配置 npm 使用全局模块（功能 1 写、功能 2 删） |
 | `.next` | 各 Next.js 项目根目录 | 功能 3 创建为带隐藏属性的**文件**以阻止缓存；功能 4 清除属性后删除（属性操作按平台实现） |
 | `config.ini` | 可执行文件同目录 | 保存 `REPO_ROOT` / `LANG` / `RECURSIVE` / `EXTRA_CLEAN_DIRS` / `SCAN_DEPTH`（5 键；保存时去重并保留注释与未知行） |
-| `repo-manager.log` | 可执行文件同目录 | v2.3.0 起 CLI / GUI 执行日志追加写入，带时间戳；打开失败时降级为仅下游输出，不阻断功能 |
+| `repo-manager.log` | 可执行文件同目录 | v2.3.0 起 CLI / GUI 执行日志追加写入，带时间戳；文件权限 0600，达 5 MB 轮转为 `.log.1`；打开失败时降级为仅下游输出，不阻断功能 |
 
 ---
 
@@ -455,7 +457,7 @@ npm run check:docs                          # 校验所有 Markdown 相对链接
 - [x] ~~功能 5 检查 `npm install -g` 退出码并汇总失败项（对应 L4）~~（v2.1.0 已完成）
 - [x] ~~功能 6 / 7 改为 `Y/N` 二次确认~~（v2.0.0 已完成，见 L5）
 - [x] ~~支持递归扫描 monorepo 深层项目（对应 L3）~~（v2.3.0 已完成，见 §3.0 / §7.3）
-- [ ] 添加详细进度显示
+- [x] ~~添加详细进度显示~~（v2.3.3 已完成，见 tasks-done.md 第九节 V5）
 
 ---
 

@@ -104,10 +104,12 @@ build 编号（10 位 `yymmddhhmm`）与版本号由脚本经 `-ldflags -X repo-
 | `EXTRA_CLEAN_DIRS` | 逗号分隔的单级目录名或受限相对子路径 | 空 | 并入功能 7 清理白名单；逐段安全校验，`..`、绝对路径、Windows 保留名等会被丢弃并告警（[ARCHITECTURE.md §6.1](./ARCHITECTURE.md)） |
 | `SCAN_DEPTH` | 整数 1–8 | `3` | 递归扫描深度；CLI `-scan-depth` 优先，越界回落默认（S6） |
 
+模板 `docs/config.example.ini` 同样是上述 5 键，仅含默认值（不含本机路径），可直接复制为 `config.ini`。
+
 两个随产物落地的数据文件（均自动生成，删除即重置）：
 
 - `config.ini` — 上述 5 键；
-- `repo-manager.log` — 运行日志（带时间戳追加；GUI / CLI 执行均写入）。
+- `repo-manager.log` — 运行日志（带时间戳追加；GUI / CLI 执行均写入；文件权限 0600，达 5 MB 轮转为 `repo-manager.log.1`）。
 
 ## 4. 多环境部署方案
 
@@ -139,5 +141,5 @@ build 编号（10 位 `yymmddhhmm`）与版本号由脚本经 `-ldflags -X repo-
 
 ## 6. 升级与卸载
 
-- **升级**：下载新版归档，覆盖可执行文件即可；`config.ini` 与 `repo-manager.log` 保留。跨大版本升级无迁移步骤（配置仅 4 键）。
+- **升级**：下载新版归档，覆盖可执行文件即可；`config.ini` 与 `repo-manager.log` 保留。跨大版本升级无迁移步骤（配置共 5 键）。
 - **卸载**：删除程序目录（含 `config.ini`、`repo-manager.log`）即可，程序不写注册表、不写系统目录（除功能 1 写入的用户环境变量 `NODE_PATH` 与各项目 `.npmrc`——卸载前如需还原请先执行一次功能 2）。
