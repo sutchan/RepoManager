@@ -53,7 +53,13 @@ func runCLI(p platform.Platform, cfgPath string, cfg *config.Config, fn int, roo
 		}
 	}
 	// V4：执行日志同时追加写入可执行文件同目录的 repo-manager.log。
-	fileLog := logs.NewFileLogger(logs.DefaultPath(), engine.StdLogger{})
+	// -json 模式下 stdout 必须是单个 JSON 文档，因此文件 logger 不再转发到 stdout；
+	// 日志只进文件与内存收集器，最终由 emitJSONResult 统一输出。
+	var downstream engine.Logger = engine.StdLogger{}
+	if useJSON {
+		downstream = nil
+	}
+	fileLog := logs.NewFileLogger(logs.DefaultPath(), downstream)
 	defer fileLog.Close()
 	logger := engine.Logger(fileLog)
 	var mem *memLogger

@@ -439,7 +439,7 @@ npm run check:docs                          # 校验所有 Markdown 相对链接
 
 ### 9.3 覆盖范围说明
 
-- 当前共 **24 个 `*_test.go`**（其中 1 个为测试辅助文件 `internal/engine/testkit_test.go`）、**72 个 `Test*` 函数**，覆盖 8 个包：`internal/buildinfo`（页脚格式）、`internal/config`（配置读写与新键）、`internal/engine`（功能 1～7、预演、递归、失败汇总与取消上下文）、`internal/i18n`（字典完整性）、`internal/logs`（日志落盘）、`internal/platform`（目录枚举、路径校验与哨兵错误）、`cmd/repo-manager`（参数优先级与 `-json` 契约）、`internal/ui`（有界日志缓冲、进度解析、语言选择、功能按钮与取消按钮）。CI 以 `-tags nogui` 运行全部测试，并以 `-tags ci` 运行 GUI 组件测试。
+- 当前共 **24 个 `*_test.go`**（其中 1 个为测试辅助文件 `internal/engine/testkit_test.go`）、**73 个 `Test*` 函数**，覆盖 8 个包：`internal/buildinfo`（页脚格式）、`internal/config`（配置读写与新键）、`internal/engine`（功能 1～7、预演、递归、失败汇总与取消上下文）、`internal/i18n`（字典完整性）、`internal/logs`（日志落盘）、`internal/platform`（目录枚举、路径校验与哨兵错误）、`cmd/repo-manager`（参数优先级与 `-json` 契约）、`internal/ui`（有界日志缓冲、进度解析、语言选择、功能按钮与取消按钮）。CI 以 `-tags nogui` 运行全部测试，并以 `-tags ci` 运行 GUI 组件测试。
 - v2.3.14 回归补强：符号链接越界防护（根目录 / 自定义清理目录 / `.next` 占位）、功能 1 只删除 Node 项目依赖、预演不回写配置、递归深度日志、三语原始字典完整性与 `RECURSIVE` 大小写；数据按当前仓库实算，新增测试后须同步本段。
 - `cmd/repo-manager` 与 `internal/ui` 的**入口纯逻辑与关键组件已覆盖**（见上），但完整 GUI 事件循环与对话框流程仍依赖 [§9.2](./CONTRIBUTING.md) 的手动冒烟清单；数据按当前仓库实算，新增测试后须同步本段。
 - 历史版本文档中的「功能 1～7 ✅ 通过」是当时的手工验证结论，不作为当前自动化覆盖证据。
