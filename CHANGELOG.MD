@@ -16,10 +16,11 @@ All notable changes to this project will be documented in this file.
 - **配置保存原子性** - 改用唯一临时文件 + `Sync` + `Rename`，避免多实例争用固定 `.config.tmp`；`RECURSIVE` 解析改为大小写不敏感
 - **GUI 执行期交互** - 执行期间禁用语言下拉，防止重绘丢失取消函数与日志目标；取消 / 失败不再把进度条置满
 - **递归深度日志** - `RecursiveOn` 改为格式串并传实际深度，`-scan-depth 7` 不再误报「深度 3」
+- **`-json` 输出纯度** - JSON 模式下日志不再转发 stdout，stdout 固定为单个 JSON 对象（日志仍落盘并进入 `messages`）
 - **三语校验与测试构造** - 新增原始字典全字段断言（字段级回退不再掩盖漏配）；修正 npm 超时测试重复传入 `install -g` 的参数错误
 
 ### Added
-- **回归测试** - 新增符号链接越界、功能 1 边界、`.next` 链接保护、预演无副作用、递归深度等用例；全仓 24 个测试文件 / 72 个 `Test*` 函数 / 8 个包
+- **回归测试** - 新增符号链接越界、功能 1 边界、`.next` 链接保护、预演无副作用、递归深度与 JSON 输出纯度等用例；全仓 24 个测试文件 / 73 个 `Test*` 函数 / 8 个包
 - **语义化 ID 与无障碍** - 参考界面补 `app-version`、统计值与语言标签 id、语言组 `aria-pressed`，Tabs 补 `tablist` / `aria-controls` / `aria-labelledby` 与方向键导航；落地页补重复项语义 id、三语无障碍标签与 FAQ 导航
 - **日志权限** - `repo-manager.log` 由 0644 收紧为 0600，避免多用户机器读取本机路径信息
 
