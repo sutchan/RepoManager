@@ -1,4 +1,4 @@
-# Repo Manager 接口文档（CLI 契约）v2.3.12
+# Repo Manager 接口文档（CLI 契约）v2.3.13
 
 > **关于 OpenAPI**：OpenAPI 规范描述 HTTP API。Repo Manager 是本地桌面 / CLI 工具，**没有 HTTP 接口**（无网络监听、无 RPC，见 [ARCHITECTURE.md §1.3](./ARCHITECTURE.md)），因此**不适用 OpenAPI 规范**，本文以等效的 CLI 接口契约承载「路径 / 方法 / 参数 / 返回 / 错误码 / 调用示例」信息。若未来引入 HTTP API（如本地守护服务），须另立 OpenAPI 文档并登记 [tasks.md](./tasks.md)。
 > 接口事实来源为 `cmd/repo-manager/main.go` 与 `internal/engine/options.go`；本文与代码冲突时以代码为准。

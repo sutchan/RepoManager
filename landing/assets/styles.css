@@ -1,4 +1,4 @@
-/* landing/assets/styles.css v2.3.3 */
+/* landing/assets/styles.css v2.3.13 */
 /* 视觉对齐 docs/tokens.json；浅色为默认，跟随系统深色偏好 */
 :root {
   --background: #ffffff;
@@ -173,13 +173,60 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--sp-4); }
 .faq-item summary { cursor: pointer; font-weight: 600; font-size: 14px; }
 .faq-item p { margin: var(--sp-3) 0 0; color: var(--muted-foreground); font-size: 13px; }
 
+/* 演示：双栏示例与等宽命令块，窄屏单列；代码块可横向滚动不撑破容器 */
+.demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--sp-4); }
+.demo-panel { border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--card); padding: var(--sp-6); }
+.demo-panel p { color: var(--muted-foreground); font-size: 13px; }
+.code-block {
+  margin: 0 0 var(--sp-3);
+  padding: var(--sp-4);
+  overflow-x: auto;
+  border-radius: var(--radius-button);
+  background: var(--muted);
+  color: var(--foreground);
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  tab-size: 2;
+}
+.demo-note { margin: var(--sp-4) 0 0; font-size: 13px; color: var(--muted-foreground); }
+
+/* 更新记录：版本徽标 + 时间 + 摘要，窄屏纵向堆叠 */
+.updates-list, .contact-list { list-style: none; margin: 0 0 var(--sp-4); padding: 0; }
+.updates-list li, .contact-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-2) var(--sp-4);
+  padding: var(--sp-3) 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.updates-list time { color: var(--muted-foreground); font-variant-numeric: tabular-nums; }
+.update-ver { font-weight: 700; color: var(--primary); font-variant-numeric: tabular-nums; }
+.updates-list li span:last-child { flex: 1 1 240px; color: var(--muted-foreground); }
+
+/* 联系方式：标题 + 说明 + 外链三段式 */
+.contact-list li strong { flex: 0 0 160px; font-size: 14px; }
+.contact-list li span { flex: 1 1 260px; color: var(--muted-foreground); }
+.contact-list li a, .text-link { color: var(--primary); font-weight: 600; text-underline-offset: 3px; }
+.text-link { font-size: 14px; }
+
 #landing-footer { max-width: var(--maxw); margin: 0 auto; padding: var(--sp-8) var(--sp-4); text-align: center; }
 #landing-version { font-variant-numeric: tabular-nums; font-size: 13px; font-weight: 600; }
 .footer-note { color: var(--muted-foreground); font-size: 12px; margin: var(--sp-2) 0 0; }
 
 @media (max-width: 640px) {
   .site-header { gap: var(--sp-2); }
-  #landing-nav { order: 3; width: 100%; justify-content: center; }
+  #landing-nav { order: 3; width: 100%; justify-content: center; flex-wrap: wrap; gap: var(--sp-2) var(--sp-4); }
   .hero { padding: 64px 0 48px; }
   .section { padding: 48px 0; }
+  .updates-list li, .contact-list li { gap: var(--sp-1) var(--sp-3); }
+  .contact-list li strong { flex-basis: 100%; }
+}
+
+/* 可访问性：尊重减少动效偏好，关闭平滑滚动与过渡 */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }

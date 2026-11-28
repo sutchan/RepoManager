@@ -1,4 +1,4 @@
-# Repo Manager 用户操作指南 v2.3.12
+# Repo Manager 用户操作指南 v2.3.13
 
 > 面向日常使用者。功能行为细则见 [OPENSPEC.md](./OPENSPEC.md)；参数速查见 [CLI-REFERENCE.md](./CLI-REFERENCE.md)；FAQ 见根 [README.MD](../README.MD)「常见问题 FAQ」，故障排除见 [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)。
 

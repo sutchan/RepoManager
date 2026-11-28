@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.3.13] - 2026-11-28
+
+### Added
+- **落地页板块完善** - 展示页新增目标受众、演示（GUI 说明 + 真实 CLI 示例）、技术栈、更新记录与联系方式五个板块，明确受众与核心信息、事实来源与转化路径（落地面）
+- **页面文案三语拆分** - 词条从 `app.js` 拆到 `assets/dict.js`，新增板块三语齐全；`dict.js` 与 `app.js` 均保持单文件 ≤ 200 行
+
+### Changed
+- **响应式与可访问性** - 新增演示 / 更新 / 联系板块样式与 640px 断点适配，命令块可横向滚动；补 `aria-labelledby`、语言按钮 `aria-pressed` 与 `prefers-reduced-motion` 降级
+- **页面加载性能** - 脚本全部 `defer`、无外部字体 / 图片 / CDN 请求，保持零构建依赖
+- **维护文档** - `landing/README.md` 扩写目标受众、结构规划、视觉交互要求与内容更新维护方式，注册为展示页单一说明源
+- **版本同步** - bump 至 2.3.13，全局展示位与 CHANGELOG 同步，落地页版本文件重新生成
+
+---
+
 ## [2.3.12] - 2026-11-26
 
 ### Added

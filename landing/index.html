@@ -3,10 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Repo Manager — 7 项功能管理全局依赖与前端项目缓存，支持 Windows / macOS / Linux。">
+  <meta name="theme-color" content="#0f9d75">
+  <meta name="description" content="Repo Manager — 面向前端与全栈开发者的跨平台清理工具：7 项功能统一管理全局 node_modules 与项目缓存，支持 GUI / CLI 与预演模式。">
   <title>Repo Manager · 前端项目清理工具</title>
   <link rel="stylesheet" href="assets/styles.css">
-  <script src="assets/version.js"></script>
+  <script src="assets/version.js" defer></script>
+  <script src="assets/dict.js" defer></script>
   <script src="assets/app.js" defer></script>
 </head>
 <body id="landing-body">
@@ -16,8 +18,11 @@
     <a class="brand" href="#landing-hero">Repo Manager</a>
     <nav id="landing-nav" aria-label="主导航">
       <a href="#landing-features" data-i18n="navFeatures">功能</a>
+      <a href="#landing-demo" data-i18n="navDemo">演示</a>
       <a href="#landing-workflow" data-i18n="navWorkflow">使用步骤</a>
-      <a href="#landing-faq" data-i18n="navFaq">常见问题</a>
+      <a href="#landing-stack" data-i18n="navStack">技术栈</a>
+      <a href="#landing-updates" data-i18n="navUpdates">更新记录</a>
+      <a href="#landing-contact" data-i18n="navContact">联系方式</a>
     </nav>
     <div id="landing-lang-switch" role="group" aria-label="语言切换">
       <button type="button" data-lang="zh" id="landing-lang-zh">简体中文</button>
@@ -27,10 +32,10 @@
   </header>
 
   <main id="landing-main">
-    <section id="landing-hero" class="hero">
+    <section id="landing-hero" class="hero" aria-labelledby="landing-hero-title">
       <p class="eyebrow" data-i18n="heroEyebrow">跨平台 · 本地优先</p>
-      <h1 data-i18n="heroTitle">让前端项目保持干净</h1>
-      <p class="hero-desc" data-i18n="heroDesc">7 项功能统一管理全局 node_modules 与前端项目缓存；危险操作执行前二次确认，支持预演模式与执行日志。</p>
+      <h1 id="landing-hero-title" data-i18n="heroTitle">让前端项目保持干净</h1>
+      <p class="hero-desc" data-i18n="heroDesc">面向前端、全栈开发者与多 Node.js 项目团队：7 项功能统一管理全局 node_modules 与项目缓存；危险操作执行前二次确认，支持预演模式与执行日志。</p>
       <div id="landing-cta" class="cta-row">
         <a class="btn btn-primary" href="https://github.com/sutchan/RepoManager/releases" data-i18n="ctaDownload">下载 Release</a>
         <a class="btn btn-outline" href="https://github.com/sutchan/RepoManager/blob/main/docs/README.md" data-i18n="ctaDocs">阅读文档</a>
@@ -42,8 +47,18 @@
       </ul>
     </section>
 
-    <section id="landing-features" class="section">
-      <h2 data-i18n="featuresTitle">七项功能</h2>
+    <section id="landing-audience" class="section" aria-labelledby="landing-audience-title">
+      <h2 id="landing-audience-title" data-i18n="audienceTitle">谁适合使用</h2>
+      <p class="section-lead" data-i18n="audienceLead">面向需要同时维护多个前端项目的开发者与团队；单项目用户也能受益。</p>
+      <div id="landing-audience-grid" class="card-grid">
+        <article class="card"><h3 data-i18n="aud1t">前端 / 全栈开发者</h3><p data-i18n="aud1d">用一条命令启用全局依赖，不再为每个项目重复生成 node_modules。</p></article>
+        <article class="card"><h3 data-i18n="aud2t">多项目团队</h3><p data-i18n="aud2d">统一清理仓库根目录下多个项目的缓存，按白名单执行，结果可追溯。</p></article>
+        <article class="card"><h3 data-i18n="aud3t">monorepo 维护者</h3><p data-i18n="aud3d">可选递归扫描深层包目录，默认 3 层，避免误扫依赖与产物目录。</p></article>
+      </div>
+    </section>
+
+    <section id="landing-features" class="section section-alt" aria-labelledby="landing-features-title">
+      <h2 id="landing-features-title" data-i18n="featuresTitle">七项功能</h2>
       <p class="section-lead" data-i18n="featuresLead">功能编号与命令行参数一致，可直接调用。</p>
       <div id="landing-feature-grid" class="card-grid">
         <article class="card"><span class="card-no">01</span><h3 data-i18n="f1">启用全局 node_modules</h3><p data-i18n="d1">配置 NODE_PATH 并清理项目内本地依赖。</p></article>
@@ -56,8 +71,28 @@
       </div>
     </section>
 
-    <section id="landing-workflow" class="section section-alt">
-      <h2 data-i18n="workflowTitle">三步开始</h2>
+    <section id="landing-demo" class="section" aria-labelledby="landing-demo-title">
+      <h2 id="landing-demo-title" data-i18n="demoTitle">演示</h2>
+      <p class="section-lead" data-i18n="demoLead">以下示例取自 CLI 契约；删除类操作请先在隔离目录预演。</p>
+      <div id="landing-demo-grid" class="demo-grid">
+        <article class="demo-panel">
+          <h3 data-i18n="demoGuiTitle">桌面界面（GUI）</h3>
+          <p data-i18n="demoGuiDesc">不带参数启动 repo-manager，选择仓库根目录，勾选预演后点击功能按钮 1–7；执行日志显示在结果区并写入 repo-manager.log。</p>
+        </article>
+        <article class="demo-panel">
+          <h3 id="landing-demo-cli-title" data-i18n="demoCliTitle">命令行（CLI）</h3>
+          <pre class="code-block" aria-labelledby="landing-demo-cli-title"><code>repo-manager                              # 启动 GUI
+repo-manager -dry-run 1 ~/Github          # 预演功能 1（零副作用）
+repo-manager 1 ~/Github                   # 确认后执行
+repo-manager -lang en -recursive 7 ~/Github</code></pre>
+          <p data-i18n="demoCliDesc">路径按平台书写（Windows 如 E:\Github）；-dry-run 只输出计划操作，不修改文件。</p>
+        </article>
+      </div>
+      <p class="demo-note" data-i18n="demoNote">删除不可逆。请先在隔离目录用 -dry-run 预演，确认后再执行。</p>
+    </section>
+
+    <section id="landing-workflow" class="section section-alt" aria-labelledby="landing-workflow-title">
+      <h2 id="landing-workflow-title" data-i18n="workflowTitle">三步开始</h2>
       <div id="landing-steps" class="steps">
         <article class="step"><span class="step-no">1</span><h3 data-i18n="w1t">取得程序</h3><p data-i18n="w1d">从 Release 下载对应平台归档，或用 Go 构建 repo-manager。</p></article>
         <article class="step"><span class="step-no">2</span><h3 data-i18n="w2t">选择目录</h3><p data-i18n="w2d">GUI 选择目录或 CLI 传入路径，config.ini 可保存默认目录。</p></article>
@@ -65,18 +100,40 @@
       </div>
     </section>
 
-    <section id="landing-safety" class="section">
-      <h2 data-i18n="safetyTitle">安全设计</h2>
+    <section id="landing-stack" class="section" aria-labelledby="landing-stack-title">
+      <h2 id="landing-stack-title" data-i18n="stackTitle">技术栈</h2>
+      <p class="section-lead" data-i18n="stackLead">单一代码库交叉编译，平台差异收口到独立接口层。</p>
+      <div id="landing-stack-grid" class="card-grid">
+        <article class="card"><h3 data-i18n="stack1t">Go 1.25+</h3><p data-i18n="stack1d">产品本体编译为 Windows / macOS / Linux 单二进制，无第三方运行时依赖。</p></article>
+        <article class="card"><h3 data-i18n="stack2t">Fyne v2.8.2</h3><p data-i18n="stack2d">桌面 GUI 使用单一 UI 依赖，配色遵循设计令牌；运行需要系统 OpenGL。</p></article>
+        <article class="card"><h3 data-i18n="stack3t">build tag 分层</h3><p data-i18n="stack3d">nogui 标签仅编译 CLI；platform 接口按 build tag 隔离 Windows / Unix 实现。</p></article>
+        <article class="card"><h3 data-i18n="stack4t">原生 HTML / CSS / JS</h3><p data-i18n="stack4d">本展示页无前端框架、无外部字体与图片请求；三语文案集中在一个脚本。</p></article>
+      </div>
+    </section>
+
+    <section id="landing-safety" class="section section-alt" aria-labelledby="landing-safety-title">
+      <h2 id="landing-safety-title" data-i18n="safetyTitle">安全设计</h2>
       <ul id="landing-safety-list" class="safety-list">
         <li data-i18n="s1">危险功能（1 / 6 / 7）执行前二次确认。</li>
         <li data-i18n="s2">预演模式只显示将执行的操作，不修改文件。</li>
-        <li data-i18n="s3">递归扫描限制为 3 层，自定义清理目录名经安全校验。</li>
+        <li data-i18n="s3">递归扫描限制为 3 层（1–8 可配），自定义清理目录名经安全校验。</li>
         <li data-i18n="s4">执行日志同步写入可执行文件同目录的日志文件。</li>
       </ul>
     </section>
 
-    <section id="landing-faq" class="section section-alt">
-      <h2 data-i18n="faqTitle">常见问题</h2>
+    <section id="landing-updates" class="section" aria-labelledby="landing-updates-title">
+      <h2 id="landing-updates-title" data-i18n="updatesTitle">更新记录</h2>
+      <p class="section-lead" data-i18n="updatesLead">页面页脚显示当前版本与构建编号；下方为最近三条摘要，完整历史见 CHANGELOG。</p>
+      <ul id="landing-update-list" class="updates-list">
+        <li><time datetime="2026-11-28">2026-11-28</time><span class="update-ver">v2.3.13</span><span data-i18n="up13">展示页补齐目标受众、演示、技术栈、更新记录与联系方式板块</span></li>
+        <li><time datetime="2026-11-26">2026-11-26</time><span class="update-ver">v2.3.12</span><span data-i18n="up12">新增 GUI 组件测试与操作取消，平台错误本地化</span></li>
+        <li><time datetime="2026-11-26">2026-11-26</time><span class="update-ver">v2.3.11</span><span data-i18n="up11">失败汇总、安装超时、CLI 结构化输出与配置增强</span></li>
+      </ul>
+      <p><a class="text-link" href="https://github.com/sutchan/RepoManager/blob/main/CHANGELOG.MD" data-i18n="updatesMore">查看完整更新日志</a></p>
+    </section>
+
+    <section id="landing-faq" class="section section-alt" aria-labelledby="landing-faq-title">
+      <h2 id="landing-faq-title" data-i18n="faqTitle">常见问题</h2>
       <details class="faq-item">
         <summary data-i18n="q1">是否需要联网或上传项目数据？</summary>
         <p data-i18n="a1">不需要。工具在本地运行，不上传仓库内容；联网仅发生在功能 5 安装全局依赖时。</p>
@@ -89,6 +146,16 @@
         <summary data-i18n="q3">界面语言可以切换吗？</summary>
         <p data-i18n="a3">支持简体中文、繁体中文与英文；CLI 帮助固定为英文，不随语言切换。</p>
       </details>
+    </section>
+
+    <section id="landing-contact" class="section" aria-labelledby="landing-contact-title">
+      <h2 id="landing-contact-title" data-i18n="contactTitle">联系方式</h2>
+      <p class="section-lead" data-i18n="contactLead">由个人维护，不提供实时支持；提问前请先查阅文档。</p>
+      <ul id="landing-contact-list" class="contact-list">
+        <li><strong data-i18n="c1t">缺陷与功能建议</strong><span data-i18n="c1d">使用 Issue 模板提交，附版本号、系统与脱敏后的复现信息。</span><a href="https://github.com/sutchan/RepoManager/issues/new/choose">GitHub Issues</a></li>
+        <li><strong data-i18n="c2t">安全漏洞</strong><span data-i18n="c2d">请勿公开提 Issue，按安全策略中的私密渠道报告。</span><a href="https://github.com/sutchan/RepoManager/blob/main/.github/SECURITY.md">SECURITY.md</a></li>
+        <li><strong data-i18n="c3t">参与贡献</strong><span data-i18n="c3d">开发规范、提交格式与发版流程见贡献指南。</span><a href="https://github.com/sutchan/RepoManager/blob/main/docs/CONTRIBUTING.md">CONTRIBUTING.md</a></li>
+      </ul>
     </section>
   </main>
 
