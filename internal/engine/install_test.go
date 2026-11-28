@@ -14,7 +14,7 @@ func TestRunNpmInstallTimeout(t *testing.T) {
 	installTimeout = time.Nanosecond
 	defer func() { installTimeout = old }()
 
-	_, err := runNpmInstall([]string{"install", "-g", "no-such-package"})
+	_, err := runNpmInstall([]string{"no-such-package"})
 	if err == nil || !strings.Contains(err.Error(), "超时") {
 		t.Fatalf("期望明确超时错误，得到 %v", err)
 	}

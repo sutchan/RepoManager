@@ -37,7 +37,7 @@ type FileLogger struct {
 
 // NewFileLogger 以追加模式打开日志文件；打开失败时返回仅含下游输出的 logger。
 func NewFileLogger(path string, next engine.Logger) *FileLogger {
-	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
 	if err != nil {
 		f = nil
 	}
@@ -58,10 +58,10 @@ func (l *FileLogger) rotateIfNeeded(incoming int) {
 	_ = l.f.Close()
 	_ = os.Remove(path + ".1")
 	if err := os.Rename(path, path+".1"); err != nil {
-		l.f, _ = os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
+		l.f, _ = os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
 		return
 	}
-	l.f, _ = os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
+	l.f, _ = os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
 }
 
 // Logf 实现 engine.Logger：写文件（带时间戳）并转发下游。

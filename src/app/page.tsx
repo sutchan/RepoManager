@@ -23,19 +23,28 @@ export default function Home() {
   const [lang, setLang] = useState<Lang>("zh");
   const t = i18n[lang];
 
-  // 挂载后恢复语言偏好（避免 SSR hydration 不一致），并做枚举校验
+  // 挂载后恢复语言偏好（避免 SSR hydration 不一致），并做枚举校验。
+  // 隐私模式 / 存储被禁用时 localStorage 可能抛 SecurityError，静默降级为默认简中。
   useEffect(() => {
-    const stored = window.localStorage.getItem(LANG_STORAGE_KEY);
-    if (stored && SUPPORTED_LANGS.includes(stored as Lang)) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLang(stored as Lang);
+    try {
+      const stored = window.localStorage.getItem(LANG_STORAGE_KEY);
+      if (stored && SUPPORTED_LANGS.includes(stored as Lang)) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setLang(stored as Lang);
+      }
+    } catch {
+      // 存储不可用：保持默认语言，不影响页面功能。
     }
   }, []);
 
   // 同步 html lang 与持久化偏好；三语词条齐全，繁中缺失由字典保证回退
   useEffect(() => {
     document.documentElement.lang = HTML_LANG[lang];
-    window.localStorage.setItem(LANG_STORAGE_KEY, lang);
+    try {
+      window.localStorage.setItem(LANG_STORAGE_KEY, lang);
+    } catch {
+      // 存储不可用时仅跳过持久化。
+    }
   }, [lang]);
 
   const totalScan = scanResults.length;
@@ -49,10 +58,11 @@ export default function Home() {
           <h1 id="app-title" className="text-2xl font-bold">
             {t.appTitle}
           </h1>
-          <div id="lang-switch" className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">{t.language}</span>
+          <div id="lang-switch" role="group" aria-label={t.language} className="flex items-center gap-2">
+            <span id="lang-switch-label" className="text-sm text-muted-foreground">{t.language}</span>
             <Button
               id="lang-btn-zh"
+              aria-pressed={lang === "zh"}
               variant={lang === "zh" ? "default" : "outline"}
               size="sm"
               onClick={() => setLang("zh")}
@@ -61,6 +71,7 @@ export default function Home() {
             </Button>
             <Button
               id="lang-btn-zh-hant"
+              aria-pressed={lang === "zh-Hant"}
               variant={lang === "zh-Hant" ? "default" : "outline"}
               size="sm"
               onClick={() => setLang("zh-Hant")}
@@ -69,6 +80,7 @@ export default function Home() {
             </Button>
             <Button
               id="lang-btn-en"
+              aria-pressed={lang === "en"}
               variant={lang === "en" ? "default" : "outline"}
               size="sm"
               onClick={() => setLang("en")}
@@ -87,7 +99,7 @@ export default function Home() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold">{totalScan}</p>
+              <p id="stat-total-value" className="text-3xl font-bold">{totalScan}</p>
             </CardContent>
           </Card>
           <Card id="stat-safe">
@@ -97,7 +109,7 @@ export default function Home() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold">{safeCount}</p>
+              <p id="stat-safe-value" className="text-3xl font-bold">{safeCount}</p>
             </CardContent>
           </Card>
           <Card id="stat-tweaks">
@@ -107,7 +119,7 @@ export default function Home() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold">{tweaks.length}</p>
+              <p id="stat-tweaks-value" className="text-3xl font-bold">{tweaks.length}</p>
             </CardContent>
           </Card>
         </section>
@@ -177,7 +189,9 @@ export default function Home() {
         </Tabs>
 
         <footer id="app-footer" className="mt-8 text-center text-xs text-muted-foreground">
-          {t.footer} · v{APP_VERSION}{BUILD_ID ? ` · build ${BUILD_ID}` : ""}
+          <span id="app-version">
+            {t.footer} · v{APP_VERSION}{BUILD_ID ? ` · build ${BUILD_ID}` : ""}
+          </span>
         </footer>
       </div>
     </main>

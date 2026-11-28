@@ -34,7 +34,26 @@ export function Tabs({
 }
 
 export function TabsList({ id, className, children }: { id?: string; className?: string; children: React.ReactNode }) {
-  return <div id={id} className={cn("inline-flex rounded-[8px] bg-muted p-1", className)}>{children}</div>;
+  const ctx = React.useContext(Ctx)!;
+  const values = React.Children.toArray(children)
+    .filter(React.isValidElement)
+    .map((child) => (child.props as { value?: string }).value)
+    .filter((v): v is string => typeof v === "string");
+  const onKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    const index = values.indexOf(ctx.value);
+    if (index < 0) return;
+    event.preventDefault();
+    const step = event.key === "ArrowRight" ? 1 : values.length - 1;
+    const next = values[(index + step) % values.length];
+    ctx.setValue(next);
+    document.getElementById(`tab-${next}`)?.focus();
+  };
+  return (
+    <div id={id} role="tablist" onKeyDown={onKeyDown} className={cn("inline-flex rounded-[8px] bg-muted p-1", className)}>
+      {children}
+    </div>
+  );
 }
 
 export function TabsTrigger({ id, value, children }: { id?: string; value: string; children: React.ReactNode }) {
@@ -42,9 +61,11 @@ export function TabsTrigger({ id, value, children }: { id?: string; value: strin
   const active = ctx.value === value;
   return (
     <button
-      id={id}
+      id={id ?? `tab-${value}`}
       role="tab"
       aria-selected={active}
+      aria-controls={`tab-content-${value}`}
+      tabIndex={active ? 0 : -1}
       onClick={() => ctx.setValue(value)}
       className={cn(
         "rounded-[6px] px-3 py-1.5 text-sm font-medium transition-colors",
@@ -60,7 +81,7 @@ export function TabsContent({ id, value, children, className }: { id?: string; v
   const ctx = React.useContext(Ctx)!;
   if (ctx.value !== value) return null;
   return (
-    <div id={id} role="tabpanel" className={cn("mt-4", className)}>
+    <div id={id ?? `tab-content-${value}`} role="tabpanel" aria-labelledby={`tab-${value}`} className={cn("mt-4", className)}>
       {children}
     </div>
   );

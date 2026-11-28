@@ -3,7 +3,7 @@
 const SUPPORTED = ["zh", "zh-Hant", "en"];
 const HTML_LANG = { zh: "zh", "zh-Hant": "zh-Hant", en: "en" };
 const STORAGE_KEY = "repo-manager-landing-lang";
-const DICT = window.LANDING_DICT;
+const DICT = window.LANDING_DICT || {};
 
 function readLang() {
   try {
@@ -21,6 +21,11 @@ function applyLang(lang) {
   document.querySelectorAll("[data-i18n]").forEach((el) => {
     const value = dict[el.dataset.i18n];
     if (value) el.textContent = value;
+  });
+  // 无障碍标签同样随语言切换，避免英文模式下屏幕阅读器朗读中文。
+  document.querySelectorAll("[data-i18n-aria]").forEach((el) => {
+    const value = dict[el.dataset.i18nAria];
+    if (value) el.setAttribute("aria-label", value);
   });
   document.querySelectorAll("#landing-lang-switch button").forEach((btn) => {
     const active = btn.dataset.lang === chosen;

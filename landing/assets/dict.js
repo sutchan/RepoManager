@@ -4,6 +4,7 @@ window.LANDING_DICT = {
   zh: {
     navFeatures: "功能", navDemo: "演示", navWorkflow: "使用步骤", navStack: "技术栈",
     navUpdates: "更新记录", navContact: "联系方式", navFaq: "常见问题",
+    skipLink: "跳到主要内容", navAriaLabel: "主导航", langSwitchAriaLabel: "语言切换",
     heroEyebrow: "跨平台 · 本地优先", heroTitle: "让前端项目保持干净",
     heroDesc: "面向前端、全栈开发者与多 Node.js 项目团队：7 项功能统一管理全局 node_modules 与项目缓存；危险操作执行前二次确认，支持预演模式与执行日志。",
     ctaDownload: "下载 Release", ctaDocs: "阅读文档",
@@ -64,6 +65,7 @@ window.LANDING_DICT = {
   "zh-Hant": {
     navFeatures: "功能", navDemo: "演示", navWorkflow: "使用步驟", navStack: "技術棧",
     navUpdates: "更新紀錄", navContact: "聯絡方式", navFaq: "常見問題",
+    skipLink: "跳至主要內容", navAriaLabel: "主導覽", langSwitchAriaLabel: "語言切換",
     heroEyebrow: "跨平台 · 本機優先", heroTitle: "讓前端專案保持乾淨",
     heroDesc: "面向前端、全端開發者與多 Node.js 專案團隊：7 項功能統一管理全域 node_modules 與專案快取；危險操作執行前二次確認，支援預演模式與執行紀錄。",
     ctaDownload: "下載 Release", ctaDocs: "閱讀文件",
@@ -124,6 +126,7 @@ window.LANDING_DICT = {
   en: {
     navFeatures: "Features", navDemo: "Demo", navWorkflow: "How it works", navStack: "Tech stack",
     navUpdates: "Changelog", navContact: "Contact", navFaq: "FAQ",
+    skipLink: "Skip to main content", navAriaLabel: "Main navigation", langSwitchAriaLabel: "Language switcher",
     heroEyebrow: "Cross-platform · local first", heroTitle: "Keep your front-end projects clean",
     heroDesc: "Built for front-end and full-stack developers and teams juggling many Node.js projects: seven functions manage global node_modules and project caches, with confirmation for destructive actions, dry-run mode and execution logs.",
     ctaDownload: "Download Release", ctaDocs: "Read the docs",

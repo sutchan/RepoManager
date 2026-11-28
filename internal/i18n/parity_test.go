@@ -22,6 +22,14 @@ func TestFillMissing(t *testing.T) {
 	}
 }
 
+// TestRawDictsComplete 直接校验原始字典：字段级回退会掩盖漏配，必须检查未填充的源数据。
+func TestRawDictsComplete(t *testing.T) {
+	for _, lang := range []Lang{Zh, Hant, En} {
+		assertNoEmptyFields(t, string(lang)+"/raw Dict", dicts[lang])
+		assertNoEmptyFields(t, string(lang)+"/raw LogDict", logDicts[lang])
+	}
+}
+
 // TestAllLocalesComplete 校验三语 Dict / LogDict 所有字段均非空（字段级回退生效）。
 func TestAllLocalesComplete(t *testing.T) {
 	for _, lang := range []Lang{Zh, Hant, En} {
