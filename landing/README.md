@@ -1,4 +1,4 @@
-# Repo Manager 落地页目录 (landing/) v2.3.13
+# Repo Manager 落地页目录 (landing/) v2.3.15
 
 > **定位**：产品 Web 展示页（`index.html` + `assets/`）的唯一落点；面向想快速了解并下载 Repo Manager 的开发者。
 > 本文件记录目标受众、页面结构、视觉与交互要求、内容维护方式；功能事实见 [`docs/OPENSPEC.md`](../docs/OPENSPEC.md)，技术栈见 [`docs/CONTRIBUTING.md` §2.1](../docs/CONTRIBUTING.md)，版本历史见 [`CHANGELOG.MD`](../CHANGELOG.MD)。部署 / 上线方式仍未确定，属规划项。

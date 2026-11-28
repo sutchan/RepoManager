@@ -51,7 +51,7 @@
 | 目录没切换 | 优先级为 CLI 位置路径 > `config.ini` 的 `REPO_ROOT` > 平台默认（Windows `E:\Github`、Unix `~/Github`）；无功能号时路径被忽略 | 在 GUI 中选择并「保存」，或与功能号同用 CLI 位置路径 |
 | 提示「路径不存在」/「不是目录」 | `platform.ValidateRoot` 校验失败 | CLI 报错并以非 0 退出；GUI 弹窗后返回目录选择。路径含空格时用引号包裹参数 |
 
-`config.ini` 共 5 个键：`REPO_ROOT`、`LANG`、`RECURSIVE`、`EXTRA_CLEAN_DIRS`、`SCAN_DEPTH`。保存时程序会去重同名键、保留注释与未知行；CLI 执行完成后会把本次根目录写回。
+`config.ini` 共 5 个键：`REPO_ROOT`、`LANG`、`RECURSIVE`、`EXTRA_CLEAN_DIRS`、`SCAN_DEPTH`。保存时程序会去重同名键、保留注释与未知行；CLI 在**非预演模式**执行完成后会把本次根目录写回（`-dry-run` 不回写）。
 
 ---
 
